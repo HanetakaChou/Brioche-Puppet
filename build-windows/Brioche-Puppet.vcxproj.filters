@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\thirdparty\DXUT\Optional\DXUTcamera.cpp">
+      <Filter>thirdparty\DXUT\Optional</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\user_input_model.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\user_input_controller.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\thirdparty\DLB\DLB.h">
+      <Filter>thirdparty\DLB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h">
+      <Filter>thirdparty\DXUT\Optional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\user_input_model.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\user_input_controller.h">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\thirdparty\DLB\DLB.glsli">
+      <Filter>thirdparty\DLB</Filter>
+    </None>
+    <None Include="..\thirdparty\DLB\DLB.hlsli">
+      <Filter>thirdparty\DLB</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{3fd46330-fb50-48b9-9af8-f2bd1292021a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\Vulkan-ValidationLayers">
+      <UniqueIdentifier>{0a393837-6c85-4124-89a5-28e5ae120ec4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\Vulkan-ValidationLayers\x86">
+      <UniqueIdentifier>{8392cec9-8a4b-4f55-939a-fda75c196bb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\Vulkan-ValidationLayers\x64">
+      <UniqueIdentifier>{20e5e431-be5d-49a8-9c62-4973be7abee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{59f24b2c-072f-4fca-91b0-b70b46bd4124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DLB">
+      <UniqueIdentifier>{87c8f33e-e008-4862-9dcd-f4325a3c1c68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DXUT">
+      <UniqueIdentifier>{73a2c49d-7653-4975-b401-e06655c0d7de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\DXUT\Optional">
+      <UniqueIdentifier>{09f4db43-7429-4ae0-b11b-a44ce3150fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\D3D12-Agility-SDK">
+      <UniqueIdentifier>{92a0e778-650d-4e2d-aa7e-5252d3e13d52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\D3D12-Agility-SDK\bin">
+      <UniqueIdentifier>{19a8fb26-957d-4fc2-8008-018b942941e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\D3D12-Agility-SDK\bin\x64">
+      <UniqueIdentifier>{88dd13ce-00db-48c6-9e06-5ce3bc75fbf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\D3D12-Agility-SDK\bin\x86">
+      <UniqueIdentifier>{c9473151-de3d-4ed5-9ea3-752fa17b7cf6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x86\VkLayer_khronos_validation.json">
+      <Filter>thirdparty\Vulkan-ValidationLayers\x86</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x86\VkLayer_khronos_validation.dll">
+      <Filter>thirdparty\Vulkan-ValidationLayers\x86</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x64\VkLayer_khronos_validation.json">
+      <Filter>thirdparty\Vulkan-ValidationLayers\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x64\VkLayer_khronos_validation.dll">
+      <Filter>thirdparty\Vulkan-ValidationLayers\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x64\D3D12Core.dll">
+      <Filter>thirdparty\D3D12-Agility-SDK\bin\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x64\d3d12SDKLayers.dll">
+      <Filter>thirdparty\D3D12-Agility-SDK\bin\x64</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x86\D3D12Core.dll">
+      <Filter>thirdparty\D3D12-Agility-SDK\bin\x86</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x86\d3d12SDKLayers.dll">
+      <Filter>thirdparty\D3D12-Agility-SDK\bin\x86</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+</Project>

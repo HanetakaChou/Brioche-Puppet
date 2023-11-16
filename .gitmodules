@@ -1,0 +1,84 @@
+[submodule "thirdparty/Brioche-Asset-Import"]
+	path = thirdparty/Brioche-Asset-Import
+	url = git@github.com:HanetakaChou/Brioche-Asset-Import.git
+	branch = master
+[submodule "thirdparty/Brioche-Analytic-Rendering-Interface"]
+	path = thirdparty/Brioche-Analytic-Rendering-Interface
+	url = git@github.com:HanetakaChou/Brioche-Analytic-Rendering-Interface.git
+	branch = master
+[submodule "thirdparty/Brioche-ImGui"]
+	path = thirdparty/Brioche-ImGui
+	url = git@github.com:HanetakaChou/Brioche-ImGui.git
+	branch = master
+[submodule "thirdparty/Brioche-Motion"]
+	path = thirdparty/Brioche-Motion
+	url = git@github.com:HanetakaChou/Brioche-Motion.git
+	branch = master
+[submodule "thirdparty/Brioche-Physics"]
+	path = thirdparty/Brioche-Physics
+	url = git@github.com:HanetakaChou/Brioche-Physics.git
+	branch = master
+[submodule "thirdparty/BulletPhysics"]
+	path = thirdparty/BulletPhysics
+	url = git@github.com:HanetakaChou/BulletPhysics.git
+	branch = master
+[submodule "thirdparty/Brioche-Platform-Abstraction-Layer"]
+	path = thirdparty/Brioche-Platform-Abstraction-Layer
+	url = git@github.com:HanetakaChou/Brioche-Platform-Abstraction-Layer.git
+	branch = master
+[submodule "thirdparty/D3D12-Agility-SDK"]
+	path = thirdparty/D3D12-Agility-SDK
+	url = git@github.com:HanetakaChou/Brioche-Platform-Abstraction-Layer.git
+	branch = D3D12-Agility-SDK
+[submodule "thirdparty/Vulkan-ValidationLayers"]
+	path = thirdparty/Vulkan-ValidationLayers
+	url = git@github.com:HanetakaChou/Brioche-Platform-Abstraction-Layer.git
+	branch = Vulkan-ValidationLayers
+[submodule "thirdparty/Brioche-Shader-Language"]
+	path = thirdparty/Brioche-Shader-Language
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = master
+[submodule "thirdparty/DirectXShaderCompiler"]
+	path = thirdparty/DirectXShaderCompiler
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = DirectXShaderCompiler
+[submodule "thirdparty/shaderc"]
+	path = thirdparty/shaderc
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = shaderc
+[submodule "thirdparty/make"]
+	path = thirdparty/make
+	url = git@github.com:HanetakaChou/Brioche-Shader-Language.git
+	branch = make
+[submodule "thirdparty/CoreRT"]
+	path = thirdparty/CoreRT
+	url = git@github.com:HanetakaChou/CoreRT.git
+	branch = master
+[submodule "thirdparty/DirectXMath"]
+	path = thirdparty/DirectXMath
+	url = git@github.com:HanetakaChou/DirectXMath.git
+	branch = master
+[submodule "thirdparty/DXUT"]
+	path = thirdparty/DXUT
+	url = git@github.com:HanetakaChou/DXUT.git
+	branch = master
+[submodule "thirdparty/DLB"]
+	path = thirdparty/DLB
+	url = git@github.com:HanetakaChou/Dual-Quaternion-Linear-Blending.git
+	branch = master
+[submodule "thirdparty/Environment-Lighting"]
+	path = thirdparty/Environment-Lighting
+	url = git@github.com:HanetakaChou/Environment-Lighting.git
+	branch = master
+[submodule "thirdparty/McRT-Malloc"]
+	path = thirdparty/McRT-Malloc
+	url = git@github.com:HanetakaChou/McRT-Malloc.git
+	branch = master
+[submodule "thirdparty/OpenCV"]
+	path = thirdparty/OpenCV
+	url = git@github.com:HanetakaChou/OpenCV.git
+	branch = master
+[submodule "thirdparty/libiconv"]
+	path = thirdparty/libiconv
+	url = git@github.com:HanetakaChou/libiconv.git
+	branch = master
