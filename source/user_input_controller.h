@@ -43,7 +43,7 @@ enum ANIMATION_INPUT_TYPE
     ANIMATION_INPUT_TYPE_COUNT = 3
 };
 
-static constexpr int const INVALID_INT_INDEX = -1;
+static constexpr int const INVALID_UINT32_INDEX = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
 
 static constexpr uint64_t const INVALID_TIMESTAMP = 0XFFFFFFFFFFFFFFFFU;
 
@@ -52,9 +52,10 @@ struct ui_instance_model_controller_t
     ANIMATION_INPUT_TYPE m_animation_input_type;
 };
 
-
 struct ui_controller_t
 {
+    CDXUTFirstPersonCamera m_first_person_camera;
+
     int m_language_index;
 
     VIDEO_CAPTURE_TYPE m_new_video_capture_type;
@@ -84,12 +85,12 @@ struct ui_controller_t
 
     mcrt_vector<char> m_new_instance_motion_name;
     mcrt_string m_new_instance_motion_selected_asset_motion;
-    int m_new_instance_motion_selected_animation_index;
+    uint32_t m_new_instance_motion_selected_animation_index;
     uint64_t m_tree_view_selected_instance_motion;
 
     mcrt_vector<char> m_new_instance_model_name;
     mcrt_string m_new_instance_model_selected_asset_model;
-    int m_new_instance_model_selected_surface_group_index;
+    uint32_t m_new_instance_model_selected_surface_group_index;
     ANIMATION_INPUT_TYPE m_new_instance_model_animation_input_type;
     uint64_t m_new_instance_model_selected_video_detector;
     uint32_t m_new_instance_model_selected_video_detector_face_index;
@@ -104,19 +105,14 @@ struct ui_controller_t
     uint64_t m_tree_view_selected_instance_model;
 
     mcrt_unordered_map<uint64_t, ui_instance_model_controller_t> m_instance_controllers;
+
+    mcrt_string m_hdri_selected_asset_image;
 };
 
-struct user_camera_controller_t
-{
-    CDXUTFirstPersonCamera m_first_person_camera;
-};
+extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_controller);
 
-extern void ui_controller_init(ui_controller_t *ui_controller);
+extern void user_camera_simulate(float interval_time, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
 
 extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
-
-extern void user_camera_controller_init(brx_anari_device *device, user_camera_model_t const *user_camera_model, user_camera_controller_t *user_camera_controller);
-
-extern void user_camera_simulate(float interval_time, brx_anari_device *device, user_camera_model_t *user_camera_model, user_camera_controller_t *user_camera_controller);
 
 #endif

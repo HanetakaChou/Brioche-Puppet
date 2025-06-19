@@ -45,6 +45,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ANARI-GLSL", "..\thirdp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Intel-TBB", "..\thirdparty\McRT-Malloc\thirdparty\Intel-TBB\build-windows\Intel-TBB.vcxproj", "{25907A28-2E2A-4D59-BF57-912C2A855C18}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenEXRCore", "..\thirdparty\Brioche-Asset-Import\thirdparty\OpenEXR\build-windows\OpenEXRCore.vcxproj", "{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdeflate", "..\thirdparty\Brioche-Asset-Import\thirdparty\libdeflate\build-windows\libdeflate.vcxproj", "{AD066C1C-1C22-48CB-B028-480F590BAAEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -221,6 +225,22 @@ Global
 		{25907A28-2E2A-4D59-BF57-912C2A855C18}.Release|x64.Build.0 = Release|x64
 		{25907A28-2E2A-4D59-BF57-912C2A855C18}.Release|x86.ActiveCfg = Release|Win32
 		{25907A28-2E2A-4D59-BF57-912C2A855C18}.Release|x86.Build.0 = Release|Win32
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Debug|x64.ActiveCfg = Debug|x64
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Debug|x64.Build.0 = Debug|x64
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Debug|x86.ActiveCfg = Debug|Win32
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Debug|x86.Build.0 = Debug|Win32
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Release|x64.ActiveCfg = Release|x64
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Release|x64.Build.0 = Release|x64
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Release|x86.ActiveCfg = Release|Win32
+		{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}.Release|x86.Build.0 = Release|Win32
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Debug|x64.ActiveCfg = Debug|x64
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Debug|x64.Build.0 = Debug|x64
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Debug|x86.ActiveCfg = Debug|Win32
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Debug|x86.Build.0 = Debug|Win32
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x64.ActiveCfg = Release|x64
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x64.Build.0 = Release|x64
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x86.ActiveCfg = Release|Win32
+		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

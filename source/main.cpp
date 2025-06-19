@@ -39,8 +39,6 @@ struct wsi_state_t
     bool m_ui_view;
     ui_model_t m_ui_model;
     ui_controller_t m_ui_controller;
-    user_camera_model_t m_user_camera_model;
-    user_camera_controller_t m_user_camera_controller;
 };
 
 static inline uint64_t _internal_tick_count_per_second();
@@ -1243,13 +1241,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
         wsi_state.m_anari_device = brx_anari_new_device(NULL);
 
-        ui_model_init(&wsi_state.m_ui_model);
+        ui_model_init(wsi_state.m_anari_device, &wsi_state.m_ui_model);
 
-        ui_controller_init(&wsi_state.m_ui_controller);
-
-        user_camera_model_init(wsi_state.m_anari_device, &wsi_state.m_user_camera_model);
-
-        user_camera_controller_init(wsi_state.m_anari_device, &wsi_state.m_user_camera_model, &wsi_state.m_user_camera_controller);
+        ui_controller_init(wsi_state.m_anari_device, &wsi_state.m_ui_controller);
 
         wsi_state.m_anari_device->frame_attach_window(window);
 
@@ -1280,6 +1274,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                 wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
             }
 
+            // User Camera
+            user_camera_simulate(interval_time, wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
+
             // UI
             if (wsi_state.m_ui_view)
             {
@@ -1290,11 +1287,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                 // ImGui::EndFrame();
                 ImGui::Render();
-            }
-
-            // User Camera
-            {
-                user_camera_simulate(interval_time, wsi_state.m_anari_device, &wsi_state.m_user_camera_model, &wsi_state.m_user_camera_controller);
             }
 
             // Motion
@@ -1543,7 +1535,7 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         }
         };
 
-        wsi_state->m_user_camera_controller.m_first_person_camera.HandleKeyDownMessage(mappedKey);
+        wsi_state->m_ui_controller.m_first_person_camera.HandleKeyDownMessage(mappedKey);
     }
         return 0;
     case WM_KEYUP:
@@ -1590,7 +1582,7 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         }
         };
 
-        wsi_state->m_user_camera_controller.m_first_person_camera.HandleKeyUpMessage(mappedKey);
+        wsi_state->m_ui_controller.m_first_person_camera.HandleKeyUpMessage(mappedKey);
     }
         return 0;
     case WM_MOUSEMOVE:
@@ -1608,7 +1600,7 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         bool middleButton = (0U != (wParam & MK_MBUTTON));
         bool rightButton = (0U != (wParam & MK_RBUTTON));
 
-        wsi_state->m_user_camera_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalizedY, leftButton, middleButton, rightButton);
+        wsi_state->m_ui_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalizedY, leftButton, middleButton, rightButton);
     }
         return 0;
     case WM_CREATE:
@@ -1924,7 +1916,7 @@ static inline bool _internal_platform_get_file_timestamp_and_data(wchar_t const 
             {
                 if (NULL != out_file_data)
                 {
-                    if ((static_cast<int64_t>(length.QuadPart) > 0U) && (static_cast<int64_t>(length.QuadPart) < static_cast<int64_t>(static_cast<int64_t>(1) << static_cast<int64_t>(24))))
+                    if ((static_cast<int64_t>(length.QuadPart) > 0U) && (static_cast<int64_t>(length.QuadPart) < static_cast<int64_t>(INT32_MAX)))
                     {
                         assert(out_file_data->empty());
                         out_file_data->resize(static_cast<int64_t>(length.QuadPart));

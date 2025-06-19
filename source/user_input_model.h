@@ -89,14 +89,8 @@ struct ui_model_t
     mcrt_unordered_map<uint64_t, ui_instance_model_model_t> m_instance_models;
 };
 
-struct user_camera_model_t
-{
-};
-
-extern void ui_model_init(ui_model_t *out_user_camera_model);
+extern void ui_model_init(brx_anari_device *device, ui_model_t *out_user_camera_model);
 
 extern void ui_model_uninit(brx_anari_device *device, ui_model_t *out_user_camera_model);
-
-extern void user_camera_model_init(brx_anari_device *device, user_camera_model_t *out_user_camera_model);
 
 #endif

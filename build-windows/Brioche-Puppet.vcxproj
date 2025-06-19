@@ -110,8 +110,8 @@
     <ProjectReference Include="..\thirdparty\Brioche-Analytic-Rendering-Interface\build-windows\BRX-ANARI.vcxproj">
       <Project>{11771461-545c-44bd-9cfb-479cf13c407c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\thirdparty\Brioche-Asset-Import\build-windows\Brx-Asset-Import.vcxproj">
-      <Project>{69879180-c3d1-4e61-bd26-8dfda749c6e0}</Project>
+    <ProjectReference Include="..\thirdparty\Brioche-Asset-Import\build-windows\BRX-Asset-Import.vcxproj">
+      <Project>{5de1be74-daa9-4be0-9290-4b9f4ed1b19c}</Project>
     </ProjectReference>
     <ProjectReference Include="..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui.vcxproj">
       <Project>{961cb0b4-5c0a-4824-9dc1-f784239d8d52}</Project>
@@ -224,7 +224,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -247,7 +248,7 @@
       </HeapCommitSize>
       <StackReserveSize>209715200</StackReserveSize>
       <StackCommitSize>104857600</StackCommitSize>
-      <AdditionalDependencies>comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -268,7 +269,8 @@
       </HeapReserveSize>
       <HeapCommitSize>
       </HeapCommitSize>
-      <AdditionalDependencies>comdlg32.lib;$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -288,7 +290,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
