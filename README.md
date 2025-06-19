@@ -1,6 +1,8 @@
 # Brioche Puppet  
 
-I am currently working on the free and open-source **VTuber** software **Brioche Puppet**.  
+[![build windows](https://github.com/HanetakaChou/Brioche-Puppet/actions/workflows/build-windows.yml/badge.svg)](https://github.com/HanetakaChou/Brioche-Puppet/actions/workflows/build-windows.yml)
+
+I am currently working on the free and open-source **VTuber** software [Brioche Puppet](https://github.com/HanetakaChou/Brioche-Puppet).  
 
 As a rendering engineer, the **rendering** is implemented by myself. But the third-party libraries [BulletPhysics](https://github.com/HanetakaChou/BulletPhysics) and [MeidaPipe](https://github.com/HanetakaChou/mediapipe) are used for **ragdoll physics** and **motion capture**.  
 
@@ -20,12 +22,12 @@ As a rendering engineer, the **rendering** is implemented by myself. But the thi
         - [x] [WebP](https://chromium.googlesource.com/webm/libwebp)  
         - [x] [PNG](https://github.com/pnggroup/libpng)  
         - [x] [JPEG](https://github.com/libjpeg-turbo/libjpeg-turbo)  
-    - [ ] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
-        - [ ] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
-- [ ] Environment Map (Environment Lighting Image)  
-    - [ ] [Equirectangular (Latitude-Longitude) Map](https://www.pbr-book.org/3ed-2018/Light_Sources/Infinite_Area_Lights)  
-    - [ ] [Octahedral Map](https://www.pbr-book.org/4ed/Light_Sources/Infinite_Area_Lights#ImageInfiniteLights)  
-    - [ ] [~~Cube Map~~](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-cubemaps?application_version=4.27)  
+        - [ ] TIFF  
+        - [ ] [TGA](https://tgalib.sourceforge.net/)  
+        - [ ] BMP  
+        - [ ] PNM  
+    - [x] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
+        - [x] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
 
 ## 2\. Motion    
     
