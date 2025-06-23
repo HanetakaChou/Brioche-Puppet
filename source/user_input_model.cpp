@@ -62,23 +62,17 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         float zoom_y = DirectX::XMVectorGetY(zoom);
         float distance = std::max(zoom_x, zoom_y);
 
-        // MMD
-        // LH
-        // Right -X
-        // Up +Y
-        // Forward -Z
-
         // glTF
         // RH
         // Right -X
         // Up +Y
-        // Forward Z
+        // Forward +Z
 
         DirectX::XMFLOAT3 target = scene_bounding_box.Center;
 
         DirectX::XMVECTOR look_at_position = DirectX::XMLoadFloat3(&target);
 
-        DirectX::XMFLOAT3 const look_direction(0.0F, 0.0F, 1.0F);
+        DirectX::XMFLOAT3 const look_direction(0.0F, 0.0F, -1.0F);
 
         DirectX::XMFLOAT3 eye_position;
         DirectX::XMStoreFloat3(&eye_position, DirectX::XMVectorSubtract(look_at_position, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&look_direction), distance)));
@@ -94,7 +88,7 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
     // HDRI
     {
         device->hdri_light_set_up(brx_anari_vec3{0.0F, 1.0F, 0.0F});
-        device->hdri_light_set_direction(brx_anari_vec3{0.0F, 0.0F, 1.0F});
+        device->hdri_light_set_direction(brx_anari_vec3{0.0F, 0.0F, -1.0F});
     }
 
     assert(ui_model->m_video_captures.empty());

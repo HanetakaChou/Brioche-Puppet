@@ -33,8 +33,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ANARI", "..\thirdparty\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Physics-BT", "..\thirdparty\Brioche-Physics\build-windows\BRX-Physics-BT.vcxproj", "{787679BF-454C-4AC9-967B-37A4B5128E92}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bullet", "..\thirdparty\BulletPhysics\build-windows\Bullet.vcxproj", "{E5FA4976-13BF-40C8-A46B-489E61A591BD}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Asset-Import", "..\thirdparty\Brioche-Asset-Import\build-windows\BRX-Asset-Import.vcxproj", "{5DE1BE74-DAA9-4BE0-9290-4B9F4ED1B19C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-PAL", "..\thirdparty\Brioche-Platform-Abstraction-Layer\build-windows\BRX-PAL.vcxproj", "{B196B7C7-31E1-470A-9627-F05830589366}"
@@ -48,6 +46,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenEXRCore", "..\thirdparty\Brioche-Asset-Import\thirdparty\OpenEXR\build-windows\OpenEXRCore.vcxproj", "{DF1598AA-7296-4A92-BCAF-1E6BB5E65146}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdeflate", "..\thirdparty\Brioche-Asset-Import\thirdparty\libdeflate\build-windows\libdeflate.vcxproj", "{AD066C1C-1C22-48CB-B028-480F590BAAEE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bullet", "..\thirdparty\Brioche-Physics\thirdparty\BulletPhysics\build-windows\Bullet.vcxproj", "{E5FA4976-13BF-40C8-A46B-489E61A591BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -177,14 +177,6 @@ Global
 		{787679BF-454C-4AC9-967B-37A4B5128E92}.Release|x64.Build.0 = Release|x64
 		{787679BF-454C-4AC9-967B-37A4B5128E92}.Release|x86.ActiveCfg = Release|Win32
 		{787679BF-454C-4AC9-967B-37A4B5128E92}.Release|x86.Build.0 = Release|Win32
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x64.ActiveCfg = Debug|x64
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x64.Build.0 = Debug|x64
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x86.ActiveCfg = Debug|Win32
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x86.Build.0 = Debug|Win32
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.ActiveCfg = Release|x64
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.Build.0 = Release|x64
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x86.ActiveCfg = Release|Win32
-		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x86.Build.0 = Release|Win32
 		{5DE1BE74-DAA9-4BE0-9290-4B9F4ED1B19C}.Debug|x64.ActiveCfg = Debug|x64
 		{5DE1BE74-DAA9-4BE0-9290-4B9F4ED1B19C}.Debug|x64.Build.0 = Debug|x64
 		{5DE1BE74-DAA9-4BE0-9290-4B9F4ED1B19C}.Debug|x86.ActiveCfg = Debug|Win32
@@ -241,6 +233,14 @@ Global
 		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x64.Build.0 = Release|x64
 		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x86.ActiveCfg = Release|Win32
 		{AD066C1C-1C22-48CB-B028-480F590BAAEE}.Release|x86.Build.0 = Release|Win32
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x64.ActiveCfg = Debug|x64
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x64.Build.0 = Debug|x64
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Debug|x86.Build.0 = Debug|Win32
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.ActiveCfg = Release|x64
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.Build.0 = Release|x64
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x86.ActiveCfg = Release|Win32
+		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

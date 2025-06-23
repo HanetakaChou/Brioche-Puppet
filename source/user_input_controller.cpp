@@ -355,6 +355,10 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
     float const help_marker_position = ImGui::GetFontSize() * 35.0F;
 
+    constexpr float const left_child_width_ratio = 0.5F;
+
+    // constexpr float const table_column_same_line_ratio = 0.35F;
+
     ImGui::SetNextWindowSize(ImVec2(ui_width, ui_height), ImGuiCond_FirstUseEver);
 
     ImGui::Begin("Brioche Puppet (ESC Enable/Disable UI)");
@@ -730,7 +734,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Video-Capture-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Video-Capture-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -1140,7 +1144,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Asset-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Asset-Motion-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -1539,7 +1543,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Asset-Model-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Asset-Model-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -1743,13 +1747,14 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     uint64_t asset_image_file_timestamp;
                     mcrt_vector<uint8_t> asset_image_file_data;
                     {
-                        constexpr size_t const asset_image_filter_count = 5;
+                        constexpr size_t const asset_image_filter_count = 6;
 
                         constexpr char const *const asset_image_filter_names[asset_image_filter_count] = {
                             "All Files",
                             "Web Picture",
                             "Portable Network Graphics",
                             "Joint Photographic Expert Group",
+                            "Truevision Graphics Adapter",
                             "Extended Dynamic Range"};
 
                         constexpr char const *const asset_image_filter_specs[asset_image_filter_count] = {
@@ -1757,6 +1762,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             "*.webp",
                             "*.png",
                             "*.jpg;*.jpeg",
+                            "*.tga",
                             "*.exr"};
 
                         asset_image_file_open = _internal_platform_get_open_file_name(platform_context, asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);
@@ -1809,7 +1815,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Asset-Image-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Asset-Image-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -2262,7 +2268,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Video-Detector-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Video-Detector-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -2863,7 +2869,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Instance-Motion-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Instance-Motion-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -3698,6 +3704,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                             // ImGui::SameLine();
 
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
 #undef _INTERNAL_BRX_STRINGIZING
@@ -3729,6 +3737,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                             // ImGui::SameLine();
 
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
 #undef _INTERNAL_BRX_STRINGIZING
@@ -3759,6 +3769,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             ImGui::SliderFloat("##Instance-Model-Manager-Model-Transform-Rotation-Euler-Yaw-Slider", &rotation, -180.0F, 180.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
 
                             // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
 
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
@@ -4066,7 +4078,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::Separator();
 
-            if (ImGui::BeginChild("##Instance-Model-Manager-Left-Child", ImVec2(ui_width * 0.5F, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+            if (ImGui::BeginChild("##Instance-Model-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
             {
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
@@ -4779,6 +4791,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                             // ImGui::SameLine();
 
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
 #undef _INTERNAL_BRX_STRINGIZING
@@ -4813,6 +4827,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                             // ImGui::SameLine();
 
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
 #undef _INTERNAL_BRX_STRINGIZING
@@ -4846,6 +4862,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             ImGui::SliderFloat("##Instance-Model-Manager-Right-Group-Table-Value-Model-Transform-Rotation-Euler-Yaw-Slider", &rotation, -180.0F, 180.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
 
                             // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
 
                             char rotation_text[256];
                             std::snprintf(&rotation_text[0], sizeof(rotation_text) / sizeof(rotation_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", rotation);
@@ -5299,6 +5317,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         ImGui::SliderFloat("##Camera-Manager-Table-Value-FOV-Slider", &fov, 1.0F, 180.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
 
                         // ImGui::SameLine();
+
+                        // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
 
                         char fov_text[256];
                         std::snprintf(&fov_text[0], sizeof(fov_text) / sizeof(fov_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", fov);
