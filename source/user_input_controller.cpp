@@ -1743,13 +1743,14 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     uint64_t asset_image_file_timestamp;
                     mcrt_vector<uint8_t> asset_image_file_data;
                     {
-                        constexpr size_t const asset_image_filter_count = 5;
+                        constexpr size_t const asset_image_filter_count = 6;
 
                         constexpr char const *const asset_image_filter_names[asset_image_filter_count] = {
                             "All Files",
                             "Web Picture",
                             "Portable Network Graphics",
                             "Joint Photographic Expert Group",
+                            "Truevision Graphics Adapter",
                             "Extended Dynamic Range"};
 
                         constexpr char const *const asset_image_filter_specs[asset_image_filter_count] = {
@@ -1757,6 +1758,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             "*.webp",
                             "*.png",
                             "*.jpg;*.jpeg",
+                            "*.tga",
                             "*.exr"};
 
                         asset_image_file_open = _internal_platform_get_open_file_name(platform_context, asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);

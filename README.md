@@ -6,7 +6,40 @@ I am currently working on the free and open-source **VTuber** software [Brioche 
 
 As a rendering engineer, the **rendering** is implemented by myself. But the third-party libraries [BulletPhysics](https://github.com/HanetakaChou/BulletPhysics) and [MeidaPipe](https://github.com/HanetakaChou/mediapipe) are used for **ragdoll physics** and **motion capture**.  
 
-## 1\. Asset Import  
+## 1\. Rendering (High Level)  
+
+[Brioche ANARI](https://github.com/HanetakaChou/Brioche-Analytic-Rendering-Interface)  
+  
+- [ ] Rasterization  
+    - [x] [PBR (Microfacet Model: Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
+    - [ ] [~~Toon Shading~~](https://github.com/unity3d-jp/UnityChanToonShaderVer2_Project)  
+    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://zero-radiance.github.io/post/sampling-diffusion/)  
+    - [ ] [~~LTC (Area Lighting: Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
+    - [ ] [IBL (Environment Lighting)](https://github.com/HanetakaChou/Environment-Lighting)  
+        - [x] [Diffuse (Spherical Harmonics)](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#irradiance-coefficients)  
+        - [ ] [Specular (Split Sum Approximation)](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#prefiltered-specular-radiance-cubemaps)      
+        - [ ] ~~TODO: is it possible to use LTC to simulate the environment lighting?~~    
+    - [ ] [~~VXGI (Global Illumination: Clipmap Cone Tracing)~~](https://dl.acm.org/doi/abs/10.1145/2775280.2792546)  
+- [ ] Ray Tracing  
+    - [ ] [ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)](https://intro-to-restir.cwyman.org/)  
+    - [ ] [~~SVGF (Denoiser: Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
+    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://github.com/NVIDIA-RTX/RTXCR/blob/main/docs/RtxcrSssGuide.md)  
+    - [ ] [~~SHaRC (Spatially Hashed Radiance Cache)~~](https://github.com/NVIDIA-RTX/SHARC)  
+- [ ] Nerual Rendering  
+    - [ ] [~~NS (Nerual Shading)~~](https://github.com/NVIDIA-RTX/RTXNS/blob/main/docs/ShaderTraining.md)  
+    - [ ] [~~NeRF (Neural Radiance Fields)~~ ](https://www.matthewtancik.com/nerf)  
+    - [ ] [~~NRC (Neural Radiance Cache)~~](https://github.com/NVIDIA-RTX/NRC)  
+
+## 2\. Rendering (Low Level)  
+
+[Brioche PAL](https://github.com/HanetakaChou/Brioche-Platform-Abstraction-Layer)  
+
+- [ ] Backend  
+    - [x] Direct3D12  
+    - [x] Vulkan  
+    - [ ] Metal  
+
+## 3\. File Format  
   
 [Brioche Asset Import](https://github.com/HanetakaChou/Brioche-Asset-Import)  
 
@@ -23,14 +56,14 @@ As a rendering engineer, the **rendering** is implemented by myself. But the thi
         - [x] [PNG](https://github.com/pnggroup/libpng)  
         - [x] [JPEG](https://github.com/libjpeg-turbo/libjpeg-turbo)  
         - [ ] TIFF  
-        - [ ] [TGA](https://tgalib.sourceforge.net/)  
+        - [x] [TGA](https://tgalib.sourceforge.net/)  
         - [ ] BMP  
         - [ ] PNM  
     - [x] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
         - [x] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
-        - [ ] [Radiance HDR](https://radsite.lbl.gov/radiance/framer.html)  
+        - [ ] [Radiance HDR](https://radsite.lbl.gov/radiance/refer/filefmts.pdf)  
 
-## 2\. Motion    
+## 4\. Animation    
     
 [Brioche Motion](https://github.com/HanetakaChou/Brioche-Motion)  
 
@@ -55,7 +88,7 @@ As a rendering engineer, the **rendering** is implemented by myself. But the thi
         - [ ] Ragdoll Kinematics Controller  
         - [ ] ~~Ragdoll Motors Controller~~  
 
-## 3\. Physics  
+## 5\. Physics  
 
 [Brioche Physics](https://github.com/HanetakaChou/Brioche-Physics)  
 
@@ -78,26 +111,3 @@ As a rendering engineer, the **rendering** is implemented by myself. But the thi
   - [x] Prismatic  
   - [x] Ragdoll  
   - [ ] ~~6 DOF~~  
-
-## 4\. Rendering  
-
-[Brioche ANARI](https://github.com/HanetakaChou/Brioche-Analytic-Rendering-Interface)  
-  
-- [ ] Rasterization  
-    - [x] [PBR (Microfacet Model: Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
-    - [ ] [~~Toon Shading~~](https://github.com/unity3d-jp/UnityChanToonShaderVer2_Project)  
-    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://zero-radiance.github.io/post/sampling-diffusion/)  
-    - [ ] [~~LTC (Area Lighting: Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
-    - [ ] [IBL (Environment Lighting)](https://github.com/HanetakaChou/Environment-Lighting)  
-        - [x] Diffuse (Spherical Harmonics)  
-        - [ ] Specular (Split Sum Approximation)  // Can we use LTC to emulate?  
-    - [ ] [~~VXGI (Global Illumination: Clipmap Cone Tracing)~~](https://dl.acm.org/doi/abs/10.1145/2775280.2792546)  
-- [ ] Ray Tracing  
-    - [ ] [ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)](https://intro-to-restir.cwyman.org/)  
-    - [ ] [~~SVGF (Denoiser: Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
-    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://github.com/NVIDIA-RTX/RTXCR/blob/main/docs/RtxcrSssGuide.md)  
-    - [ ] [~~SHaRC (Spatially Hashed Radiance Cache)~~](https://github.com/NVIDIA-RTX/SHARC)  
-- [ ] Nerual Rendering  
-    - [ ] [~~NS (Nerual Shading)~~](https://github.com/NVIDIA-RTX/RTXNS/blob/main/docs/ShaderTraining.md)  
-    - [ ] [~~NeRF (Neural Radiance Fields)~~ ](https://www.matthewtancik.com/nerf)  
-    - [ ] [~~NRC (Neural Radiance Cache)~~](https://github.com/NVIDIA-RTX/NRC)  
