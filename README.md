@@ -1,10 +1,12 @@
 # Brioche Puppet  
 
+![](Brioche-Puppet.png)  
+
 [![build windows](https://github.com/HanetakaChou/Brioche-Puppet/actions/workflows/build-windows.yml/badge.svg)](https://github.com/HanetakaChou/Brioche-Puppet/actions/workflows/build-windows.yml)
 
 I am currently working on the free and open-source **VTuber** software [Brioche Puppet](https://github.com/HanetakaChou/Brioche-Puppet).  
 
-As a rendering engineer, the **rendering** is implemented by myself. But the third-party libraries [BulletPhysics](https://github.com/HanetakaChou/BulletPhysics) and [MeidaPipe](https://github.com/HanetakaChou/mediapipe) are used for **ragdoll physics** and **motion capture**.  
+As a rendering engineer, the **rendering** is implemented by me. But the third-party libraries [BulletPhysics](https://github.com/HanetakaChou/BulletPhysics) and [MeidaPipe](https://github.com/HanetakaChou/mediapipe) are used for **ragdoll physics** and **motion capture**.  
 
 ## 1\. Rendering (High Level)  
 
@@ -17,11 +19,10 @@ As a rendering engineer, the **rendering** is implemented by myself. But the thi
     - [ ] [~~LTC (Area Lighting: Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
     - [ ] [IBL (Environment Lighting)](https://github.com/HanetakaChou/Environment-Lighting)  
         - [x] [Diffuse (Spherical Harmonics)](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#irradiance-coefficients)  
-        - [ ] [Specular (Split Sum Approximation)](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#prefiltered-specular-radiance-cubemaps)      
-        - [ ] ~~TODO: is it possible to use LTC to simulate the environment lighting?~~    
-    - [ ] [~~VXGI (Global Illumination: Clipmap Cone Tracing)~~](https://dl.acm.org/doi/abs/10.1145/2775280.2792546)  
+        - [ ] [~~Specular (Split Sum Approximation)~~](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#prefiltered-specular-radiance-cubemaps)      
+    - [x] [VXGI (Voxel Cone Tracing)](https://hanetakachou.github.io/index.html?file=Rendering/Rasterization/Lighting/Voxel-Cone-Tracing.md)  
 - [ ] Ray Tracing  
-    - [ ] [ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)](https://intro-to-restir.cwyman.org/)  
+    - [ ] [~~ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)~~](https://intro-to-restir.cwyman.org/)  
     - [ ] [~~SVGF (Denoiser: Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
     - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://github.com/NVIDIA-RTX/RTXCR/blob/main/docs/RtxcrSssGuide.md)  
     - [ ] [~~SHaRC (Spatially Hashed Radiance Cache)~~](https://github.com/NVIDIA-RTX/SHARC)  

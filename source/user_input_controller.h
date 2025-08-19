@@ -106,6 +106,8 @@ struct ui_controller_t
 
     mcrt_unordered_map<uint64_t, ui_instance_model_controller_t> m_instance_controllers;
 
+    BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
+
     mcrt_string m_hdri_selected_asset_image;
 };
 

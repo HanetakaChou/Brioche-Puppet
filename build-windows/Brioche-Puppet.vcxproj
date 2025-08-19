@@ -29,6 +29,7 @@
     <ClInclude Include="..\source\user_input_model.h" />
     <ClInclude Include="..\thirdparty\DLB\DLB.h" />
     <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x64\D3D12Core.dll">
@@ -126,6 +127,12 @@
       <Project>{998afb75-f449-402d-a300-30da702b3ddf}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Brioche-Puppet.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Brioche-Puppet.ico" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{00ACFB22-3872-4380-BA9D-E1DD24888EF4}</ProjectGuid>
@@ -218,6 +225,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
  %(AdditionalOptions)</AdditionalOptions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -238,6 +246,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
  %(AdditionalOptions)</AdditionalOptions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -261,6 +270,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
  %(AdditionalOptions)</AdditionalOptions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -284,6 +294,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
  %(AdditionalOptions)</AdditionalOptions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

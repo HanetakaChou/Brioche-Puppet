@@ -1111,6 +1111,8 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
 
 #include <algorithm>
 
+#include "../build-windows/resource.h"
+
 #ifndef NDEBUG
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -1180,12 +1182,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                 0,
                 sizeof(LONG_PTR),
                 hInstance,
-                LoadIconW(NULL, IDI_APPLICATION),
-                LoadCursorW(NULL, IDC_ARROW),
+                LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON_BRIOCHE_PUPPET)),
+                LoadCursorW(hInstance, IDC_ARROW),
                 (HBRUSH)(COLOR_WINDOW + 1),
                 NULL,
                 L"Brioche Puppet",
-                LoadIconW(NULL, IDI_APPLICATION),
+                LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON_BRIOCHE_PUPPET)),
             };
             window_class = RegisterClassExW(&window_class_create_info);
             assert(0 != window_class);
@@ -1415,7 +1417,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                             if ((NULL != video_detector) || (NULL != animation_instance))
                             {
-                                skeleton_instance->step();
+                                skeleton_instance->step(wsi_state.m_ui_controller.m_physics_ragdoll_quality);
                                 surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), wrap(skeleton_instance->get_skin_transforms()));
                             }
                         }

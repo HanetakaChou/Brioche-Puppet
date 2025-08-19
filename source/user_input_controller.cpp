@@ -292,6 +292,8 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
 
     assert(ui_controller->m_instance_controllers.empty());
 
+    ui_controller->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_LOW;
+
     assert(ui_controller->m_hdri_selected_asset_image.empty());
 }
 
@@ -348,8 +350,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
     constexpr int const LANGUAGE_COUNT = 4;
 
-    constexpr float const ui_width = 1024.0F;
-    constexpr float const ui_height = 600.0F;
+    constexpr float const ui_width = 512.0F;
+    constexpr float const ui_height = 512.0F;
 
     constexpr char const *const help_marker_text = "[ I ]";
 
@@ -5456,9 +5458,64 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Physics Ragdoll Manager",
+                "物理布人形管理",
+                "物理布偶管理",
+                "物理布娃娃管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::TreeNodeEx("##Physics-Ragdoll-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        {
+            if (ImGui::BeginTable("##Physics-Ragdoll-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                ImGui::TableSetupColumn("##Physics-Ragdoll-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Physics-Ragdoll-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Quality",
+                        "品質",
+                        "質量",
+                        "质量"};
+
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    constexpr char const *const items[LANGUAGE_COUNT][BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_COUNT] = {
+                        {"Disable", "Low", "Medium", "High"},
+                        {"無効", "低", "中", "高"},
+                        {"停用", "低", "中", "高"},
+                        {"停用", "低", "中", "高"}};
+
+                    int select_physics_ragdoll_quality = std::min(std::max(0, static_cast<int>(ui_controller->m_physics_ragdoll_quality)), (int(BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_COUNT) - 1));
+
+                    ImGui::Combo("##Physics-Ragdoll-Manager-Table-Layout", &select_physics_ragdoll_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+
+                    ui_controller->m_physics_ragdoll_quality = static_cast<BRX_MOTION_PHYSICS_RAGDOLL_QUALITY>(std::min(std::max(0, select_physics_ragdoll_quality), (int(BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_COUNT) - 1)));
+                }
+
+                ImGui::EndTable();
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    {
+        ImGui::Separator();
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
                 "Environment Lighting Manager",
-                "環境光照管理",
-                "環境光照管理",
+                "環境照明管理",
+                "環境照明管理",
                 "环境光照管理"};
             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
         }
@@ -5619,17 +5676,17 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 }
                 ImGui::TableNextColumn();
                 {
-                    constexpr char const *const items[LANGUAGE_COUNT][ANIMATION_INPUT_TYPE_COUNT] = {
+                    constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_HDRI_LIGHT_LAYOUT_COUNT] = {
                         {"Undefined", "Equirectangular Mapping", "Octahedral Mapping"},
                         {"未定義", "正距円筒図法", "八面体図法"},
                         {"未定義", "等距矩形映射", "八面體映射"},
                         {"未定义", "等距矩形映射", "八面体映射"}};
 
-                    int select_layout = std::min(std::max(0, static_cast<int>(device->hdri_light_get_layout())), 2);
+                    int select_layout = std::min(std::max(0, static_cast<int>(device->hdri_light_get_layout())), (int(BRX_ANARI_HDRI_LIGHT_LAYOUT_COUNT) - 1));
 
                     ImGui::Combo("##Environment-Lighting-Manager-Table-Layout", &select_layout, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
 
-                    device->hdri_light_set_layout(static_cast<BRX_ANARI_HDRI_LIGHT_LAYOUT>(std::min(std::max(0, select_layout), 2)));
+                    device->hdri_light_set_layout(static_cast<BRX_ANARI_HDRI_LIGHT_LAYOUT>(std::min(std::max(0, select_layout), (int(BRX_ANARI_HDRI_LIGHT_LAYOUT_COUNT) - 1))));
                 }
 
                 {
@@ -5818,6 +5875,61 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     }
 
                     device->hdri_light_set_up(hdri_light_up);
+                }
+
+                ImGui::EndTable();
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    {
+        ImGui::Separator();
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Global Illumination Manager",
+                "大域照明管理",
+                "全域照明管理",
+                "全局光照管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::TreeNodeEx("##Global-Illumination-Manager", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        {
+            if (ImGui::BeginTable("##Global-Illumination-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                ImGui::TableSetupColumn("##Global-Illumination-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Global-Illumination-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Quality",
+                        "品質",
+                        "質量",
+                        "质量"};
+
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_GI_QUALITY_COUNT] = {
+                        {"Disable", "Low", "Medium", "High"},
+                        {"無効", "低", "中", "高"},
+                        {"停用", "低", "中", "高"},
+                        {"停用", "低", "中", "高"}};
+
+                    int select_gi_quality = std::min(std::max(0, static_cast<int>(device->renderer_get_gi_quality())), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1));
+
+                    ImGui::Combo("##Global-Illumination-Manager-Table-Layout", &select_gi_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+
+                    device->renderer_set_gi_quality(static_cast<BRX_ANARI_RENDERER_GI_QUALITY>(std::min(std::max(0, select_gi_quality), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1))));
                 }
 
                 ImGui::EndTable();
