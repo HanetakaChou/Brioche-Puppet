@@ -62,10 +62,6 @@
 	path = thirdparty/DLB
 	url = git@github.com:HanetakaChou/Dual-Quaternion-Linear-Blending.git
 	branch = master
-[submodule "thirdparty/Environment-Lighting"]
-	path = thirdparty/Environment-Lighting
-	url = git@github.com:HanetakaChou/Environment-Lighting.git
-	branch = master
 [submodule "thirdparty/McRT-Malloc"]
 	path = thirdparty/McRT-Malloc
 	url = git@github.com:HanetakaChou/McRT-Malloc.git
@@ -81,4 +77,12 @@
 [submodule "thirdparty/Voxel-Cone-Tracing"]
 	path = thirdparty/Voxel-Cone-Tracing
 	url = git@github.com:HanetakaChou/Voxel-Cone-Tracing.git
+	branch = master
+[submodule "thirdparty/Spherical-Harmonic"]
+	path = thirdparty/Spherical-Harmonic
+	url = git@github.com:HanetakaChou/Spherical-Harmonic.git
+	branch = master
+[submodule "thirdparty/Hemispherical-Directional-Reflectance"]
+	path = thirdparty/Hemispherical-Directional-Reflectance
+	url = git@github.com:HanetakaChou/Hemispherical-Directional-Reflectance.git
 	branch = master

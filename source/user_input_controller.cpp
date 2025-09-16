@@ -389,7 +389,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
                 "Rendering FPS:",
-                "Rendering FPS:",
+                "描画 FPS:",
                 "渲染 FPS:",
                 "渲染 FPS:"};
             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -412,7 +412,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         {
             constexpr char const *const text[LANGUAGE_COUNT] = {
                 "Video Capture Manager",
-                "動画捕獲管理",
+                "映像捕捉管理",
                 "視訊捕捉管理",
                 "视频捕捉管理"};
             ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -511,7 +511,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             {
                                 constexpr char const *const text[LANGUAGE_COUNT] = {
                                     "Video Capture FPS",
-                                    "動画捕獲 FPS",
+                                    "映像捕捉 FPS",
                                     "視訊捕捉 FPS",
                                     "视频捕捉 FPS"};
                                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -528,7 +528,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                     ImGui::PushTextWrapPos(help_marker_position);
                                     constexpr char const *const text[LANGUAGE_COUNT] = {
                                         "It is NOT possible for the rendering FPS to be higher than the video capture FPS. But too high video capture FPS may not necessarily benefit rendering FPS.",
-                                        "Rendering FPS が動画捕獲 FPS より高くなることはあり得ません。ただし、動画捕獲 FPS が高すぎると、Rendering FPS にメリットが及ばない可能性があります。",
+                                        "描画 FPS は映像捕捉 FPS 超過不可。但し、映像捕捉 FPS 過高時、描画 FPS 利点必ずしも生じず。",
                                         "渲染 FPS 不可能高於視訊捕捉 FPS。但過高的視訊捕捉 FPS 不一定能有利於渲染 FPS。",
                                         "渲染 FPS 不可能高于视频捕捉 FPS。但过高的视频捕捉 FPS 并不一定能有利于渲染 FPS。"};
                                     ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -567,7 +567,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "新規作成",
                         "新建",
                         "新建"};
-
                     ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                 }
 
@@ -634,7 +633,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
                         "Import",
-                        "輸入",
+                        "導入",
                         "導入",
                         "导入"};
                     ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -869,7 +868,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Backend:",
-                            "Backend:",
+                            "後端:",
                             "後端:",
                             "后端:"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
@@ -926,7 +925,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         {
                             constexpr char const *const text[LANGUAGE_COUNT] = {
                                 "Video Capture FPS",
-                                "動画捕獲 FPS",
+                                "映像捕捉 FPS",
                                 "視訊捕捉 FPS",
                                 "视频捕捉 FPS"};
                             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
@@ -943,7 +942,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 ImGui::PushTextWrapPos(help_marker_position);
                                 constexpr char const *const text[LANGUAGE_COUNT] = {
                                     "It is NOT possible for the rendering FPS to be higher than the video capture FPS. But too high video capture FPS may not necessarily benefit rendering FPS.",
-                                    "Rendering FPS が動画捕獲 FPS より高くなることはあり得ません。ただし、動画捕獲 FPS が高すぎると、Rendering FPS にメリットが及ばない可能性があります。",
+                                    "描画 FPS は映像捕捉 FPS 超過不可。但し、映像捕捉 FPS 過高時、描画 FPS 利点必ずしも生じず。",
                                     "渲染 FPS 不可能高於視訊捕捉 FPS。但過高的視訊捕捉 FPS 不一定能有利於渲染 FPS。",
                                     "渲染 FPS 不可能高于视频捕捉 FPS。但过高的视频捕捉 FPS 并不一定能有利于渲染 FPS。"};
                                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -992,7 +991,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
-                    "輸入",
+                    "導入",
                     "導入",
                     "导入"};
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -1255,7 +1254,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Animation Count",
-                            "Animation 数",
+                            "動作数",
                             "動畫數",
                             "动画数"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
@@ -1305,7 +1304,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
-                    "輸入",
+                    "導入",
                     "導入",
                     "导入"};
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -1654,7 +1653,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Surface Group Count",
-                            "表面 Group 数",
+                            "表面群数",
                             "表面組數",
                             "表面组数"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
@@ -1735,7 +1734,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             {
                 constexpr char const *const text[LANGUAGE_COUNT] = {
                     "Import",
-                    "輸入",
+                    "導入",
                     "導入",
                     "导入"};
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -1999,7 +1998,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Name",
-                            "名前",
+                            "名称",
                             "名稱",
                             "名称"};
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -2147,9 +2146,9 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *text[LANGUAGE_COUNT] = {
                             "Enable Debug Renderer",
-                            "Debug Renderer 有効",
-                            "啟用調試渲染",
-                            "启用调试渲染"};
+                            "調試描画器有効",
+                            "啟用調試器渲染",
+                            "启用调试器渲染"};
 
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                     }
@@ -2594,7 +2593,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Name",
-                            "名前",
+                            "名称",
                             "名稱",
                             "名称"};
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -2684,7 +2683,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Animation Index",
-                            "Animation 索引",
+                            "動作索引",
                             "動畫索引",
                             "动画索引"};
 
@@ -3085,7 +3084,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Name",
-                            "名前",
+                            "名称",
                             "名稱",
                             "名称"};
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
@@ -3278,7 +3277,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
                             "Animation Input Type",
-                            "Animation 入力種類",
+                            "動作入力種類",
                             "動畫輸入類型",
                             "动画输入类型"};
 
@@ -5648,7 +5647,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
                         "Layout",
-                        "Layout",
+                        "配置",
                         "佈局",
                         "布局"};
 
@@ -5665,7 +5664,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                             ImGui::PushTextWrapPos(help_marker_position);
                             constexpr char const *const text[LANGUAGE_COUNT] = {
                                 "You may refer to PBRT-V4 for more information about equirectangular mapping and octahedral mapping.",
-                                "正距円筒図法と八面体図法の詳細については、PBRT-V4 を参照してください。",
+                                "正距円筒図法及八面体図法詳細は PBRT-V4 参照。",
                                 "你可以參考 PBRT-V4 以了解有關等矩形映射和八面體映射的更多資訊。",
                                 "你可以参考 PBRT-V4 以了解有关等矩形映射和八面体映射的更多信息。"};
                             ImGui::TextUnformatted(text[ui_controller->m_language_index]);

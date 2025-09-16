@@ -13,18 +13,16 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
 [Brioche ANARI](https://github.com/HanetakaChou/Brioche-Analytic-Rendering-Interface)  
   
 - [ ] Rasterization  
-    - [x] [PBR (Microfacet Model: Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
+    - [x] [PBR (Microfacet Model | Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
     - [ ] [~~Toon Shading~~](https://github.com/unity3d-jp/UnityChanToonShaderVer2_Project)  
-    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://zero-radiance.github.io/post/sampling-diffusion/)  
-    - [ ] [~~LTC (Area Lighting: Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
-    - [ ] [IBL (Environment Lighting)](https://github.com/HanetakaChou/Environment-Lighting)  
-        - [x] [Diffuse (Spherical Harmonics)](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#irradiance-coefficients)  
-        - [ ] [~~Specular (Split Sum Approximation)~~](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_lights_image_based/README.md#prefiltered-specular-radiance-cubemaps)      
-    - [x] [VXGI (Voxel Cone Tracing)](https://hanetakachou.github.io/index.html?file=Rendering/Rasterization/Lighting/Voxel-Cone-Tracing.md)  
+    - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://zero-radiance.github.io/post/sampling-diffusion/)  
+    - [ ] [~~LTC (Area Lighting | Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
+    - [x] [SH (Environment Lighting | Spherical Harmonics)](https://github.com/HanetakaChou/Spherical-Harmonic)  
+    - [x] [VCT (Global Illumination | Voxel Cone Tracing)](https://hanetakachou.github.io/index.html?file=Rendering/Rasterization/Lighting/Voxel-Cone-Tracing.md)  
 - [ ] Ray Tracing  
     - [ ] [~~ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)~~](https://intro-to-restir.cwyman.org/)  
-    - [ ] [~~SVGF (Denoiser: Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
-    - [ ] [~~SSS (Skin: Subsurface Scattering)~~](https://github.com/NVIDIA-RTX/RTXCR/blob/main/docs/RtxcrSssGuide.md)  
+    - [ ] [~~SVGF (Denoiser | Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
+    - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://github.com/NVIDIA-RTX/RTXCR/blob/main/docs/RtxcrSssGuide.md)  
     - [ ] [~~SHaRC (Spatially Hashed Radiance Cache)~~](https://github.com/NVIDIA-RTX/SHARC)  
 - [ ] Nerual Rendering  
     - [ ] [~~NS (Nerual Shading)~~](https://github.com/NVIDIA-RTX/RTXNS/blob/main/docs/ShaderTraining.md)  
