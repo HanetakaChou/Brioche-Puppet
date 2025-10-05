@@ -1280,7 +1280,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
             user_camera_simulate(interval_time, wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
 
             // UI
-            if (wsi_state.m_ui_view)
             {
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
@@ -1462,34 +1461,66 @@ extern "C" IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT
 
 static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    LRESULT const res_imgui = ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+    wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+
+    LRESULT res_imgui;
+    if ((NULL != wsi_state) && (wsi_state->m_ui_view))
+    {
+        res_imgui = ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+    }
+    else
+    {
+        switch (Msg)
+        {
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONDBLCLK:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONDBLCLK:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONDBLCLK:
+        case WM_XBUTTONDOWN:
+        case WM_XBUTTONDBLCLK:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_XBUTTONUP:
+        case WM_MOUSEWHEEL:
+        case WM_MOUSEHWHEEL:
+        {
+            // Do Nothing
+            res_imgui = 1;
+        }
+        break;
+        default:
+        {
+            res_imgui = ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+        }
+        }
+    }
 
     switch (Msg)
     {
-    case WM_SIZE:
+    case WM_MOUSEMOVE:
     {
-        wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         assert(NULL != wsi_state);
 
-        WORD const new_width = LOWORD(lParam);
-        WORD const new_height = HIWORD(lParam);
+        int window_x = GET_X_LPARAM(lParam);
+        int window_y = GET_Y_LPARAM(lParam);
 
-        if (wsi_state->m_window_width != new_width || wsi_state->m_window_height != new_height)
-        {
-            if (new_width > 0 && new_height > 0)
-            {
-                wsi_state->m_anari_device->frame_resize_window();
-            }
-            wsi_state->m_window_width = new_width;
-            wsi_state->m_window_height = new_height;
-        }
+        float normalized_x = static_cast<float>(static_cast<double>(window_x) / static_cast<double>(wsi_state->m_window_width));
+        float normalized_y = static_cast<float>(static_cast<double>(window_y) / static_cast<double>(wsi_state->m_window_height));
+
+        bool leftButton = (0U != (wParam & MK_LBUTTON));
+        bool middleButton = (0U != (wParam & MK_MBUTTON));
+        bool rightButton = (0U != (wParam & MK_RBUTTON));
+
+        wsi_state->m_ui_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalized_y, leftButton, middleButton, rightButton);
     }
         return 0;
     case WM_ERASEBKGND:
         return 1;
     case WM_KEYDOWN:
     {
-        wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         assert(NULL != wsi_state);
 
         D3DUtil_CameraKeys mappedKey;
@@ -1542,7 +1573,6 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         return 0;
     case WM_KEYUP:
     {
-        wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         assert(NULL != wsi_state);
 
         D3DUtil_CameraKeys mappedKey;
@@ -1587,22 +1617,22 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         wsi_state->m_ui_controller.m_first_person_camera.HandleKeyUpMessage(mappedKey);
     }
         return 0;
-    case WM_MOUSEMOVE:
+    case WM_SIZE:
     {
-        wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         assert(NULL != wsi_state);
 
-        int window_x = GET_X_LPARAM(lParam);
-        int window_y = GET_Y_LPARAM(lParam);
+        WORD const new_width = LOWORD(lParam);
+        WORD const new_height = HIWORD(lParam);
 
-        float normalized_x = static_cast<float>(static_cast<double>(window_x) / static_cast<double>(wsi_state->m_window_width));
-        float normalizedY = static_cast<float>(static_cast<double>(window_y) / static_cast<double>(wsi_state->m_window_height));
-
-        bool leftButton = (0U != (wParam & MK_LBUTTON));
-        bool middleButton = (0U != (wParam & MK_MBUTTON));
-        bool rightButton = (0U != (wParam & MK_RBUTTON));
-
-        wsi_state->m_ui_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalizedY, leftButton, middleButton, rightButton);
+        if (wsi_state->m_window_width != new_width || wsi_state->m_window_height != new_height)
+        {
+            if (new_width > 0 && new_height > 0)
+            {
+                wsi_state->m_anari_device->frame_resize_window();
+            }
+            wsi_state->m_window_width = new_width;
+            wsi_state->m_window_height = new_height;
+        }
     }
         return 0;
     case WM_CREATE:
@@ -1617,7 +1647,6 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
         return 0;
     case WM_DESTROY:
     {
-        wsi_state_t *const wsi_state = reinterpret_cast<wsi_state_t *>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         assert(NULL != wsi_state);
 
         wsi_state->m_running = false;

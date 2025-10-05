@@ -21,3 +21,9 @@ jobs:
       - shell: cmd
         run: |
           msbuild ./build-windows/Brioche-Puppet.sln /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}}
+      - uses: actions/upload-artifact@main
+        with:
+          name: Brioche-Puppet-Windows-${{matrix.platform}}-${{matrix.configuration}}
+          path: |
+            ./build-windows/bin/${{matrix.platform}}/${{matrix.configuration}}\**\*.exe
+            ./build-windows/bin/${{matrix.platform}}/${{matrix.configuration}}\**\*.dll
