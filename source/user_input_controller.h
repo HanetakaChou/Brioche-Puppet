@@ -58,6 +58,18 @@ struct ui_controller_t
 
     int m_language_index;
 
+    bool m_show_video_capture_manager;
+    bool m_show_asset_motion_manager;
+    bool m_show_asset_model_manager;
+    bool m_show_asset_image_manager;
+    bool m_show_video_detector_manager;
+    bool m_show_instance_motion_manager;
+    bool m_show_instance_model_manager;
+    bool m_show_camera_manager;
+    bool m_show_physics_ragdoll_manager;
+    bool m_show_environment_lighting_manager;
+    bool m_show_global_illumination_manager;
+
     VIDEO_CAPTURE_TYPE m_new_video_capture_type;
     int m_new_video_capture_camera_index;
     int m_new_video_capture_camera_resolution_index;

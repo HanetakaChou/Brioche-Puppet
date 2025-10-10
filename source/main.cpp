@@ -1184,7 +1184,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                 hInstance,
                 LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON_BRIOCHE_PUPPET)),
                 LoadCursorW(hInstance, IDC_ARROW),
-                (HBRUSH)(COLOR_WINDOW + 1),
+                (HBRUSH)GetStockObject(NULL_BRUSH),
                 NULL,
                 L"Brioche Puppet",
                 LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON_BRIOCHE_PUPPET)),
@@ -1260,7 +1260,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
     while (wsi_state.m_running)
     {
         MSG msg;
-        while (::PeekMessageW(&msg, NULL, 0U, 0U, PM_REMOVE))
+        while (PeekMessageW(&msg, NULL, 0U, 0U, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
@@ -1556,12 +1556,6 @@ static LRESULT CALLBACK wnd_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPar
             mappedKey = CAM_MOVE_DOWN;
         }
         break;
-        case VK_ESCAPE:
-        {
-            wsi_state->m_ui_view = (!wsi_state->m_ui_view);
-            mappedKey = CAM_UNKNOWN;
-        }
-        break;
         default:
         {
             mappedKey = CAM_UNKNOWN;
@@ -1676,7 +1670,13 @@ static void _internal_imgui_free_wrapper(void *ptr, void *)
 static HRESULT STDMETHODCALLTYPE NoRegCoCreate(const __wchar_t *dllName, REFCLSID rclsid, REFIID riid, void **ppv)
 {
     HMODULE dynamic_library = GetModuleHandleW(dllName);
-    assert(NULL != dynamic_library);
+    if (NULL == dynamic_library)
+    {
+        assert(ERROR_MOD_NOT_FOUND == GetLastError());
+
+        dynamic_library = LoadLibraryW(dllName);
+        assert(NULL != dynamic_library);
+    }
 
     decltype(DllGetClassObject) *const pfn_dll_get_class_object = reinterpret_cast<decltype(DllGetClassObject) *>(GetProcAddress(dynamic_library, "DllGetClassObject"));
 
@@ -1755,7 +1755,7 @@ extern bool _internal_platform_get_open_file_name(void *platform_context, size_t
         IFileOpenDialog *file_open_dialog = NULL;
         // HRESULT res_co_create_instance = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&file_open_dialog));
         assert(reinterpret_cast<void *>(7U) != GetOpenFileNameW);
-        HRESULT res_co_create_instance = (reinterpret_cast<void *>(7U) != GetOpenFileNameW) ? NoRegCoCreate(L"Comdlg32.dll", CLSID_FileOpenDialog, IID_PPV_ARGS(&file_open_dialog)) : E_FAIL;
+        HRESULT res_co_create_instance = NoRegCoCreate(L"Comdlg32.dll", CLSID_FileOpenDialog, IID_PPV_ARGS(&file_open_dialog));
         assert(SUCCEEDED(res_co_create_instance));
 
         FILEOPENDIALOGOPTIONS file_open_dialog_options;

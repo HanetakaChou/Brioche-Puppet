@@ -232,7 +232,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -257,7 +256,6 @@
       </HeapCommitSize>
       <StackReserveSize>209715200</StackReserveSize>
       <StackCommitSize>104857600</StackCommitSize>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -279,7 +277,6 @@
       </HeapReserveSize>
       <HeapCommitSize>
       </HeapCommitSize>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -301,7 +298,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
