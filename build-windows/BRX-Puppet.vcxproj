@@ -120,6 +120,9 @@
     <ProjectReference Include="..\thirdparty\Brioche-Motion\build-windows\BRX-Motion.vcxproj">
       <Project>{720ba09e-4cbc-4e86-85d9-2766a80fe516}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\thirdparty\Brioche-Window-System-Integration\build-windows\BRX-WSI.vcxproj">
+      <Project>{0d2def0c-0883-44cb-a9c2-38063ed78802}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\thirdparty\libiconv\build-windows\libiconv.vcxproj">
       <Project>{b0b625d2-ae06-468f-81ca-848a0f9b617c}</Project>
     </ProjectReference>
@@ -128,18 +131,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Brioche-Puppet.rc" />
+    <ResourceCompile Include="BRX-Puppet.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Brioche-Puppet.ico" />
+    <Image Include="BRX-Puppet.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{00ACFB22-3872-4380-BA9D-E1DD24888EF4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Brioche-Puppet</RootNamespace>
+    <RootNamespace>BRX-Puppet</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Brioche-Puppet</ProjectName>
+    <ProjectName>BRX-Puppet</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -194,25 +197,25 @@
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>Brioche-Puppet</TargetName>
+    <TargetName>BRX-Puppet</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>Brioche-Puppet</TargetName>
+    <TargetName>BRX-Puppet</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>Brioche-Puppet</TargetName>
+    <TargetName>BRX-Puppet</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>Brioche-Puppet</TargetName>
+    <TargetName>BRX-Puppet</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -232,7 +235,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -257,7 +259,6 @@
       </HeapCommitSize>
       <StackReserveSize>209715200</StackReserveSize>
       <StackCommitSize>104857600</StackCommitSize>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -279,7 +280,6 @@
       </HeapReserveSize>
       <HeapCommitSize>
       </HeapCommitSize>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\..\thirdparty\OpenCV\build\x64\vc15\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -301,7 +301,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comdlg32.lib;opencv_world3410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

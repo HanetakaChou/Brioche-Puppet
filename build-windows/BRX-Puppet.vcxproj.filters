@@ -107,12 +107,12 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Brioche-Puppet.rc">
+    <ResourceCompile Include="BRX-Puppet.rc">
       <Filter>build-windows</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Brioche-Puppet.ico">
+    <Image Include="BRX-Puppet.ico">
       <Filter>build-windows</Filter>
     </Image>
   </ItemGroup>

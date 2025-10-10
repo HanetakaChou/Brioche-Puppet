@@ -1,2 +1,2 @@
 
-#define IDI_ICON_BRIOCHE_PUPPET         101
+#define IDI_ICON_BRX_PUPPET         101

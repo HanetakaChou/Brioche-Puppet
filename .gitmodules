@@ -66,10 +66,6 @@
 	path = thirdparty/McRT-Malloc
 	url = git@github.com:HanetakaChou/McRT-Malloc.git
 	branch = master
-[submodule "thirdparty/OpenCV"]
-	path = thirdparty/OpenCV
-	url = git@github.com:HanetakaChou/OpenCV.git
-	branch = master
 [submodule "thirdparty/libiconv"]
 	path = thirdparty/libiconv
 	url = git@github.com:HanetakaChou/libiconv.git
@@ -85,4 +81,16 @@
 [submodule "thirdparty/Hemispherical-Directional-Reflectance"]
 	path = thirdparty/Hemispherical-Directional-Reflectance
 	url = git@github.com:HanetakaChou/Hemispherical-Directional-Reflectance.git
+	branch = master
+[submodule "thirdparty/OpenCV"]
+	path = thirdparty/OpenCV
+	url = git@github.com:BriochePuppet/OpenCV.git
+	branch = master
+[submodule "thirdparty/Brioche-Window-System-Integration"]
+	path = thirdparty/Brioche-Window-System-Integration
+	url = git@github.com:HanetakaChou/Brioche-Window-System-Integration.git
+	branch = master
+[submodule "thirdparty/NDK-Build-Linux"]
+	path = thirdparty/NDK-Build-Linux
+	url = git@github.com:BriochePuppet/NDK-Build-Linux.git
 	branch = master
