@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-HLSL", "..\thirdp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-GLSL", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-GLSL.vcxproj", "{BF2D50A0-976D-4012-A735-571E6403CB54}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-Font-Asset", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-Font-Asset.vcxproj", "{E2D856C4-D34C-47B9-B5CA-12C71466FD07}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freetype", "..\thirdparty\Brioche-ImGui\thirdparty\freetype\build-windows\freetype.vcxproj", "{A1A81B51-6F55-451B-B910-B8625D263323}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui.vcxproj", "{961CB0B4-5C0A-4824-9DC1-F784239D8D52}"
@@ -54,6 +52,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Motion-MediaPipe-Model", "..\thirdparty\Brioche-Motion\build-windows\BRX-Motion-MediaPipe-Model.vcxproj", "{1B3AD1F1-BBB2-4473-AD0A-F9C1487CD385}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-WSI", "..\thirdparty\Brioche-Window-System-Integration\build-windows\BRX-WSI.vcxproj", "{0D2DEF0C-0883-44CB-A9C2-38063ED78802}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-Fonts", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-Fonts.vcxproj", "{2EF530D4-818C-4689-BFFD-06987F9A7D8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,14 +103,6 @@ Global
 		{BF2D50A0-976D-4012-A735-571E6403CB54}.Release|Win32.Build.0 = Release|Win32
 		{BF2D50A0-976D-4012-A735-571E6403CB54}.Release|x64.ActiveCfg = Release|x64
 		{BF2D50A0-976D-4012-A735-571E6403CB54}.Release|x64.Build.0 = Release|x64
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Debug|Win32.Build.0 = Debug|Win32
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Debug|x64.ActiveCfg = Debug|x64
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Debug|x64.Build.0 = Debug|x64
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Release|Win32.ActiveCfg = Release|Win32
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Release|Win32.Build.0 = Release|Win32
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Release|x64.ActiveCfg = Release|x64
-		{E2D856C4-D34C-47B9-B5CA-12C71466FD07}.Release|x64.Build.0 = Release|x64
 		{A1A81B51-6F55-451B-B910-B8625D263323}.Debug|Win32.ActiveCfg = Debug|Win32
 		{A1A81B51-6F55-451B-B910-B8625D263323}.Debug|Win32.Build.0 = Debug|Win32
 		{A1A81B51-6F55-451B-B910-B8625D263323}.Debug|x64.ActiveCfg = Debug|x64
@@ -271,6 +263,14 @@ Global
 		{0D2DEF0C-0883-44CB-A9C2-38063ED78802}.Release|Win32.Build.0 = Release|Win32
 		{0D2DEF0C-0883-44CB-A9C2-38063ED78802}.Release|x64.ActiveCfg = Release|x64
 		{0D2DEF0C-0883-44CB-A9C2-38063ED78802}.Release|x64.Build.0 = Release|x64
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Debug|Win32.Build.0 = Debug|Win32
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Debug|x64.ActiveCfg = Debug|x64
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Debug|x64.Build.0 = Debug|x64
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|Win32.ActiveCfg = Release|Win32
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|Win32.Build.0 = Release|Win32
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|x64.ActiveCfg = Release|x64
+		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
