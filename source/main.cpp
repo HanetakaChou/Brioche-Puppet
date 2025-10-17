@@ -343,7 +343,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                     }
                     else
                     {
-                        assert(false);
+                        assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
+                        assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
                     }
                 }
 
@@ -441,7 +442,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                                 }
                             }
 
-                            if ((NULL != video_detector) || (NULL != animation_instance))
                             {
                                 skeleton_instance->step(s_wsi_state.m_ui_controller.m_physics_ragdoll_quality);
                                 surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), wrap(skeleton_instance->get_skin_transforms()));
@@ -454,7 +454,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                     }
                     else
                     {
-                        assert(false);
+                        assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
+                        assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
                     }
                 }
             }
@@ -1108,7 +1109,6 @@ extern bool internal_platform_get_open_file_name(void *platform_context, uint32_
 
         IFileOpenDialog *file_open_dialog = NULL;
         // HRESULT res_co_create_instance = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&file_open_dialog));
-        assert(reinterpret_cast<void *>(7U) != GetOpenFileNameW);
         HRESULT res_co_create_instance = NoRegCoCreate(L"Comdlg32.dll", CLSID_FileOpenDialog, IID_PPV_ARGS(&file_open_dialog));
         assert(SUCCEEDED(res_co_create_instance));
 

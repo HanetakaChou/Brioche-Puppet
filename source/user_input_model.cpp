@@ -121,7 +121,8 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
         }
         else
         {
-            assert(false);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
         }
     }
     ui_model->m_instance_models.clear();
@@ -195,7 +196,8 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
             }
             else
             {
-                assert(false);
+                // TODO
+                // assert(false);
             }
         }
         asset_model.second.m_skeletons.clear();

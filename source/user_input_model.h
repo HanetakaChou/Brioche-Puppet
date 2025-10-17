@@ -24,6 +24,8 @@
 #include "../thirdparty/Brioche-Analytic-Rendering-Interface/include/brx_anari.h"
 #include "../thirdparty/Brioche-Motion/include/brx_motion.h"
 
+static constexpr uint64_t const INVALID_TIMESTAMP = 0XFFFFFFFFFFFFFFFFU;
+
 struct ui_video_capture_model_t
 {
     brx_motion_video_capture *m_video_capture;

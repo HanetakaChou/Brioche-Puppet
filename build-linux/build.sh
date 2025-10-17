@@ -78,9 +78,16 @@ MAKE_ARGUMENT=(
 cd ${PROJECT_DIRECTORY}
 
 if make -C "${PROJECT_DIRECTORY}/../thirdparty/Brioche-Analytic-Rendering-Interface/build-GLSL" -f "GLSL.mk" "${MAKE_ARGUMENT[@]}"; then
-    echo "build Brioche-ImGui GLSL passed"
+    echo "build Brioche-Analytic-Rendering-Interface GLSL passed"
 else
-    echo "build Brioche-ImGui GLSL failed"
+    echo "build Brioche-Analytic-Rendering-Interface GLSL failed"
+    exit 1
+fi
+
+if make -C "${PROJECT_DIRECTORY}/../thirdparty/Brioche-ImGui/build-fonts" -f "fonts.mk" "${MAKE_ARGUMENT[@]}"; then
+    echo "build fonts passed"
+else
+    echo "build fonts failed"
     exit 1
 fi
 

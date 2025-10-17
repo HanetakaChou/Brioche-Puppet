@@ -15,9 +15,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\thirdparty\DLB\DLB.h">
-      <Filter>thirdparty\DLB</Filter>
-    </ClInclude>
     <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h">
       <Filter>thirdparty\DXUT\Optional</Filter>
     </ClInclude>
@@ -30,14 +27,6 @@
     <ClInclude Include="resource.h">
       <Filter>build-windows</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\thirdparty\DLB\DLB.glsli">
-      <Filter>thirdparty\DLB</Filter>
-    </None>
-    <None Include="..\thirdparty\DLB\DLB.hlsli">
-      <Filter>thirdparty\DLB</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="thirdparty">
@@ -54,9 +43,6 @@
     </Filter>
     <Filter Include="source">
       <UniqueIdentifier>{59f24b2c-072f-4fca-91b0-b70b46bd4124}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\DLB">
-      <UniqueIdentifier>{87c8f33e-e008-4862-9dcd-f4325a3c1c68}</UniqueIdentifier>
     </Filter>
     <Filter Include="thirdparty\DXUT">
       <UniqueIdentifier>{73a2c49d-7653-4975-b401-e06655c0d7de}</UniqueIdentifier>
