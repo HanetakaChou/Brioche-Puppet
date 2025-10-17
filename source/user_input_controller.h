@@ -45,8 +45,6 @@ enum ANIMATION_INPUT_TYPE
 
 static constexpr int const INVALID_UINT32_INDEX = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
 
-static constexpr uint64_t const INVALID_TIMESTAMP = 0XFFFFFFFFFFFFFFFFU;
-
 struct ui_instance_model_controller_t
 {
     ANIMATION_INPUT_TYPE m_animation_input_type;

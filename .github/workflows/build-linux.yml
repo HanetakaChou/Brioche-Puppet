@@ -19,7 +19,7 @@ jobs:
           submodules: 'recursive'
       - shell: bash
         run: |
-          sudo apt install libxcb1-dev libvulkan-dev qtbase5-dev
+          sudo apt install libxcb*-dev libvulkan-dev libxkbcommon-dev libxkbcommon-x11-dev
           ./build-linux/build.sh "${{matrix.configuration}}"
       - uses: actions/upload-artifact@main
         with:

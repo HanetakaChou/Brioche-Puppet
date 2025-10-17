@@ -17,10 +17,10 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
 - [ ] Rasterization  
     - [x] [PBR (Microfacet Model | Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
     - [ ] [~~Toon Shading~~](https://github.com/unity3d-jp/UnityChanToonShaderVer2_Project)  
-    - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://zero-radiance.github.io/post/sampling-diffusion/)  
-    - [ ] [~~LTC (Area Lighting | Linearly Transformed Cosine)~~](https://github.com/selfshadow/ltc_code)  
+    - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://github.com/HanetakaChou/Subsurface-Scattering)  
+    - [ ] [~~LTC (Area Lighting | Linearly Transformed Cosine)~~](https://github.com/HanetakaChou/Linearly-Transformed-Cosine)  
     - [x] [SH (Environment Lighting | Spherical Harmonics)](https://github.com/HanetakaChou/Spherical-Harmonic)  
-    - [x] [VCT (Global Illumination | Voxel Cone Tracing)](https://hanetakachou.github.io/index.html?file=Rendering/Rasterization/Lighting/Voxel-Cone-Tracing.md)  
+    - [x] [VCT (Global Illumination | Voxel Cone Tracing)](https://github.com/HanetakaChou/Voxel-Cone-Tracing)  
 - [ ] Ray Tracing  
     - [ ] [~~ReSITR (Reservoir-Based Spatiotemporal Importance Resampling)~~](https://intro-to-restir.cwyman.org/)  
     - [ ] [~~SVGF (Denoiser | Spatiotemporal Variance Guided Filtering)~~](https://github.com/NVIDIA-RTX/NRD)  
@@ -60,7 +60,7 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
         - [x] [TGA](https://tgalib.sourceforge.net/)  
         - [ ] BMP  
         - [ ] PNM  
-    - [x] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
+    - [ ] [Illuminant Image](https://www.pbr-book.org/4ed/Radiometry,_Spectra,_and_Color/Color#x6-RGBIlluminants)  
         - [x] [OpenEXR](https://github.com/AcademySoftwareFoundation/openexr)  
         - [ ] [Radiance HDR](https://radsite.lbl.gov/radiance/refer/filefmts.pdf)  
 
@@ -69,7 +69,7 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
 [Brioche Motion](https://github.com/HanetakaChou/Brioche-Motion)  
 
 - [x] Motion Capture  
-    - [x] Video Capture (Backend [OpenCV](https://github.com/HanetakaChou/OpenCV))  
+    - [x] Video Capture (Backend [OpenCV](https://github.com/BriochePuppet/OpenCV))  
     - [x] Motion Detector (Backend [MeidaPipe](https://github.com/HanetakaChou/mediapipe))  
 - [ ] Animation  
     - [ ] IK (Inverse Kinematics)  

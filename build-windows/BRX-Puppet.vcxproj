@@ -27,7 +27,6 @@
   <ItemGroup>
     <ClInclude Include="..\source\user_input_controller.h" />
     <ClInclude Include="..\source\user_input_model.h" />
-    <ClInclude Include="..\thirdparty\DLB\DLB.h" />
     <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -76,8 +75,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CopyFileToFolders>
-    <None Include="..\thirdparty\DLB\DLB.glsli" />
-    <None Include="..\thirdparty\DLB\DLB.hlsli" />
     <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x64\VkLayer_khronos_validation.dll">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

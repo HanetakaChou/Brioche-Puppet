@@ -213,9 +213,11 @@ extern bool internal_platform_get_open_file_name(void *platform_context, uint32_
 
 extern bool internal_platform_get_file_timestamp_and_data(char const *file_name, uint64_t *out_file_timestamp, mcrt_vector<uint8_t> *out_file_data);
 
-static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
+static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model, mcrt_vector<brx_anari_image *> &out_anonymous_images);
 
 static inline brx_anari_image *internal_load_asset_image_file(char const *asset_image_file_name, uint64_t asset_image_file_timestamp, void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
+
+static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, mcrt_vector<brx_anari_image *> &out_anonymous_images);
 
 extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_controller)
 {
@@ -810,7 +812,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     video_capture_identity += video_capture_url;
                 }
 
-                auto const &found_video_capture = ui_model->m_video_captures.find(video_capture_identity);
+                auto const found_video_capture = ui_model->m_video_captures.find(video_capture_identity);
                 if (ui_model->m_video_captures.end() == found_video_capture)
                 {
                     brx_motion_video_capture *const video_capture = brx_motion_create_video_capture(video_capture_url.c_str());
@@ -900,7 +902,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         video_capture_identity += video_capture_url;
                     }
 
-                    auto const &found_video_capture = ui_model->m_video_captures.find(video_capture_identity);
+                    auto const found_video_capture = ui_model->m_video_captures.find(video_capture_identity);
                     if (ui_model->m_video_captures.end() == found_video_capture)
                     {
                         brx_motion_video_capture *const video_capture = brx_motion_create_video_capture(video_capture_url.c_str());
@@ -933,7 +935,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Video-Capture-Manager-Delete-Button"))
             {
-                auto const &found_video_capture = ui_model->m_video_captures.find(ui_controller->m_tree_view_selected_video_capture);
+                auto const found_video_capture = ui_model->m_video_captures.find(ui_controller->m_tree_view_selected_video_capture);
                 if (ui_model->m_video_captures.end() != found_video_capture)
                 {
                     if (NULL != found_video_capture->second.m_video_capture)
@@ -1003,7 +1005,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_video_capture = ui_model->m_video_captures.find(ui_controller->m_tree_view_selected_video_capture);
+        auto const found_video_capture = ui_model->m_video_captures.find(ui_controller->m_tree_view_selected_video_capture);
 
         if (ui_model->m_video_captures.end() != found_video_capture)
         {
@@ -1264,7 +1266,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         asset_motion_file_identity += asset_motion_file_name;
                     }
 
-                    auto const &found_asset_motion = ui_model->m_asset_motions.find(asset_motion_file_identity);
+                    auto const found_asset_motion = ui_model->m_asset_motions.find(asset_motion_file_identity);
 
                     if (ui_model->m_asset_motions.end() == found_asset_motion)
                     {
@@ -1344,7 +1346,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Asset-Motion-Manager-Delete"))
             {
-                auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_tree_view_selected_asset_motion);
+                auto const found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_tree_view_selected_asset_motion);
                 if (ui_model->m_asset_motions.end() != found_asset_motion)
                 {
                     assert(!found_asset_motion->second.m_animations.empty());
@@ -1419,7 +1421,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_tree_view_selected_asset_motion);
+        auto const found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_tree_view_selected_asset_motion);
 
         if (ui_model->m_asset_motions.end() != found_asset_motion)
         {
@@ -1549,19 +1551,17 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 uint64_t asset_model_file_timestamp;
                 mcrt_vector<uint8_t> asset_model_file_data;
                 {
-                    constexpr size_t const asset_model_filter_count = 2;
-
-                    // TODO
-                    // "glTF Binary"    "*.glb;*.vrm"
-                    // "glTF Separate"  "*.gltf"
+                    constexpr size_t const asset_model_filter_count = 3;
 
                     constexpr char const *const asset_model_filter_names[asset_model_filter_count] = {
                         "All Files",
-                        "MMD Model Data"};
+                        "MMD Model Data",
+                        "VRM Model Data"};
 
                     constexpr char const *const asset_model_filter_specs[asset_model_filter_count] = {
                         "*",
-                        "*.pmx"};
+                        "*.pmx",
+                        "*.vrm;*.glb"};
 
                     asset_model_file_open = internal_platform_get_open_file_name(platform_context, asset_model_filter_count, asset_model_filter_names, asset_model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &asset_model_file_name, &asset_model_file_timestamp, &asset_model_file_data);
                 }
@@ -1583,7 +1583,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         asset_model_file_identity += asset_model_file_name;
                     }
 
-                    auto const &found_asset_model = ui_model->m_asset_models.find(asset_model_file_identity);
+                    auto const found_asset_model = ui_model->m_asset_models.find(asset_model_file_identity);
 
                     if (ui_model->m_asset_models.end() == found_asset_model)
                     {
@@ -1613,71 +1613,93 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                                 uint32_t const surface_count = asset_import_surface_group->get_surface_count();
 
-                                mcrt_vector<BRX_ANARI_SURFACE> surfaces(static_cast<size_t>(surface_count));
-
-                                for (uint32_t surface_index = 0U; surface_index < surface_count; ++surface_index)
-                                {
-                                    brx_asset_import_surface const *const asset_import_surface = asset_import_surface_group->get_surface(surface_index);
-
-                                    surfaces[surface_index].m_vertex_count = asset_import_surface->get_vertex_count();
-                                    surfaces[surface_index].m_vertex_positions = wrap(asset_import_surface->get_vertex_positions());
-                                    surfaces[surface_index].m_vertex_varyings = wrap(asset_import_surface->get_vertex_varyings());
-                                    surfaces[surface_index].m_vertex_blendings = wrap(asset_import_surface->get_vertex_blendings());
-                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                                    {
-                                        surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = NULL;
-                                        surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = NULL;
-                                    }
-                                    for (uint32_t morph_target_index = 0U; morph_target_index < asset_import_surface->get_morph_target_count(); ++morph_target_index)
-                                    {
-                                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = wrap(asset_import_surface->get_morph_target_name(morph_target_index));
-                                        uint32_t const morph_target_name_index = morph_target_name;
-                                        surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_positions(morph_target_index));
-                                        surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_varyings(morph_target_index));
-                                    }
-                                    surfaces[surface_index].m_index_count = asset_import_surface->get_index_count();
-                                    surfaces[surface_index].m_indices = asset_import_surface->get_indices();
-                                    surfaces[surface_index].m_emissive_image = internal_load_asset_image(asset_import_surface->get_emissive_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
-                                    surfaces[surface_index].m_emissive_factor = wrap(asset_import_surface->get_emissive_factor());
-                                    surfaces[surface_index].m_normal_image = internal_load_asset_image(asset_import_surface->get_normal_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
-                                    surfaces[surface_index].m_normal_scale = asset_import_surface->get_normal_scale();
-                                    surfaces[surface_index].m_base_color_image = internal_load_asset_image(asset_import_surface->get_base_color_image_url(), asset_model_directory_name.c_str(), true, device, ui_model);
-                                    surfaces[surface_index].m_base_color_factor = wrap(asset_import_surface->get_base_color_factor());
-                                    surfaces[surface_index].m_metallic_roughness_image = internal_load_asset_image(asset_import_surface->get_metallic_roughness_image_url(), asset_model_directory_name.c_str(), false, device, ui_model);
-                                    surfaces[surface_index].m_metallic_factor = asset_import_surface->get_metallic_factor();
-                                    surfaces[surface_index].m_roughness_factor = asset_import_surface->get_roughness_factor();
-                                }
-
-                                brx_anari_surface_group *const anari_surface_group = device->new_surface_group(surface_count, surfaces.data());
-
                                 uint32_t const animation_skeleton_joint_count = asset_import_surface_group->get_animation_skeleton_joint_count();
 
-                                brx_motion_skeleton *const motion_skeleton = brx_motion_create_skeleton(animation_skeleton_joint_count, wrap(asset_import_surface_group->get_animation_skeleton_joint_names()), asset_import_surface_group->get_animation_skeleton_joint_parent_indices(), wrap(asset_import_surface_group->get_animation_skeleton_joint_transforms_bind_pose_local_space()), asset_import_surface_group->get_animation_skeleton_joint_constraint_count(), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraint_names()), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraints()), asset_import_surface_group->get_ragdoll_skeleton_rigid_body_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_rigid_bodies()), asset_import_surface_group->get_ragdoll_skeleton_constraint_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_constraints()), asset_import_surface_group->get_animation_to_ragdoll_direct_mapping_count(), wrap(asset_import_surface_group->get_animation_to_ragdoll_direct_mappings()), asset_import_surface_group->get_ragdoll_to_animation_direct_mapping_count(), wrap(asset_import_surface_group->get_ragdoll_to_animation_direct_mappings()));
+                                bool const skin = (animation_skeleton_joint_count > 0U);
 
-                                if ((NULL != anari_surface_group) && (NULL != motion_skeleton))
+                                brx_anari_surface_group *anari_surface_group = NULL;
                                 {
-                                    surface_groups[surface_group_index] = anari_surface_group;
-                                    skeletons[surface_group_index] = motion_skeleton;
+                                    mcrt_vector<BRX_ANARI_SURFACE> surfaces(static_cast<size_t>(surface_count));
+
+                                    mcrt_vector<brx_anari_image *> anonymous_images;
+
+                                    for (uint32_t surface_index = 0U; surface_index < surface_count; ++surface_index)
+                                    {
+                                        brx_asset_import_surface const *const asset_import_surface = asset_import_surface_group->get_surface(surface_index);
+
+                                        surfaces[surface_index].m_vertex_count = asset_import_surface->get_vertex_count();
+                                        surfaces[surface_index].m_vertex_positions = wrap(asset_import_surface->get_vertex_positions());
+                                        surfaces[surface_index].m_vertex_varyings = wrap(asset_import_surface->get_vertex_varyings());
+                                        surfaces[surface_index].m_vertex_blendings = wrap(asset_import_surface->get_vertex_blendings());
+                                        assert((NULL != surfaces[surface_index].m_vertex_blendings) == skin);
+                                        for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                        {
+                                            surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = NULL;
+                                            surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = NULL;
+                                        }
+                                        for (uint32_t morph_target_index = 0U; morph_target_index < asset_import_surface->get_morph_target_count(); ++morph_target_index)
+                                        {
+                                            BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = wrap(asset_import_surface->get_morph_target_name(morph_target_index));
+                                            uint32_t const morph_target_name_index = morph_target_name;
+                                            surfaces[surface_index].m_morph_targets_vertex_positions[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_positions(morph_target_index));
+                                            surfaces[surface_index].m_morph_targets_vertex_varyings[morph_target_name_index] = wrap(asset_import_surface->get_morph_target_vertex_varyings(morph_target_index));
+                                        }
+                                        surfaces[surface_index].m_index_count = asset_import_surface->get_index_count();
+                                        surfaces[surface_index].m_indices = asset_import_surface->get_indices();
+                                        surfaces[surface_index].m_is_double_sided = asset_import_surface->get_is_double_sided();
+                                        surfaces[surface_index].m_emissive_image = internal_load_asset_image(asset_import_surface->get_emissive_image_url_data(), asset_import_surface->get_emissive_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_emissive_factor = wrap(asset_import_surface->get_emissive_factor());
+                                        surfaces[surface_index].m_normal_image = internal_load_asset_image(asset_import_surface->get_normal_image_url_data(), asset_import_surface->get_normal_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_normal_scale = asset_import_surface->get_normal_scale();
+                                        surfaces[surface_index].m_base_color_image = internal_load_asset_image(asset_import_surface->get_base_color_image_url_data(), asset_import_surface->get_base_color_image_url_size(), asset_model_directory_name.c_str(), true, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_base_color_factor = wrap(asset_import_surface->get_base_color_factor());
+                                        surfaces[surface_index].m_metallic_roughness_image = internal_load_asset_image(asset_import_surface->get_metallic_roughness_image_url_data(), asset_import_surface->get_metallic_roughness_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_metallic_factor = asset_import_surface->get_metallic_factor();
+                                        surfaces[surface_index].m_roughness_factor = asset_import_surface->get_roughness_factor();
+                                    }
+
+                                    assert(NULL == anari_surface_group);
+                                    anari_surface_group = device->new_surface_group(surface_count, surfaces.data());
+
+                                    for (auto &anonymous_image : anonymous_images)
+                                    {
+                                        device->release_image(anonymous_image);
+                                        anonymous_image = NULL;
+                                    }
+                                }
+
+                                if (skin)
+                                {
+                                    brx_motion_skeleton *const motion_skeleton = brx_motion_create_skeleton(animation_skeleton_joint_count, wrap(asset_import_surface_group->get_animation_skeleton_joint_names()), asset_import_surface_group->get_animation_skeleton_joint_parent_indices(), wrap(asset_import_surface_group->get_animation_skeleton_joint_transforms_bind_pose_local_space()), asset_import_surface_group->get_animation_skeleton_joint_constraint_count(), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraint_names()), wrap(asset_import_surface_group->get_animation_skeleton_joint_constraints()), asset_import_surface_group->get_ragdoll_skeleton_rigid_body_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_rigid_bodies()), asset_import_surface_group->get_ragdoll_skeleton_constraint_count(), wrap(asset_import_surface_group->get_ragdoll_skeleton_constraints()), asset_import_surface_group->get_animation_to_ragdoll_direct_mapping_count(), wrap(asset_import_surface_group->get_animation_to_ragdoll_direct_mappings()), asset_import_surface_group->get_ragdoll_to_animation_direct_mapping_count(), wrap(asset_import_surface_group->get_ragdoll_to_animation_direct_mappings()));
+
+                                    if ((NULL != anari_surface_group) && (NULL != motion_skeleton))
+                                    {
+                                        surface_groups[surface_group_index] = anari_surface_group;
+                                        skeletons[surface_group_index] = motion_skeleton;
+                                    }
+                                    else
+                                    {
+                                        success = false;
+                                        break;
+                                    }
                                 }
                                 else
                                 {
-                                    success = false;
-                                    break;
+                                    if (NULL != anari_surface_group)
+                                    {
+                                        surface_groups[surface_group_index] = anari_surface_group;
+                                        skeletons[surface_group_index] = NULL;
+                                    }
+                                    else
+                                    {
+                                        success = false;
+                                        break;
+                                    }
                                 }
                             }
 
                             if (success)
                             {
-                                for (brx_anari_surface_group *const surface_group : surface_groups)
-                                {
-                                    assert(NULL != surface_group);
-                                }
-
-                                for (brx_motion_skeleton *const skeleton : skeletons)
-                                {
-                                    assert(NULL != skeleton);
-                                }
-
                                 ui_model->m_asset_models.insert(found_asset_model, std::pair<mcrt_string, ui_asset_model_model_t>{std::move(asset_model_file_identity), ui_asset_model_model_t{std::move(surface_groups), std::move(skeletons)}});
                             }
                             else
@@ -1734,7 +1756,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Asset-Model-Manager-Delete"))
             {
-                auto const &found_asset_model = ui_model->m_asset_models.find(ui_controller->m_tree_view_selected_asset_model);
+                auto const found_asset_model = ui_model->m_asset_models.find(ui_controller->m_tree_view_selected_asset_model);
                 if (ui_model->m_asset_models.end() != found_asset_model)
                 {
                     assert(!found_asset_model->second.m_surface_groups.empty());
@@ -1762,7 +1784,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         }
                         else
                         {
-                            assert(false);
+                            // TODO
+                            // assert(false);
                         }
                     }
                     found_asset_model->second.m_skeletons.clear();
@@ -1824,7 +1847,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_asset_model = ui_model->m_asset_models.find(ui_controller->m_tree_view_selected_asset_model);
+        auto const found_asset_model = ui_model->m_asset_models.find(ui_controller->m_tree_view_selected_asset_model);
 
         if (ui_model->m_asset_models.end() != found_asset_model)
         {
@@ -2032,7 +2055,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Asset-Image-Manager-Delete"))
             {
-                auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_tree_view_selected_asset_image);
+                auto const found_asset_image = ui_model->m_asset_images.find(ui_controller->m_tree_view_selected_asset_image);
                 if (ui_model->m_asset_images.end() != found_asset_image)
                 {
                     if (NULL != found_asset_image->second.m_image)
@@ -2101,7 +2124,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_asset_image = ui_model->m_asset_images.find(ui_controller->m_tree_view_selected_asset_image);
+        auto const found_asset_image = ui_model->m_asset_images.find(ui_controller->m_tree_view_selected_asset_image);
 
         if (ui_model->m_asset_images.end() != found_asset_image)
         {
@@ -2423,7 +2446,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
             {
                 mcrt_string const selected_video_capture = ui_controller->m_new_video_detector_selected_video_capture;
 
-                auto const &found_video_capture = ui_model->m_video_captures.find(selected_video_capture);
+                auto const found_video_capture = ui_model->m_video_captures.find(selected_video_capture);
 
                 if (ui_model->m_video_captures.end() != found_video_capture)
                 {
@@ -2491,7 +2514,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Video-Detector-Manager-Delete"))
             {
-                auto const &found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_tree_view_selected_video_detector);
+                auto const found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_tree_view_selected_video_detector);
                 if (ui_model->m_video_detectors.end() != found_video_detector)
                 {
                     if (NULL != found_video_detector->second.m_video_detector)
@@ -2572,7 +2595,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_tree_view_selected_video_detector);
+        auto const found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_tree_view_selected_video_detector);
 
         if (ui_model->m_video_detectors.end() != found_video_detector)
         {
@@ -2939,7 +2962,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 }
                 ImGui::TableNextColumn();
                 {
-                    auto const &found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_new_instance_motion_selected_asset_motion);
+                    auto const found_asset_motion = ui_model->m_asset_motions.find(ui_controller->m_new_instance_motion_selected_asset_motion);
 
                     constexpr char const *const label = "##Instance-Motion-Manager-Select-Animation-Index";
 
@@ -3052,7 +3075,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 int const selected_animation_index = ui_controller->m_new_instance_motion_selected_animation_index;
 
-                auto const &found_asset_motion = ui_model->m_asset_motions.find(selected_asset_motion);
+                auto const found_asset_motion = ui_model->m_asset_motions.find(selected_asset_motion);
 
                 if ((ui_model->m_asset_motions.end() != found_asset_motion) && (selected_animation_index < found_asset_motion->second.m_animations.size()))
                 {
@@ -3097,7 +3120,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Instance-Motion-Manager-Delete"))
             {
-                auto const &found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_tree_view_selected_instance_motion);
+                auto const found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_tree_view_selected_instance_motion);
                 if (ui_model->m_instance_motions.end() != found_instance_motion)
                 {
                     if (NULL != found_instance_motion->second.m_animation_instance)
@@ -3178,7 +3201,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_tree_view_selected_instance_motion);
+        auto const found_instance_motion = ui_model->m_instance_motions.find(ui_controller->m_tree_view_selected_instance_motion);
 
         if (ui_model->m_instance_motions.end() != found_instance_motion)
         {
@@ -3434,7 +3457,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 ImGui::TableNextColumn();
 
                 {
-                    auto const &found_asset_model = ui_model->m_asset_models.find(ui_controller->m_new_instance_model_selected_asset_model);
+                    auto const found_asset_model = ui_model->m_asset_models.find(ui_controller->m_new_instance_model_selected_asset_model);
 
                     constexpr char const *const label = "##Instance-Model-Manager-Select-Surface-Group-Index";
 
@@ -3639,7 +3662,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     }
 
                     {
-                        auto const &found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_new_instance_model_selected_video_detector);
+                        auto const found_video_detector = ui_model->m_video_detectors.find(ui_controller->m_new_instance_model_selected_video_detector);
 
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
@@ -4142,7 +4165,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 uint32_t const surface_group_index = ui_controller->m_new_instance_model_selected_surface_group_index;
 
-                auto const &found_asset_model = ui_model->m_asset_models.find(asset_model);
+                auto const found_asset_model = ui_model->m_asset_models.find(asset_model);
 
                 if ((ui_model->m_asset_models.end() != found_asset_model) && (surface_group_index < found_asset_model->second.m_surface_groups.size()) && (surface_group_index < found_asset_model->second.m_skeletons.size()))
                 {
@@ -4152,68 +4175,84 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                     brx_motion_skeleton *const skeleton = found_asset_model->second.m_skeletons[surface_group_index];
 
-                    if ((NULL != surface_group) && (NULL != skeleton))
+                    if (NULL != surface_group)
                     {
                         brx_anari_surface_group_instance *const surface_group_instance = device->world_new_surface_group_instance(surface_group);
 
-                        brx_motion_skeleton_instance *const skeleton_instance = brx_motion_create_skeleton_instance(skeleton);
+                        brx_motion_skeleton_instance *const skeleton_instance = ((NULL != skeleton) ? brx_motion_create_skeleton_instance(skeleton) : NULL);
 
-                        if ((NULL != surface_group_instance) && (NULL != skeleton_instance))
+                        if ((NULL != surface_group_instance) && ((!skeleton) || (NULL != skeleton_instance)))
                         {
-                            ANIMATION_INPUT_TYPE const animation_input_type = ui_controller->m_new_instance_model_animation_input_type;
+                            ANIMATION_INPUT_TYPE animation_input_type = ANIMATION_INPUT_TYPE_INVALID;
+                            uint64_t video_detector = INVALID_TIMESTAMP;
+                            uint64_t instance_motion = INVALID_TIMESTAMP;
 
-                            uint64_t const video_detector = ui_controller->m_new_instance_model_selected_video_detector;
-
-                            uint32_t const video_detector_face_index = ui_controller->m_new_instance_model_selected_video_detector_face_index;
-
-                            uint32_t const video_detector_pose_index = ui_controller->m_new_instance_model_selected_video_detector_pose_index;
-
-                            uint64_t const instance_motion = ui_controller->m_new_instance_model_selected_instance_motion;
-
-                            auto const &found_video_detector = ui_model->m_video_detectors.find(video_detector);
-
-                            auto const &found_instance_motion = ui_model->m_instance_motions.find(instance_motion);
-
-                            assert((ui_model->m_video_detectors.end() == found_video_detector) || (ui_model->m_instance_motions.end() == found_instance_motion));
-
-                            if (ui_model->m_video_detectors.end() != found_video_detector)
+                            if ((NULL != skeleton) && (NULL != skeleton_instance))
                             {
-                                assert(NULL != found_video_detector->second.m_video_detector);
+                                animation_input_type = ui_controller->m_new_instance_model_animation_input_type;
 
-                                skeleton_instance->set_input_video_detector(found_video_detector->second.m_video_detector);
-                                skeleton_instance->set_input_video_detector_face_index(video_detector_face_index);
-                                skeleton_instance->set_input_video_detector_pose_index(video_detector_pose_index);
+                                video_detector = ui_controller->m_new_instance_model_selected_video_detector;
 
-                                assert(INVALID_TIMESTAMP == instance_motion);
+                                uint32_t const video_detector_face_index = ui_controller->m_new_instance_model_selected_video_detector_face_index;
 
-                                assert(ANIMATION_INPUT_TYPE_VIDEO_DETECTOR == animation_input_type);
-                            }
-                            else if (ui_model->m_instance_motions.end() != found_instance_motion)
-                            {
-                                assert(NULL != found_instance_motion->second.m_animation_instance);
+                                uint32_t const video_detector_pose_index = ui_controller->m_new_instance_model_selected_video_detector_pose_index;
 
-                                skeleton_instance->set_input_animation_instance(found_instance_motion->second.m_animation_instance);
+                                instance_motion = ui_controller->m_new_instance_model_selected_instance_motion;
 
-                                assert(INVALID_TIMESTAMP == video_detector);
+                                auto const found_video_detector = ui_model->m_video_detectors.find(video_detector);
 
-                                assert(ANIMATION_INPUT_TYPE_INSTANCE_MOTION == animation_input_type);
+                                auto const found_instance_motion = ui_model->m_instance_motions.find(instance_motion);
+
+                                assert((ui_model->m_video_detectors.end() == found_video_detector) || (ui_model->m_instance_motions.end() == found_instance_motion));
+
+                                if (ui_model->m_video_detectors.end() != found_video_detector)
+                                {
+                                    assert(NULL != found_video_detector->second.m_video_detector);
+
+                                    skeleton_instance->set_input_video_detector(found_video_detector->second.m_video_detector);
+                                    skeleton_instance->set_input_video_detector_face_index(video_detector_face_index);
+                                    skeleton_instance->set_input_video_detector_pose_index(video_detector_pose_index);
+
+                                    assert(INVALID_TIMESTAMP == instance_motion);
+
+                                    assert(ANIMATION_INPUT_TYPE_VIDEO_DETECTOR == animation_input_type);
+                                }
+                                else if (ui_model->m_instance_motions.end() != found_instance_motion)
+                                {
+                                    assert(NULL != found_instance_motion->second.m_animation_instance);
+
+                                    skeleton_instance->set_input_animation_instance(found_instance_motion->second.m_animation_instance);
+
+                                    assert(INVALID_TIMESTAMP == video_detector);
+
+                                    assert(ANIMATION_INPUT_TYPE_INSTANCE_MOTION == animation_input_type);
+                                }
+                                else
+                                {
+                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    {
+                                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
+
+                                        surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
+                                    }
+
+                                    {
+                                        mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
+
+                                        surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), skin_transforms.data());
+                                    }
+
+                                    assert(ANIMATION_INPUT_TYPE_INVALID == animation_input_type);
+                                }
                             }
                             else
                             {
-                                for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                                {
-                                    BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
-
-                                    surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
-                                }
-
-                                {
-                                    mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
-
-                                    surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), skin_transforms.data());
-                                }
+                                assert(NULL == skeleton);
+                                assert(NULL == skeleton_instance);
 
                                 assert(ANIMATION_INPUT_TYPE_INVALID == animation_input_type);
+                                assert(INVALID_TIMESTAMP == video_detector);
+                                assert(INVALID_TIMESTAMP == instance_motion);
                             }
 
                             float const model_transform_rotation_roll = ui_controller->m_new_instance_model_transform_rotation_roll;
@@ -4283,9 +4322,9 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             if (ImGui::Button("X##Instance-Model-Manager-Delete-Button"))
             {
-                auto const &found_instance_model = ui_model->m_instance_models.find(ui_controller->m_tree_view_selected_instance_model);
+                auto const found_instance_model = ui_model->m_instance_models.find(ui_controller->m_tree_view_selected_instance_model);
 
-                auto const &found_instance_controller = ui_controller->m_instance_controllers.find(ui_controller->m_tree_view_selected_instance_model);
+                auto const found_instance_controller = ui_controller->m_instance_controllers.find(ui_controller->m_tree_view_selected_instance_model);
 
                 assert((ui_model->m_instance_models.end() != found_instance_model) == (ui_controller->m_instance_controllers.end() != found_instance_controller));
 
@@ -4310,7 +4349,8 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         }
                         else
                         {
-                            assert(false);
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
                         }
 
                         ui_model->m_instance_models.erase(found_instance_model);
@@ -4392,7 +4432,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
         }
         ImGui::EndChild();
 
-        auto const &found_instance_model = ui_model->m_instance_models.find(ui_controller->m_tree_view_selected_instance_model);
+        auto const found_instance_model = ui_model->m_instance_models.find(ui_controller->m_tree_view_selected_instance_model);
 
         if (ui_model->m_instance_models.end() != found_instance_model)
         {
@@ -4481,257 +4521,275 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 ImGui::TableSetupColumn("##Instance-Model-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupColumn("##Instance-Model-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch);
 
-                assert(NULL != found_instance_model->second.m_skeleton_instance);
+                if (NULL != found_instance_model->second.m_skeleton_instance)
+                {
 #ifndef NDEBUG
-                {
-                    brx_motion_video_detector *const video_detector = found_instance_model->second.m_skeleton_instance->get_input_video_detector();
-
-                    brx_motion_animation_instance *const animation_instance = found_instance_model->second.m_skeleton_instance->get_input_animation_instance();
-
-                    assert((NULL == video_detector) || (NULL == animation_instance));
-
-                    if (NULL != video_detector)
                     {
-                        auto const &found_video_detector = ui_model->m_video_detectors.find(found_instance_model->second.m_video_detector);
+                        brx_motion_video_detector *const video_detector = found_instance_model->second.m_skeleton_instance->get_input_video_detector();
 
-                        assert((ui_model->m_video_detectors.end() == found_video_detector) || (video_detector == found_video_detector->second.m_video_detector));
+                        brx_motion_animation_instance *const animation_instance = found_instance_model->second.m_skeleton_instance->get_input_animation_instance();
 
-                        assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
-                    }
-                    else if (NULL != animation_instance)
-                    {
-                        auto const &found_instance_motion = ui_model->m_instance_motions.find(found_instance_model->second.m_instance_motion);
-
-                        assert((ui_model->m_instance_motions.end() == found_instance_motion) || (animation_instance == found_instance_motion->second.m_animation_instance));
-
-                        assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
-                    }
-                    else
-                    {
-                        assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
-                        assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
-                    }
-                }
-#endif
-
-                assert(ui_controller->m_instance_controllers.end() != ui_controller->m_instance_controllers.find(ui_controller->m_tree_view_selected_instance_model));
-                auto &found_instance_controller = ui_controller->m_instance_controllers[ui_controller->m_tree_view_selected_instance_model];
-
-                ImGui::TableNextRow();
-                ImGui::TableNextColumn();
-                ImGui::AlignTextToFramePadding();
-                {
-                    constexpr char const *const text[LANGUAGE_COUNT] = {
-                        "Animation Input Type",
-                        "Animation 入力種類",
-                        "動畫輸入類型",
-                        "动画输入类型"};
-                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                }
-                ImGui::TableNextColumn();
-                {
-                    constexpr char const *const items[LANGUAGE_COUNT][ANIMATION_INPUT_TYPE_COUNT] = {
-                        {"Disable", "Video Detector", "Instance Motion"},
-                        {"無効", "動画検出", "実例行動"},
-                        {"停用", "視訊檢測", "實例動作"},
-                        {"停用", "视频检测", "实例动作"}};
-
-                    int select_combo_index = std::min(std::max(ANIMATION_INPUT_TYPE_MIN, found_instance_controller.m_animation_input_type), ANIMATION_INPUT_TYPE_MAX);
-
-                    ImGui::Combo("##Instance-Model-Manager-Animation-Input-Type", &select_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
-
-                    found_instance_controller.m_animation_input_type = std::min(std::max(ANIMATION_INPUT_TYPE_MIN, static_cast<ANIMATION_INPUT_TYPE>(select_combo_index)), ANIMATION_INPUT_TYPE_MAX);
-                }
-
-                if (ANIMATION_INPUT_TYPE_VIDEO_DETECTOR == found_instance_controller.m_animation_input_type)
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
-                    {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Video Detector",
-                            "動画検出",
-                            "視訊檢測",
-                            "视频检测"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
-                    ImGui::TableNextColumn();
-                    {
-                        mcrt_vector<uint64_t> item_values(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
-                        mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
-                        mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
-                        int selected_combo_index = 0;
-                        {
-                            size_t combo_index = 0U;
-
-                            {
-                                item_values[combo_index] = INVALID_TIMESTAMP;
-
-                                char const *const text[LANGUAGE_COUNT] = {
-                                    "Disable",
-                                    "無効",
-                                    "停用",
-                                    "停用"};
-
-                                item_strings[combo_index] = text[ui_controller->m_language_index];
-
-                                items[combo_index] = item_strings[combo_index].c_str();
-
-                                if (found_instance_model->second.m_video_detector == item_values[combo_index])
-                                {
-                                    assert(0 == selected_combo_index);
-                                    assert(0 == combo_index);
-                                }
-
-                                ++combo_index;
-                            }
-
-                            for (auto const &video_detector : ui_model->m_video_detectors)
-                            {
-                                item_values[combo_index] = video_detector.first;
-
-                                item_strings[combo_index].clear();
-                                {
-                                    char video_detector_timestamp_text[] = {"18446744073709551615"};
-                                    std::snprintf(video_detector_timestamp_text, sizeof(video_detector_timestamp_text) / sizeof(video_detector_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(item_values[combo_index]));
-                                    video_detector_timestamp_text[(sizeof(video_detector_timestamp_text) / sizeof(video_detector_timestamp_text[0])) - 1] = '\0';
-
-                                    item_strings[combo_index] += video_detector_timestamp_text;
-                                    item_strings[combo_index] += ' ';
-                                    item_strings[combo_index] += video_detector.second.m_name;
-                                }
-
-                                items[combo_index] = item_strings[combo_index].c_str();
-
-                                if (found_instance_model->second.m_video_detector == item_values[combo_index])
-                                {
-                                    assert(0 == selected_combo_index);
-                                    assert((1U + combo_index) < static_cast<size_t>(INT_MAX));
-                                    selected_combo_index = static_cast<int>(combo_index);
-                                }
-
-                                ++combo_index;
-                            }
-                        }
-
-                        ImGui::Combo("##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector", &selected_combo_index, items.data(), items.size());
-
-                        if (selected_combo_index >= 0)
-                        {
-                            uint64_t const selected_video_detector = item_values[selected_combo_index];
-
-                            if (found_instance_model->second.m_video_detector != selected_video_detector)
-                            {
-                                auto const &found_video_detector = ui_model->m_video_detectors.find(selected_video_detector);
-
-                                if (ui_model->m_video_detectors.end() != found_video_detector)
-                                {
-                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector(found_video_detector->second.m_video_detector);
-
-                                    found_instance_model->second.m_video_detector = selected_video_detector;
-
-                                    found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
-                                }
-                                else
-                                {
-                                    assert(0 == selected_combo_index);
-                                    assert(INVALID_TIMESTAMP == selected_video_detector);
-
-                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
-
-                                    found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
-
-                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                                    {
-                                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
-
-                                        found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
-                                    }
-
-                                    {
-                                        mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
-
-                                        found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
-                                    }
-
-                                    found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
-
-                                    found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            assert(false);
-                        }
-                    }
-
-                    assert(NULL != found_instance_model->second.m_skeleton_instance);
-                    brx_motion_video_detector *const video_detector = found_instance_model->second.m_skeleton_instance->get_input_video_detector();
-
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
-                    {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Face Index",
-                            "人顔索引",
-                            "人臉索引",
-                            "人脸索引"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
-                    ImGui::TableNextColumn();
-                    {
-                        constexpr char const *const label = "##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector-Face-Index";
+                        assert((NULL == video_detector) || (NULL == animation_instance));
 
                         if (NULL != video_detector)
                         {
-                            uint32_t const face_count = video_detector->get_face_count();
+                            auto const found_video_detector = ui_model->m_video_detectors.find(found_instance_model->second.m_video_detector);
 
-                            if (face_count > 0U)
+                            assert((ui_model->m_video_detectors.end() == found_video_detector) || (video_detector == found_video_detector->second.m_video_detector));
+
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
+                        }
+                        else if (NULL != animation_instance)
+                        {
+                            auto const found_instance_motion = ui_model->m_instance_motions.find(found_instance_model->second.m_instance_motion);
+
+                            assert((ui_model->m_instance_motions.end() == found_instance_motion) || (animation_instance == found_instance_motion->second.m_animation_instance));
+
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
+                        }
+                        else
+                        {
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
+                            assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
+                        }
+                    }
+#endif
+
+                    assert(ui_controller->m_instance_controllers.end() != ui_controller->m_instance_controllers.find(ui_controller->m_tree_view_selected_instance_model));
+                    auto &found_instance_controller = ui_controller->m_instance_controllers[ui_controller->m_tree_view_selected_instance_model];
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Animation Input Type",
+                            "Animation 入力種類",
+                            "動畫輸入類型",
+                            "动画输入类型"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        constexpr char const *const items[LANGUAGE_COUNT][ANIMATION_INPUT_TYPE_COUNT] = {
+                            {"Disable", "Video Detector", "Instance Motion"},
+                            {"無効", "動画検出", "実例行動"},
+                            {"停用", "視訊檢測", "實例動作"},
+                            {"停用", "视频检测", "实例动作"}};
+
+                        int select_combo_index = std::min(std::max(ANIMATION_INPUT_TYPE_MIN, found_instance_controller.m_animation_input_type), ANIMATION_INPUT_TYPE_MAX);
+
+                        ImGui::Combo("##Instance-Model-Manager-Animation-Input-Type", &select_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+
+                        found_instance_controller.m_animation_input_type = std::min(std::max(ANIMATION_INPUT_TYPE_MIN, static_cast<ANIMATION_INPUT_TYPE>(select_combo_index)), ANIMATION_INPUT_TYPE_MAX);
+                    }
+
+                    if (ANIMATION_INPUT_TYPE_VIDEO_DETECTOR == found_instance_controller.m_animation_input_type)
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Video Detector",
+                                "動画検出",
+                                "視訊檢測",
+                                "视频检测"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            mcrt_vector<uint64_t> item_values(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
+                            mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
+                            mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_video_detectors.size() + 1U));
+                            int selected_combo_index = 0;
                             {
-                                mcrt_vector<uint32_t> item_values(static_cast<size_t>(face_count));
-                                mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(face_count));
-                                mcrt_vector<char const *> items(static_cast<size_t>(face_count));
-                                int selected_combo_index = 0;
+                                size_t combo_index = 0U;
+
                                 {
-                                    uint32_t combo_index = 0U;
+                                    item_values[combo_index] = INVALID_TIMESTAMP;
 
-                                    for (uint32_t face_index = 0U; face_index < face_count; ++face_index)
+                                    char const *const text[LANGUAGE_COUNT] = {
+                                        "Disable",
+                                        "無効",
+                                        "停用",
+                                        "停用"};
+
+                                    item_strings[combo_index] = text[ui_controller->m_language_index];
+
+                                    items[combo_index] = item_strings[combo_index].c_str();
+
+                                    if (found_instance_model->second.m_video_detector == item_values[combo_index])
                                     {
-                                        item_values[combo_index] = face_index;
-
-                                        char face_index_text[] = {"18446744073709551615"};
-                                        std::snprintf(face_index_text, sizeof(face_index_text) / sizeof(face_index_text[0]), "%llu", static_cast<long long unsigned>(item_values[combo_index]));
-                                        face_index_text[(sizeof(face_index_text) / sizeof(face_index_text[0])) - 1] = '\0';
-
-                                        item_strings[combo_index] = face_index_text;
-                                        items[combo_index] = item_strings[combo_index].c_str();
-
-                                        if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_face_index() == item_values[combo_index])
-                                        {
-                                            assert(0 == selected_combo_index);
-                                            assert(static_cast<size_t>(1U + combo_index) < static_cast<size_t>(INT_MAX));
-                                            selected_combo_index = static_cast<int>(combo_index);
-                                        }
-
-                                        ++combo_index;
+                                        assert(0 == selected_combo_index);
+                                        assert(0 == combo_index);
                                     }
+
+                                    ++combo_index;
                                 }
 
-                                ImGui::Combo(label, &selected_combo_index, items.data(), items.size());
-
-                                if (selected_combo_index >= 0)
+                                for (auto const &video_detector : ui_model->m_video_detectors)
                                 {
-                                    if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_face_index() != item_values[selected_combo_index])
+                                    item_values[combo_index] = video_detector.first;
+
+                                    item_strings[combo_index].clear();
                                     {
-                                        found_instance_model->second.m_skeleton_instance->set_input_video_detector_face_index(item_values[selected_combo_index]);
+                                        char video_detector_timestamp_text[] = {"18446744073709551615"};
+                                        std::snprintf(video_detector_timestamp_text, sizeof(video_detector_timestamp_text) / sizeof(video_detector_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(item_values[combo_index]));
+                                        video_detector_timestamp_text[(sizeof(video_detector_timestamp_text) / sizeof(video_detector_timestamp_text[0])) - 1] = '\0';
+
+                                        item_strings[combo_index] += video_detector_timestamp_text;
+                                        item_strings[combo_index] += ' ';
+                                        item_strings[combo_index] += video_detector.second.m_name;
+                                    }
+
+                                    items[combo_index] = item_strings[combo_index].c_str();
+
+                                    if (found_instance_model->second.m_video_detector == item_values[combo_index])
+                                    {
+                                        assert(0 == selected_combo_index);
+                                        assert((1U + combo_index) < static_cast<size_t>(INT_MAX));
+                                        selected_combo_index = static_cast<int>(combo_index);
+                                    }
+
+                                    ++combo_index;
+                                }
+                            }
+
+                            ImGui::Combo("##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector", &selected_combo_index, items.data(), items.size());
+
+                            if (selected_combo_index >= 0)
+                            {
+                                uint64_t const selected_video_detector = item_values[selected_combo_index];
+
+                                if (found_instance_model->second.m_video_detector != selected_video_detector)
+                                {
+                                    auto const found_video_detector = ui_model->m_video_detectors.find(selected_video_detector);
+
+                                    if (ui_model->m_video_detectors.end() != found_video_detector)
+                                    {
+                                        found_instance_model->second.m_skeleton_instance->set_input_video_detector(found_video_detector->second.m_video_detector);
+
+                                        found_instance_model->second.m_video_detector = selected_video_detector;
+
+                                        found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
+                                    }
+                                    else
+                                    {
+                                        assert(0 == selected_combo_index);
+                                        assert(INVALID_TIMESTAMP == selected_video_detector);
+
+                                        found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
+
+                                        found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
+
+                                        for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                        {
+                                            BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
+
+                                            found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
+                                        }
+
+                                        {
+                                            mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
+
+                                            found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
+                                        }
+
+                                        found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
+
+                                        found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+
+                        assert(NULL != found_instance_model->second.m_skeleton_instance);
+                        brx_motion_video_detector *const video_detector = found_instance_model->second.m_skeleton_instance->get_input_video_detector();
+
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Face Index",
+                                "人顔索引",
+                                "人臉索引",
+                                "人脸索引"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            constexpr char const *const label = "##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector-Face-Index";
+
+                            if (NULL != video_detector)
+                            {
+                                uint32_t const face_count = video_detector->get_face_count();
+
+                                if (face_count > 0U)
+                                {
+                                    mcrt_vector<uint32_t> item_values(static_cast<size_t>(face_count));
+                                    mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(face_count));
+                                    mcrt_vector<char const *> items(static_cast<size_t>(face_count));
+                                    int selected_combo_index = 0;
+                                    {
+                                        uint32_t combo_index = 0U;
+
+                                        for (uint32_t face_index = 0U; face_index < face_count; ++face_index)
+                                        {
+                                            item_values[combo_index] = face_index;
+
+                                            char face_index_text[] = {"18446744073709551615"};
+                                            std::snprintf(face_index_text, sizeof(face_index_text) / sizeof(face_index_text[0]), "%llu", static_cast<long long unsigned>(item_values[combo_index]));
+                                            face_index_text[(sizeof(face_index_text) / sizeof(face_index_text[0])) - 1] = '\0';
+
+                                            item_strings[combo_index] = face_index_text;
+                                            items[combo_index] = item_strings[combo_index].c_str();
+
+                                            if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_face_index() == item_values[combo_index])
+                                            {
+                                                assert(0 == selected_combo_index);
+                                                assert(static_cast<size_t>(1U + combo_index) < static_cast<size_t>(INT_MAX));
+                                                selected_combo_index = static_cast<int>(combo_index);
+                                            }
+
+                                            ++combo_index;
+                                        }
+                                    }
+
+                                    ImGui::Combo(label, &selected_combo_index, items.data(), items.size());
+
+                                    if (selected_combo_index >= 0)
+                                    {
+                                        if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_face_index() != item_values[selected_combo_index])
+                                        {
+                                            found_instance_model->second.m_skeleton_instance->set_input_video_detector_face_index(item_values[selected_combo_index]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        assert(false);
                                     }
                                 }
                                 else
                                 {
-                                    assert(false);
+                                    char const *const items[LANGUAGE_COUNT][1] = {
+                                        {"Disable"},
+                                        {"無効"},
+                                        {"停用"},
+                                        {"停用"}};
+
+                                    int selected_combo_index = 0;
+
+                                    ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                                    assert(0 == selected_combo_index);
+
+                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector_face_index(BRX_MOTION_UINT32_INDEX_INVALID);
                                 }
                             }
                             else
@@ -4751,86 +4809,87 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 found_instance_model->second.m_skeleton_instance->set_input_video_detector_face_index(BRX_MOTION_UINT32_INDEX_INVALID);
                             }
                         }
-                        else
+
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
                         {
-                            char const *const items[LANGUAGE_COUNT][1] = {
-                                {"Disable"},
-                                {"無効"},
-                                {"停用"},
-                                {"停用"}};
-
-                            int selected_combo_index = 0;
-
-                            ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
-
-                            assert(0 == selected_combo_index);
-
-                            found_instance_model->second.m_skeleton_instance->set_input_video_detector_face_index(BRX_MOTION_UINT32_INDEX_INVALID);
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Pose Index",
+                                "姿勢索引",
+                                "姿勢索引",
+                                "姿勢索引"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         }
-                    }
-
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
-                    {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Pose Index",
-                            "姿勢索引",
-                            "姿勢索引",
-                            "姿勢索引"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
-                    ImGui::TableNextColumn();
-                    {
-                        constexpr char const *const label = "##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector-Pose-Index";
-
-                        if (NULL != video_detector)
+                        ImGui::TableNextColumn();
                         {
-                            uint32_t const pose_count = static_cast<uint32_t>(video_detector->get_pose_count());
+                            constexpr char const *const label = "##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector-Pose-Index";
 
-                            if (pose_count > 0U)
+                            if (NULL != video_detector)
                             {
-                                mcrt_vector<uint32_t> item_values(static_cast<size_t>(pose_count));
-                                mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(pose_count));
-                                mcrt_vector<char const *> items(static_cast<size_t>(pose_count));
-                                int selected_combo_index = 0;
+                                uint32_t const pose_count = static_cast<uint32_t>(video_detector->get_pose_count());
+
+                                if (pose_count > 0U)
                                 {
-                                    uint32_t combo_index = 0U;
-
-                                    for (uint32_t pose_index = 0U; pose_index < pose_count; ++pose_index)
+                                    mcrt_vector<uint32_t> item_values(static_cast<size_t>(pose_count));
+                                    mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(pose_count));
+                                    mcrt_vector<char const *> items(static_cast<size_t>(pose_count));
+                                    int selected_combo_index = 0;
                                     {
-                                        item_values[combo_index] = pose_index;
+                                        uint32_t combo_index = 0U;
 
-                                        char pose_index_text[] = {"18446744073709551615"};
-                                        std::snprintf(pose_index_text, sizeof(pose_index_text) / sizeof(pose_index_text[0]), "%llu", static_cast<long long unsigned>(item_values[combo_index]));
-                                        pose_index_text[(sizeof(pose_index_text) / sizeof(pose_index_text[0])) - 1] = '\0';
-
-                                        item_strings[combo_index] = pose_index_text;
-                                        items[combo_index] = item_strings[combo_index].c_str();
-
-                                        if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_pose_index() == item_values[combo_index])
+                                        for (uint32_t pose_index = 0U; pose_index < pose_count; ++pose_index)
                                         {
-                                            assert(0 == selected_combo_index);
-                                            assert(static_cast<size_t>(1U + combo_index) < static_cast<size_t>(INT_MAX));
-                                            selected_combo_index = static_cast<int>(combo_index);
+                                            item_values[combo_index] = pose_index;
+
+                                            char pose_index_text[] = {"18446744073709551615"};
+                                            std::snprintf(pose_index_text, sizeof(pose_index_text) / sizeof(pose_index_text[0]), "%llu", static_cast<long long unsigned>(item_values[combo_index]));
+                                            pose_index_text[(sizeof(pose_index_text) / sizeof(pose_index_text[0])) - 1] = '\0';
+
+                                            item_strings[combo_index] = pose_index_text;
+                                            items[combo_index] = item_strings[combo_index].c_str();
+
+                                            if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_pose_index() == item_values[combo_index])
+                                            {
+                                                assert(0 == selected_combo_index);
+                                                assert(static_cast<size_t>(1U + combo_index) < static_cast<size_t>(INT_MAX));
+                                                selected_combo_index = static_cast<int>(combo_index);
+                                            }
+
+                                            ++combo_index;
                                         }
-
-                                        ++combo_index;
                                     }
-                                }
 
-                                ImGui::Combo(label, &selected_combo_index, items.data(), items.size());
+                                    ImGui::Combo(label, &selected_combo_index, items.data(), items.size());
 
-                                if (selected_combo_index >= 0)
-                                {
-                                    if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_pose_index() != item_values[selected_combo_index])
+                                    if (selected_combo_index >= 0)
                                     {
-                                        found_instance_model->second.m_skeleton_instance->set_input_video_detector_pose_index(item_values[selected_combo_index]);
+                                        if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_pose_index() != item_values[selected_combo_index])
+                                        {
+                                            found_instance_model->second.m_skeleton_instance->set_input_video_detector_pose_index(item_values[selected_combo_index]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        assert(false);
                                     }
                                 }
                                 else
                                 {
-                                    assert(false);
+
+                                    char const *const items[LANGUAGE_COUNT][1] = {
+                                        {"Disable"},
+                                        {"無効"},
+                                        {"停用"},
+                                        {"停用"}};
+
+                                    int selected_combo_index = 0;
+
+                                    ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                                    assert(0 == selected_combo_index);
+
+                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector_pose_index(BRX_MOTION_UINT32_INDEX_INVALID);
                                 }
                             }
                             else
@@ -4851,174 +4910,162 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 found_instance_model->second.m_skeleton_instance->set_input_video_detector_pose_index(BRX_MOTION_UINT32_INDEX_INVALID);
                             }
                         }
-                        else
+                    }
+                    else if (ANIMATION_INPUT_TYPE_INSTANCE_MOTION == found_instance_controller.m_animation_input_type)
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Instance Motion",
+                                "実例行動",
+                                "實例動作",
+                                "实例动作"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
                         {
 
-                            char const *const items[LANGUAGE_COUNT][1] = {
-                                {"Disable"},
-                                {"無効"},
-                                {"停用"},
-                                {"停用"}};
-
+                            mcrt_vector<uint64_t> item_values(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
+                            mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
+                            mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
                             int selected_combo_index = 0;
-
-                            ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
-
-                            assert(0 == selected_combo_index);
-
-                            found_instance_model->second.m_skeleton_instance->set_input_video_detector_pose_index(BRX_MOTION_UINT32_INDEX_INVALID);
-                        }
-                    }
-                }
-                else if (ANIMATION_INPUT_TYPE_INSTANCE_MOTION == found_instance_controller.m_animation_input_type)
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
-                    {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Instance Motion",
-                            "実例行動",
-                            "實例動作",
-                            "实例动作"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
-                    ImGui::TableNextColumn();
-                    {
-
-                        mcrt_vector<uint64_t> item_values(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
-                        mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
-                        mcrt_vector<char const *> items(static_cast<size_t>(ui_model->m_instance_motions.size() + 1U));
-                        int selected_combo_index = 0;
-                        {
-                            size_t combo_index = 0U;
-
                             {
-                                item_values[combo_index] = INVALID_TIMESTAMP;
+                                size_t combo_index = 0U;
 
-                                char const *const text[LANGUAGE_COUNT] = {
-                                    "Disable",
-                                    "無効",
-                                    "停用",
-                                    "停用"};
-
-                                item_strings[combo_index] = text[ui_controller->m_language_index];
-
-                                items[combo_index] = item_strings[combo_index].c_str();
-
-                                if (found_instance_model->second.m_instance_motion == item_values[combo_index])
                                 {
-                                    assert(0 == selected_combo_index);
-                                    assert(0 == combo_index);
-                                }
+                                    item_values[combo_index] = INVALID_TIMESTAMP;
 
-                                ++combo_index;
-                            }
+                                    char const *const text[LANGUAGE_COUNT] = {
+                                        "Disable",
+                                        "無効",
+                                        "停用",
+                                        "停用"};
 
-                            for (auto const &instance_motion : ui_model->m_instance_motions)
-                            {
-                                item_values[combo_index] = instance_motion.first;
+                                    item_strings[combo_index] = text[ui_controller->m_language_index];
 
-                                item_strings[combo_index].clear();
-                                {
-                                    char instance_motion_timestamp_text[] = {"18446744073709551615"};
-                                    std::snprintf(instance_motion_timestamp_text, sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(item_values[combo_index]));
-                                    instance_motion_timestamp_text[(sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0])) - 1] = '\0';
+                                    items[combo_index] = item_strings[combo_index].c_str();
 
-                                    item_strings[combo_index] += instance_motion_timestamp_text;
-                                    item_strings[combo_index] += ' ';
-                                    item_strings[combo_index] += instance_motion.second.m_name;
-                                }
-
-                                items[combo_index] = item_strings[combo_index].c_str();
-
-                                if (found_instance_model->second.m_instance_motion == item_values[combo_index])
-                                {
-                                    assert(0 == selected_combo_index);
-                                    assert((1U + combo_index) < static_cast<size_t>(INT_MAX));
-                                    selected_combo_index = static_cast<int>(combo_index);
-                                }
-
-                                ++combo_index;
-                            }
-                        }
-
-                        ImGui::Combo("##Instance-Model-Manager-Right-Group-Table-Value-Instance-Motion", &selected_combo_index, items.data(), items.size());
-
-                        if (selected_combo_index >= 0)
-                        {
-                            uint64_t const selected_instance_motion = item_values[selected_combo_index];
-
-                            if (found_instance_model->second.m_instance_motion != selected_instance_motion)
-                            {
-                                auto const &found_instance_motion = ui_model->m_instance_motions.find(selected_instance_motion);
-
-                                if (ui_model->m_instance_motions.end() != found_instance_motion)
-                                {
-                                    found_instance_model->second.m_skeleton_instance->set_input_animation_instance(found_instance_motion->second.m_animation_instance);
-
-                                    found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
-
-                                    found_instance_model->second.m_instance_motion = selected_instance_motion;
-                                }
-                                else
-                                {
-                                    assert(0 == selected_combo_index);
-                                    assert(INVALID_TIMESTAMP == selected_instance_motion);
-
-                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
-
-                                    found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
-
-                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    if (found_instance_model->second.m_instance_motion == item_values[combo_index])
                                     {
-                                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
-
-                                        found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
+                                        assert(0 == selected_combo_index);
+                                        assert(0 == combo_index);
                                     }
 
-                                    {
-                                        mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
+                                    ++combo_index;
+                                }
 
-                                        found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
+                                for (auto const &instance_motion : ui_model->m_instance_motions)
+                                {
+                                    item_values[combo_index] = instance_motion.first;
+
+                                    item_strings[combo_index].clear();
+                                    {
+                                        char instance_motion_timestamp_text[] = {"18446744073709551615"};
+                                        std::snprintf(instance_motion_timestamp_text, sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(item_values[combo_index]));
+                                        instance_motion_timestamp_text[(sizeof(instance_motion_timestamp_text) / sizeof(instance_motion_timestamp_text[0])) - 1] = '\0';
+
+                                        item_strings[combo_index] += instance_motion_timestamp_text;
+                                        item_strings[combo_index] += ' ';
+                                        item_strings[combo_index] += instance_motion.second.m_name;
                                     }
 
-                                    found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
+                                    items[combo_index] = item_strings[combo_index].c_str();
 
-                                    found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
+                                    if (found_instance_model->second.m_instance_motion == item_values[combo_index])
+                                    {
+                                        assert(0 == selected_combo_index);
+                                        assert((1U + combo_index) < static_cast<size_t>(INT_MAX));
+                                        selected_combo_index = static_cast<int>(combo_index);
+                                    }
+
+                                    ++combo_index;
                                 }
                             }
+
+                            ImGui::Combo("##Instance-Model-Manager-Right-Group-Table-Value-Instance-Motion", &selected_combo_index, items.data(), items.size());
+
+                            if (selected_combo_index >= 0)
+                            {
+                                uint64_t const selected_instance_motion = item_values[selected_combo_index];
+
+                                if (found_instance_model->second.m_instance_motion != selected_instance_motion)
+                                {
+                                    auto const found_instance_motion = ui_model->m_instance_motions.find(selected_instance_motion);
+
+                                    if (ui_model->m_instance_motions.end() != found_instance_motion)
+                                    {
+                                        found_instance_model->second.m_skeleton_instance->set_input_animation_instance(found_instance_motion->second.m_animation_instance);
+
+                                        found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
+
+                                        found_instance_model->second.m_instance_motion = selected_instance_motion;
+                                    }
+                                    else
+                                    {
+                                        assert(0 == selected_combo_index);
+                                        assert(INVALID_TIMESTAMP == selected_instance_motion);
+
+                                        found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
+
+                                        found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
+
+                                        for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                        {
+                                            BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
+
+                                            found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
+                                        }
+
+                                        {
+                                            mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
+
+                                            found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
+                                        }
+
+                                        found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
+
+                                        found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
                         }
-                        else
+                    }
+                    else
+                    {
+                        assert(ANIMATION_INPUT_TYPE_INVALID == found_instance_controller.m_animation_input_type);
+
+                        found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
+
+                        found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
+
+                        for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
                         {
-                            assert(false);
+                            BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
+
+                            found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
                         }
+
+                        {
+                            mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
+
+                            found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
+                        }
+
+                        found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
+
+                        found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
                     }
                 }
                 else
                 {
-                    assert(ANIMATION_INPUT_TYPE_INVALID == found_instance_controller.m_animation_input_type);
-
-                    found_instance_model->second.m_skeleton_instance->set_input_video_detector(NULL);
-
-                    found_instance_model->second.m_skeleton_instance->set_input_animation_instance(NULL);
-
-                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                    {
-                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
-
-                        found_instance_model->second.m_surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
-                    }
-
-                    {
-                        mcrt_vector<brx_anari_rigid_transform> const skin_transforms(static_cast<size_t>(found_instance_model->second.m_skeleton_instance->get_skin_transform_count()), brx_anari_rigid_transform{{0.0F, 0.0F, 0.0F, 1.0F}, {0.0F, 0.0F, 0.0F}});
-
-                        found_instance_model->second.m_surface_group_instance->set_skin_transforms(found_instance_model->second.m_skeleton_instance->get_skin_transform_count(), skin_transforms.data());
-                    }
-
-                    found_instance_model->second.m_video_detector = INVALID_TIMESTAMP;
-
-                    found_instance_model->second.m_instance_motion = INVALID_TIMESTAMP;
+                    assert(INVALID_TIMESTAMP == found_instance_model->second.m_video_detector);
+                    assert(INVALID_TIMESTAMP == found_instance_model->second.m_instance_motion);
                 }
 
                 {
@@ -5870,7 +5917,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                         if (ui_controller->m_hdri_selected_asset_image != selected_asset_image)
                         {
-                            auto const &found_asset_image = ui_model->m_asset_images.find(selected_asset_image);
+                            auto const found_asset_image = ui_model->m_asset_images.find(selected_asset_image);
                             if (ui_model->m_asset_images.end() != found_asset_image)
                             {
                                 assert(NULL != found_asset_image->second.m_image);
@@ -6215,18 +6262,18 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
     }
 }
 
-static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model)
+static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model, mcrt_vector<brx_anari_image *> &out_anonymous_images)
 {
     brx_anari_image *load_anari_image;
-    if (NULL != asset_image_url)
+    if (NULL != asset_image_url_data)
     {
-        if (('f' == asset_image_url[0]) && ('i' == asset_image_url[1]) && ('l' == asset_image_url[2]) && ('e' == asset_image_url[3]) && (':' == asset_image_url[4]) && ('/' == asset_image_url[5]) && ('/' == asset_image_url[6]))
+        if ((asset_image_url_size >= 7U) && ('f' == asset_image_url_data[0]) && ('i' == asset_image_url_data[1]) && ('l' == asset_image_url_data[2]) && ('e' == asset_image_url_data[3]) && (':' == asset_image_url_data[4]) && ('/' == asset_image_url_data[5]) && ('/' == asset_image_url_data[6]))
         {
             mcrt_string asset_image_file_name;
             {
                 asset_image_file_name += asset_model_directory_name;
                 asset_image_file_name += '/';
-                asset_image_file_name += reinterpret_cast<char const *>(asset_image_url + 7);
+                asset_image_file_name += mcrt_string(reinterpret_cast<char const *>(asset_image_url_data + 7U), asset_image_url_size - 7U);
             }
 
             bool asset_image_file;
@@ -6248,6 +6295,10 @@ static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_im
                 assert(!force_srgb);
                 load_anari_image = NULL;
             }
+        }
+        else if ((asset_image_url_size >= 7U) && ('d' == asset_image_url_data[0]) && ('a' == asset_image_url_data[1]) && ('t' == asset_image_url_data[2]) && ('a' == asset_image_url_data[3]) && (':' == asset_image_url_data[4]) && ('/' == asset_image_url_data[5]) && ('/' == asset_image_url_data[6]))
+        {
+            load_anari_image = internal_load_asset_image_data(asset_image_url_data + 7U, asset_image_url_size - 7U, force_srgb, device, out_anonymous_images);
         }
         else
         {
@@ -6278,7 +6329,7 @@ static inline brx_anari_image *internal_load_asset_image_file(char const *asset_
             asset_image_file_identity += asset_image_file_name;
         }
 
-        auto const &found_asset_image = ui_model->m_asset_images.find(asset_image_file_identity);
+        auto const found_asset_image = ui_model->m_asset_images.find(asset_image_file_identity);
 
         if (ui_model->m_asset_images.end() == found_asset_image)
         {
@@ -6336,6 +6387,64 @@ static inline brx_anari_image *internal_load_asset_image_file(char const *asset_
         {
             assert(NULL != found_asset_image->second.m_image);
             load_anari_image = found_asset_image->second.m_image;
+        }
+    }
+
+    return load_anari_image;
+}
+
+static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, mcrt_vector<brx_anari_image *> &out_anonymous_images)
+{
+    brx_anari_image *load_anari_image;
+    {
+        brx_asset_import_image *asset_import_image = brx_asset_import_create_image_from_memory(asset_image_file_data_base, asset_image_file_data_size);
+
+        if (NULL != asset_import_image)
+        {
+            if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R8G8B8A8_UNORM == asset_import_image->get_format())
+            {
+                brx_anari_image *anari_image = device->new_image(force_srgb ? BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_SRGB : BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_UNORM, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
+
+                if (NULL != anari_image)
+                {
+                    out_anonymous_images.push_back(anari_image);
+
+                    load_anari_image = anari_image;
+                }
+                else
+                {
+                    assert(false);
+                    load_anari_image = NULL;
+                }
+            }
+            else if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R16G16B16A16_SFLOAT == asset_import_image->get_format())
+            {
+                brx_anari_image *anari_image = device->new_image(BRX_ANARI_IMAGE_FORMAT_R16G16B16A16_SFLOAT, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
+
+                if (NULL != anari_image)
+                {
+                    out_anonymous_images.push_back(anari_image);
+
+                    load_anari_image = anari_image;
+                }
+                else
+                {
+                    assert(false);
+                    load_anari_image = NULL;
+                }
+            }
+            else
+            {
+                assert(false);
+                load_anari_image = NULL;
+            }
+
+            brx_asset_import_destroy_image(asset_import_image);
+        }
+        else
+        {
+            assert(false);
+            load_anari_image = NULL;
         }
     }
 
