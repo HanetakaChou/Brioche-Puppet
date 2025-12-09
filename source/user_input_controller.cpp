@@ -306,7 +306,7 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
 
     assert(ui_controller->m_instance_controllers.empty());
 
-    ui_controller->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_LOW;
+    ui_controller->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_DISABLED;
 
     assert(ui_controller->m_hdri_selected_asset_image.empty());
 }

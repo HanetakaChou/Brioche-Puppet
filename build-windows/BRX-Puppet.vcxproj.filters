@@ -50,18 +50,6 @@
     <Filter Include="thirdparty\DXUT\Optional">
       <UniqueIdentifier>{09f4db43-7429-4ae0-b11b-a44ce3150fcd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty\D3D12-Agility-SDK">
-      <UniqueIdentifier>{92a0e778-650d-4e2d-aa7e-5252d3e13d52}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\D3D12-Agility-SDK\bin">
-      <UniqueIdentifier>{19a8fb26-957d-4fc2-8008-018b942941e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\D3D12-Agility-SDK\bin\x64">
-      <UniqueIdentifier>{88dd13ce-00db-48c6-9e06-5ce3bc75fbf6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\D3D12-Agility-SDK\bin\x86">
-      <UniqueIdentifier>{c9473151-de3d-4ed5-9ea3-752fa17b7cf6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="build-windows">
       <UniqueIdentifier>{26abb298-2b4d-43f8-a8b9-31b96ad3df67}</UniqueIdentifier>
     </Filter>
@@ -78,18 +66,6 @@
     </CopyFileToFolders>
     <CopyFileToFolders Include="..\thirdparty\Vulkan-ValidationLayers\bin\win32\x64\VkLayer_khronos_validation.dll">
       <Filter>thirdparty\Vulkan-ValidationLayers\x64</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x64\D3D12Core.dll">
-      <Filter>thirdparty\D3D12-Agility-SDK\bin\x64</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x64\d3d12SDKLayers.dll">
-      <Filter>thirdparty\D3D12-Agility-SDK\bin\x64</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x86\D3D12Core.dll">
-      <Filter>thirdparty\D3D12-Agility-SDK\bin\x86</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\thirdparty\D3D12-Agility-SDK\bin\x86\d3d12SDKLayers.dll">
-      <Filter>thirdparty\D3D12-Agility-SDK\bin\x86</Filter>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>

@@ -119,10 +119,6 @@ int main(int argc, char *argv[])
 #include "../thirdparty/Brioche-ImGui/imgui.h"
 #include "../thirdparty/Brioche-ImGui/backends/imgui_impl_win32.h"
 
-// DirectX 12 Agility SDK
-extern "C" __declspec(dllexport) UINT const D3D12SDKVersion = 613U;
-extern "C" __declspec(dllexport) char const *D3D12SDKPath = ".\\D3D12\\";
-
 #ifndef NDEBUG
 int wmain(int argc, wchar_t *argv[], wchar_t *envp[])
 #else

@@ -22,10 +22,6 @@
 	path = thirdparty/Brioche-Platform-Abstraction-Layer
 	url = git@github.com:HanetakaChou/Brioche-Platform-Abstraction-Layer.git
 	branch = master
-[submodule "thirdparty/D3D12-Agility-SDK"]
-	path = thirdparty/D3D12-Agility-SDK
-	url = git@github.com:HanetakaChou/D3D12-Agility-SDK.git
-	branch = master
 [submodule "thirdparty/Vulkan-ValidationLayers"]
 	path = thirdparty/Vulkan-ValidationLayers
 	url = git@github.com:HanetakaChou/Vulkan-ValidationLayers.git
