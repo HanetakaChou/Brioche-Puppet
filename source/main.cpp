@@ -1348,7 +1348,10 @@ static inline bool internal_platform_get_file_timestamp_and_data(wchar_t const *
         }
         else
         {
-            assert(ERROR_FILE_NOT_FOUND == GetLastError());
+#ifndef NDEBUG
+            DWORD last_error = GetLastError();
+#endif
+            assert((ERROR_FILE_NOT_FOUND == last_error) || (ERROR_PATH_NOT_FOUND == last_error));
             assert(out_file_data->empty());
             file_timestamp_found = false;
             file_data_found = false;

@@ -55,6 +55,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-WSI", "..\thirdparty\Br
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-Fonts", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-Fonts.vcxproj", "{2EF530D4-818C-4689-BFFD-06987F9A7D8C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-Font-Asset", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-Font-Asset.vcxproj", "{42E90939-5AE4-472E-B07A-934378F9841D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Motion-MediaPipe-Model-Asset", "..\thirdparty\Brioche-Motion\build-windows\BRX-Motion-MediaPipe-Model-Asset.vcxproj", "{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -271,6 +275,22 @@ Global
 		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|Win32.Build.0 = Release|Win32
 		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|x64.ActiveCfg = Release|x64
 		{2EF530D4-818C-4689-BFFD-06987F9A7D8C}.Release|x64.Build.0 = Release|x64
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Debug|Win32.Build.0 = Debug|Win32
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Debug|x64.ActiveCfg = Debug|x64
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Debug|x64.Build.0 = Debug|x64
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Release|Win32.ActiveCfg = Release|Win32
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Release|Win32.Build.0 = Release|Win32
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Release|x64.ActiveCfg = Release|x64
+		{42E90939-5AE4-472E-B07A-934378F9841D}.Release|x64.Build.0 = Release|x64
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Debug|Win32.Build.0 = Debug|Win32
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Debug|x64.ActiveCfg = Debug|x64
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Debug|x64.Build.0 = Debug|x64
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|Win32.ActiveCfg = Release|Win32
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|Win32.Build.0 = Release|Win32
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|x64.ActiveCfg = Release|x64
+		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
