@@ -65,8 +65,10 @@ struct ui_controller_t
     bool m_show_instance_model_manager;
     bool m_show_camera_manager;
     bool m_show_physics_ragdoll_manager;
+    bool m_show_window_manager;
     bool m_show_environment_lighting_manager;
     bool m_show_global_illumination_manager;
+    bool m_show_about;
 
     VIDEO_CAPTURE_TYPE m_new_video_capture_type;
     int m_new_video_capture_camera_index;

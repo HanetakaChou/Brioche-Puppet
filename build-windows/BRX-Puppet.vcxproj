@@ -22,11 +22,20 @@
     <ClCompile Include="..\source\main.cpp" />
     <ClCompile Include="..\source\user_input_controller.cpp" />
     <ClCompile Include="..\source\user_input_model.cpp" />
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256.cpp" />
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_arm_shani.cpp" />
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_sse4.cpp" />
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_x86_shani.cpp" />
     <ClCompile Include="..\thirdparty\DXUT\Optional\DXUTcamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\user_input_controller.h" />
     <ClInclude Include="..\source\user_input_model.h" />
+    <ClInclude Include="..\thirdparty\bitcoin\src\attributes.h" />
+    <ClInclude Include="..\thirdparty\bitcoin\src\compat\byteswap.h" />
+    <ClInclude Include="..\thirdparty\bitcoin\src\compat\endian.h" />
+    <ClInclude Include="..\thirdparty\bitcoin\src\crypto\common.h" />
+    <ClInclude Include="..\thirdparty\bitcoin\src\crypto\sha256.h" />
     <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -199,7 +208,7 @@
       <PreprocessorDefinitions>IMGUI_API=__declspec(dllexport);IMGUI_IMPL_API=__declspec(dllexport);_WIN32_WINNT=_WIN32_WINNT_WIN7;_CONSOLE;_DEBUG;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
+      <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8 -msha
  %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
@@ -245,7 +254,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>IMGUI_API=__declspec(dllexport);IMGUI_IMPL_API=__declspec(dllexport);_WIN32_WINNT=_WIN32_WINNT_WIN7;_WINDOWS;NDEBUG;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8
+      <AdditionalOptions>-Werror=return-type /source-charset:utf-8 /execution-charset:utf-8 -msha
  %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>

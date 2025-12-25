@@ -549,8 +549,10 @@ static void internal_key_press_handler(int key, bool shift_key, bool caps_key, b
             s_wsi_state.m_ui_controller.m_show_instance_model_manager = false;
             s_wsi_state.m_ui_controller.m_show_camera_manager = false;
             s_wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;
+            s_wsi_state.m_ui_controller.m_show_window_manager = false;
             s_wsi_state.m_ui_controller.m_show_environment_lighting_manager = false;
             s_wsi_state.m_ui_controller.m_show_global_illumination_manager = false;
+            s_wsi_state.m_ui_controller.m_show_about = false;
         }
 
         mapped_camera_key = CAM_UNKNOWN;
