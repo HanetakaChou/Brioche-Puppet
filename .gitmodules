@@ -90,3 +90,7 @@
 	path = thirdparty/NDK-Build-Linux
 	url = git@github.com:BriochePuppet/NDK-Build-Linux.git
 	branch = master
+[submodule "thirdparty/bitcoin"]
+	path = thirdparty/bitcoin
+	url = git@github.com:HanetakaChou/bitcoin.git
+	branch = master

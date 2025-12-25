@@ -27,7 +27,20 @@ LOCAL_SRC_FILES := \
 	$(LOCAL_PATH)/../source/main.cpp \
 	$(LOCAL_PATH)/../source/user_input_controller.cpp \
 	$(LOCAL_PATH)/../source/user_input_model.cpp \
-	$(LOCAL_PATH)/../thirdparty/DXUT/Optional/DXUTcamera.cpp
+	$(LOCAL_PATH)/../thirdparty/DXUT/Optional/DXUTcamera.cpp \
+	$(LOCAL_PATH)/../thirdparty/bitcoin/src/crypto/sha256.cpp
+
+ifeq (armeabi-v7a,$(TARGET_ARCH_ABI))
+LOCAL_SRC_FILES += $(LOCAL_PATH)/../thirdparty/bitcoin/src/crypto/sha256_arm_shani.cpp
+else ifeq (arm64-v8a,$(TARGET_ARCH_ABI))
+LOCAL_SRC_FILES += $(LOCAL_PATH)/../thirdparty/bitcoin/src/crypto/sha256_arm_shani.cpp
+else ifeq (x86,$(TARGET_ARCH_ABI))
+LOCAL_SRC_FILES += $(LOCAL_PATH)/../thirdparty/bitcoin/src/crypto/sha256_x86_shani.cpp
+else ifeq (x86_64,$(TARGET_ARCH_ABI))
+LOCAL_SRC_FILES += $(LOCAL_PATH)/../thirdparty/bitcoin/src/crypto/sha256_sse4.cpp
+else
+LOCAL_SRC_FILES +=
+endif
 
 LOCAL_CFLAGS :=
 
@@ -40,6 +53,7 @@ else ifeq (x86,$(TARGET_ARCH_ABI))
 LOCAL_CFLAGS += -mf16c
 LOCAL_CFLAGS += -mfma
 LOCAL_CFLAGS += -mavx2
+LOCAL_CFLAGS += -msha
 else ifeq (x86_64,$(TARGET_ARCH_ABI))
 LOCAL_CFLAGS += -mf16c
 LOCAL_CFLAGS += -mfma

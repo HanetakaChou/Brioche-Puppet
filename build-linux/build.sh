@@ -85,9 +85,9 @@ else
 fi
 
 if make -C "${PROJECT_DIRECTORY}/../thirdparty/Brioche-ImGui/build-fonts" -f "fonts.mk" "${MAKE_ARGUMENT[@]}"; then
-    echo "build fonts passed"
+    echo "build Brioche-ImGui fonts passed"
 else
-    echo "build fonts failed"
+    echo "build Brioche-ImGui fonts failed"
     exit 1
 fi
 

@@ -38,6 +38,8 @@ struct wsi_state_t
     brx_anari_device *m_anari_device;
     int32_t m_window_width;
     int32_t m_window_height;
+    float m_window_width_scale;
+    float m_window_height_scale;
     double m_tick_count_resolution;
     uint64_t m_tick_count_previous_frame;
     bool m_ui_view;
@@ -45,19 +47,17 @@ struct wsi_state_t
     ui_controller_t m_ui_controller;
 };
 
-static wsi_state_t s_wsi_state;
-
 static void *internal_imgui_malloc_wrapper(size_t size, void *user_data);
 static void internal_imgui_free_wrapper(void *ptr, void *user_data);
 
-static void internal_key_press_handler(int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key);
-static void internal_key_release_handler(int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key);
-static void internal_button_press_handler(int button, int x, int y);
-static void internal_button_release_handler(int button, int x, int y);
-static void internal_scroll_up_handler(int x, int y);
-static void internal_scroll_down_handler(int x, int y);
-static void internal_motion_handler(int x, int y, bool left_button, bool middle_button, bool right_button);
-static void internal_resize_handler(int width, int height);
+static void internal_key_press_handler(void *handler_context, int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key);
+static void internal_key_release_handler(void *handler_context, int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key);
+static void internal_button_press_handler(void *handler_context, int button, int x, int y);
+static void internal_button_release_handler(void *handler_context, int button, int x, int y);
+static void internal_scroll_up_handler(void *handler_context, int x, int y);
+static void internal_scroll_down_handler(void *handler_context, int x, int y);
+static void internal_motion_handler(void *handler_context, int x, int y, bool left_button, bool middle_button, bool right_button);
+static void internal_resize_handler(void *handler_context, int width, int height, float width_scale, float height_scale);
 
 static inline BRX_ANARI_MORPH_TARGET_NAME const wrap(BRX_MOTION_MORPH_TARGET_NAME const morph_target_name)
 {
@@ -214,18 +214,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 #error Unknown Compiler
 #endif
 
-    brx_wsi_init_connection();
-
-    // ImGui_ImplWin32_EnableDpiAwareness();
-
-    // Initialize
-    s_wsi_state = wsi_state_t{
+    wsi_state_t wsi_state = wsi_state_t{
         NULL,
         1280,
         720,
+        1.0F,
+        1.0F,
         1.0 / static_cast<double>(mcrt_tick_count_per_second()),
         mcrt_tick_count_now(),
         true};
+
+    brx_wsi_init_connection();
+
+    // ImGui_ImplWin32_EnableDpiAwareness();
 
     brx_wsi_init_main_window(
         "Brioche Puppet",
@@ -237,7 +238,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
         internal_scroll_down_handler,
         internal_motion_handler,
         internal_resize_handler,
-        s_wsi_state.m_window_width, s_wsi_state.m_window_height);
+        wsi_state.m_window_width,
+        wsi_state.m_window_height,
+        &wsi_state);
+
+    brx_wsi_get_main_window_scale(&wsi_state.m_window_width_scale, &wsi_state.m_window_height_scale);
 
     {
         IMGUI_CHECKVERSION();
@@ -256,7 +261,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 #if defined(__GNUC__)
 #if defined(__linux__)
     ImGui_ImplGLUT_Init();
-    ImGui_ImplGLUT_ReshapeFunc(s_wsi_state.m_window_width, s_wsi_state.m_window_height);
+    ImGui_ImplGLUT_ReshapeFunc(wsi_state.m_window_width, wsi_state.m_window_height);
 #else
 #error Unknown Platform
 #endif
@@ -266,153 +271,63 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 #error Unknown Compiler
 #endif
 
-    s_wsi_state.m_anari_device = brx_anari_new_device(brx_wsi_get_connection());
+    wsi_state.m_anari_device = brx_anari_new_device(brx_wsi_get_connection());
 
-    ui_model_init(s_wsi_state.m_anari_device, &s_wsi_state.m_ui_model);
+    ui_model_init(wsi_state.m_anari_device, &wsi_state.m_ui_model);
 
-    ui_controller_init(s_wsi_state.m_anari_device, &s_wsi_state.m_ui_controller);
+    ui_controller_init(wsi_state.m_anari_device, &wsi_state.m_ui_controller);
 
-    s_wsi_state.m_anari_device->frame_attach_window(brx_wsi_get_main_window());
+    wsi_state.m_anari_device->frame_attach_window(brx_wsi_get_main_window(), 1.0F / wsi_state.m_window_width_scale, 1.0F / wsi_state.m_window_height_scale);
 
     brx_wsi_show_main_window();
 
-    // Run
-    while (brx_wsi_wait_window())
-    {
-        // Render
-        if (s_wsi_state.m_window_width > 0 && s_wsi_state.m_window_height > 0)
+    brx_wsi_run_main_loop(
+        [](void *tick_context) -> bool
         {
-            float interval_time;
-            {
-                uint64_t const tick_count_current_frame = mcrt_tick_count_now();
-                interval_time = static_cast<float>(static_cast<double>(tick_count_current_frame - s_wsi_state.m_tick_count_previous_frame) * s_wsi_state.m_tick_count_resolution);
-                s_wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
-            }
+            wsi_state_t &wsi_state = (*static_cast<wsi_state_t *>(tick_context));
 
-            // User Camera
-            user_camera_simulate(interval_time, s_wsi_state.m_anari_device, &s_wsi_state.m_ui_model, &s_wsi_state.m_ui_controller);
-
-            // UI
+            if ((wsi_state.m_window_width > 0) && (wsi_state.m_window_height > 0) && (wsi_state.m_window_width_scale > 1E-3F) && (wsi_state.m_window_height_scale > 1E-3F))
             {
+                float interval_time;
+                {
+                    uint64_t const tick_count_current_frame = mcrt_tick_count_now();
+                    interval_time = static_cast<float>(static_cast<double>(tick_count_current_frame - wsi_state.m_tick_count_previous_frame) * wsi_state.m_tick_count_resolution);
+                    wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
+                }
+
+                // User Camera
+                user_camera_simulate(interval_time, wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
+
+                // UI
+                {
 #if defined(__GNUC__)
 #if defined(__linux__)
-                ImGui_ImplGLUT_NewFrame(interval_time);
+                    ImGui_ImplGLUT_NewFrame(interval_time);
 #else
 #error Unknown Platform
 #endif
 #elif defined(_MSC_VER)
-                ImGui_ImplWin32_NewFrame();
+                    ImGui_ImplWin32_NewFrame();
 #else
 #error Unknown Compiler
 #endif
-                ImGui::NewFrame();
+                    ImGui::NewFrame();
 
-                ui_simulate(brx_wsi_get_main_window(), s_wsi_state.m_anari_device, &s_wsi_state.m_ui_model, &s_wsi_state.m_ui_controller);
+                    ui_simulate(brx_wsi_get_main_window(), wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
 
-                // ImGui::EndFrame();
-                ImGui::Render();
-            }
-
-            // Motion
-            {
-                mcrt_set<brx_motion_video_detector *> video_detectors;
-                mcrt_set<brx_motion_animation_instance *> animation_instances;
-                for (auto const &instance_model : s_wsi_state.m_ui_model.m_instance_models)
-                {
-                    brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
-
-                    if (NULL != skeleton_instance)
-                    {
-                        brx_motion_video_detector *const video_detector = skeleton_instance->get_input_video_detector();
-                        brx_motion_animation_instance *const animation_instance = skeleton_instance->get_input_animation_instance();
-
-                        assert((NULL == video_detector) || (NULL == animation_instance));
-
-                        if (NULL != video_detector)
-                        {
-                            video_detectors.insert(video_detector);
-                        }
-                        else if (NULL != animation_instance)
-                        {
-                            animation_instances.insert(animation_instance);
-                        }
-                    }
-                    else
-                    {
-                        assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
-                        assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
-                    }
+                    // ImGui::EndFrame();
+                    ImGui::Render();
                 }
 
-                mcrt_set<brx_motion_video_capture *> video_captures;
-                for (brx_motion_video_detector *const video_detector : video_detectors)
+                // Motion
                 {
-                    if (NULL != video_detector)
+                    mcrt_set<brx_motion_video_detector *> video_detectors;
+                    mcrt_set<brx_motion_animation_instance *> animation_instances;
+                    for (auto const &instance_model : wsi_state.m_ui_model.m_instance_models)
                     {
-                        brx_motion_video_capture *const video_capture = video_detector->get_input();
-
-                        if (NULL != video_capture)
-                        {
-                            video_captures.insert(video_capture);
-                        }
-                        else
-                        {
-                            assert(false);
-                        }
-                    }
-                    else
-                    {
-                        assert(false);
-                    }
-                }
-
-                for (brx_motion_video_capture *const video_capture : video_captures)
-                {
-                    if (NULL != video_capture)
-                    {
-
-                        video_capture->step();
-                    }
-                    else
-                    {
-                        assert(false);
-                    }
-                }
-
-                for (brx_motion_video_detector *const video_detector : video_detectors)
-                {
-                    if (NULL != video_detector)
-                    {
-
-                        video_detector->step();
-                    }
-                    else
-                    {
-                        assert(false);
-                    }
-                }
-
-                float const clipped_interval_time = std::min(interval_time, 1.0F / 30.0F);
-                for (brx_motion_animation_instance *const animation_instance : animation_instances)
-                {
-                    if (NULL != animation_instance)
-                    {
-                        animation_instance->step(clipped_interval_time);
-                    }
-                    else
-                    {
-                        assert(false);
-                    }
-                }
-
-                for (auto const &instance_model : s_wsi_state.m_ui_model.m_instance_models)
-                {
-                    if (NULL != instance_model.second.m_skeleton_instance)
-                    {
-                        brx_anari_surface_group_instance *const surface_group_instance = instance_model.second.m_surface_group_instance;
                         brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
 
-                        if ((NULL != surface_group_instance) && (NULL != skeleton_instance))
+                        if (NULL != skeleton_instance)
                         {
                             brx_motion_video_detector *const video_detector = skeleton_instance->get_input_video_detector();
                             brx_motion_animation_instance *const animation_instance = skeleton_instance->get_input_animation_instance();
@@ -421,26 +336,34 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                             if (NULL != video_detector)
                             {
-                                for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                                {
-                                    BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
-                                    float const morph_target_weight = video_detector->get_morph_target_weight(skeleton_instance->get_input_video_detector_face_index(), morph_target_name);
-                                    surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
-                                }
+                                video_detectors.insert(video_detector);
                             }
                             else if (NULL != animation_instance)
                             {
-                                for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
-                                {
-                                    BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
-                                    float const morph_target_weight = animation_instance->get_morph_target_weight(morph_target_name);
-                                    surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
-                                }
+                                animation_instances.insert(animation_instance);
                             }
+                        }
+                        else
+                        {
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
+                        }
+                    }
 
+                    mcrt_set<brx_motion_video_capture *> video_captures;
+                    for (brx_motion_video_detector *const video_detector : video_detectors)
+                    {
+                        if (NULL != video_detector)
+                        {
+                            brx_motion_video_capture *const video_capture = video_detector->get_input();
+
+                            if (NULL != video_capture)
                             {
-                                skeleton_instance->step(s_wsi_state.m_ui_controller.m_physics_ragdoll_quality);
-                                surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), wrap(skeleton_instance->get_skin_transforms()));
+                                video_captures.insert(video_capture);
+                            }
+                            else
+                            {
+                                assert(false);
                             }
                         }
                         else
@@ -448,25 +371,111 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             assert(false);
                         }
                     }
-                    else
+
+                    for (brx_motion_video_capture *const video_capture : video_captures)
                     {
-                        assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
-                        assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
+                        if (NULL != video_capture)
+                        {
+
+                            video_capture->step();
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+
+                    for (brx_motion_video_detector *const video_detector : video_detectors)
+                    {
+                        if (NULL != video_detector)
+                        {
+
+                            video_detector->step();
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+
+                    float const clipped_interval_time = std::min(interval_time, 1.0F / 30.0F);
+                    for (brx_motion_animation_instance *const animation_instance : animation_instances)
+                    {
+                        if (NULL != animation_instance)
+                        {
+                            animation_instance->step(clipped_interval_time);
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+
+                    for (auto const &instance_model : wsi_state.m_ui_model.m_instance_models)
+                    {
+                        if (NULL != instance_model.second.m_skeleton_instance)
+                        {
+                            brx_anari_surface_group_instance *const surface_group_instance = instance_model.second.m_surface_group_instance;
+                            brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
+
+                            if ((NULL != surface_group_instance) && (NULL != skeleton_instance))
+                            {
+                                brx_motion_video_detector *const video_detector = skeleton_instance->get_input_video_detector();
+                                brx_motion_animation_instance *const animation_instance = skeleton_instance->get_input_animation_instance();
+
+                                assert((NULL == video_detector) || (NULL == animation_instance));
+
+                                if (NULL != video_detector)
+                                {
+                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    {
+                                        BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
+                                        float const morph_target_weight = video_detector->get_morph_target_weight(skeleton_instance->get_input_video_detector_face_index(), morph_target_name);
+                                        surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
+                                    }
+                                }
+                                else if (NULL != animation_instance)
+                                {
+                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    {
+                                        BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
+                                        float const morph_target_weight = animation_instance->get_morph_target_weight(morph_target_name);
+                                        surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
+                                    }
+                                }
+
+                                {
+                                    skeleton_instance->step(wsi_state.m_ui_controller.m_physics_ragdoll_quality);
+                                    surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), wrap(skeleton_instance->get_skin_transforms()));
+                                }
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+                        else
+                        {
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
+                        }
                     }
                 }
+
+                // Render
+                wsi_state.m_anari_device->renderer_render_frame(wsi_state.m_ui_view);
             }
 
-            s_wsi_state.m_anari_device->renderer_render_frame(s_wsi_state.m_ui_view);
-        }
-    }
+            return true;
+        },
+        &wsi_state);
 
-    // Destroy
     {
-        s_wsi_state.m_anari_device->frame_detach_window();
+        wsi_state.m_anari_device->frame_detach_window();
 
-        ui_model_uninit(s_wsi_state.m_anari_device, &s_wsi_state.m_ui_model);
+        ui_model_uninit(wsi_state.m_anari_device, &wsi_state.m_ui_model);
 
-        brx_anari_release_device(s_wsi_state.m_anari_device);
+        brx_anari_release_device(wsi_state.m_anari_device);
     }
 
 #if defined(__GNUC__)
@@ -500,8 +509,9 @@ static void internal_imgui_free_wrapper(void *ptr, void *)
     return mcrt_free(ptr);
 }
 
-static void internal_key_press_handler(int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key)
+static void internal_key_press_handler(void *handler_context, int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key)
 {
+    wsi_state_t &wsi_state = (*static_cast<wsi_state_t *>(handler_context));
 
     D3DUtil_CameraKeys mapped_camera_key;
     switch (key)
@@ -538,19 +548,21 @@ static void internal_key_press_handler(int key, bool shift_key, bool caps_key, b
     break;
     case ImGuiKey_Escape:
     {
-        if (!(s_wsi_state.m_ui_view = (!s_wsi_state.m_ui_view)))
+        if (!(wsi_state.m_ui_view = (!wsi_state.m_ui_view)))
         {
-            s_wsi_state.m_ui_controller.m_show_video_capture_manager = false;
-            s_wsi_state.m_ui_controller.m_show_asset_motion_manager = false;
-            s_wsi_state.m_ui_controller.m_show_asset_model_manager = false;
-            s_wsi_state.m_ui_controller.m_show_asset_image_manager = false;
-            s_wsi_state.m_ui_controller.m_show_video_detector_manager = false;
-            s_wsi_state.m_ui_controller.m_show_instance_motion_manager = false;
-            s_wsi_state.m_ui_controller.m_show_instance_model_manager = false;
-            s_wsi_state.m_ui_controller.m_show_camera_manager = false;
-            s_wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;
-            s_wsi_state.m_ui_controller.m_show_environment_lighting_manager = false;
-            s_wsi_state.m_ui_controller.m_show_global_illumination_manager = false;
+            wsi_state.m_ui_controller.m_show_video_capture_manager = false;
+            wsi_state.m_ui_controller.m_show_asset_motion_manager = false;
+            wsi_state.m_ui_controller.m_show_asset_model_manager = false;
+            wsi_state.m_ui_controller.m_show_asset_image_manager = false;
+            wsi_state.m_ui_controller.m_show_video_detector_manager = false;
+            wsi_state.m_ui_controller.m_show_instance_motion_manager = false;
+            wsi_state.m_ui_controller.m_show_instance_model_manager = false;
+            wsi_state.m_ui_controller.m_show_camera_manager = false;
+            wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;
+            wsi_state.m_ui_controller.m_show_window_manager = false;
+            wsi_state.m_ui_controller.m_show_environment_lighting_manager = false;
+            wsi_state.m_ui_controller.m_show_global_illumination_manager = false;
+            wsi_state.m_ui_controller.m_show_about = false;
         }
 
         mapped_camera_key = CAM_UNKNOWN;
@@ -562,11 +574,12 @@ static void internal_key_press_handler(int key, bool shift_key, bool caps_key, b
     }
     };
 
-    s_wsi_state.m_ui_controller.m_first_person_camera.HandleKeyDownMessage(mapped_camera_key);
+    wsi_state.m_ui_controller.m_first_person_camera.HandleKeyDownMessage(mapped_camera_key);
 }
 
-static void internal_key_release_handler(int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key)
+static void internal_key_release_handler(void *handler_context, int key, bool shift_key, bool caps_key, bool ctrl_key, bool alt_key)
 {
+    wsi_state_t &wsi_state = (*static_cast<wsi_state_t *>(handler_context));
 
     D3DUtil_CameraKeys mapped_camera_key;
     switch (key)
@@ -607,44 +620,51 @@ static void internal_key_release_handler(int key, bool shift_key, bool caps_key,
     }
     };
 
-    s_wsi_state.m_ui_controller.m_first_person_camera.HandleKeyUpMessage(mapped_camera_key);
+    wsi_state.m_ui_controller.m_first_person_camera.HandleKeyUpMessage(mapped_camera_key);
 }
 
-static void internal_button_press_handler(int button, int window_x, int window_y)
+static void internal_button_press_handler(void *handler_context, int button, int window_x, int window_y)
 {
 }
 
-static void internal_button_release_handler(int button, int window_x, int window_y)
+static void internal_button_release_handler(void *handler_context, int button, int window_x, int window_y)
 {
 }
 
-static void internal_scroll_up_handler(int window_x, int window_y)
+static void internal_scroll_up_handler(void *handler_context, int window_x, int window_y)
 {
 }
 
-static void internal_scroll_down_handler(int window_x, int window_y)
+static void internal_scroll_down_handler(void *handler_context, int window_x, int window_y)
 {
 }
 
-static void internal_motion_handler(int window_x, int window_y, bool left_button, bool middle_button, bool right_button)
+static void internal_motion_handler(void *handler_context, int window_x, int window_y, bool left_button, bool middle_button, bool right_button)
 {
-    float normalized_x = static_cast<float>(static_cast<double>(window_x) / static_cast<double>(s_wsi_state.m_window_width));
-    float normalized_y = static_cast<float>(static_cast<double>(window_y) / static_cast<double>(s_wsi_state.m_window_height));
+    wsi_state_t &wsi_state = (*static_cast<wsi_state_t *>(handler_context));
 
-    s_wsi_state.m_ui_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalized_y, left_button, middle_button, right_button);
+    float normalized_x = static_cast<float>(static_cast<double>(window_x) / static_cast<double>(wsi_state.m_window_width));
+    float normalized_y = static_cast<float>(static_cast<double>(window_y) / static_cast<double>(wsi_state.m_window_height));
+
+    wsi_state.m_ui_controller.m_first_person_camera.HandleMouseMoveMessage(normalized_x, normalized_y, left_button, middle_button, right_button);
 }
 
-static void internal_resize_handler(int new_width, int new_height)
+static void internal_resize_handler(void *handler_context, int new_width, int new_height, float new_width_scale, float new_height_scale)
 {
-    if (s_wsi_state.m_window_width != new_width || s_wsi_state.m_window_height != new_height)
+    wsi_state_t &wsi_state = (*static_cast<wsi_state_t *>(handler_context));
+
+    if ((wsi_state.m_window_width != new_width) || (wsi_state.m_window_height != new_height) || (std::abs(wsi_state.m_window_width_scale - new_width_scale) > 1E-3F) || (std::abs(wsi_state.m_window_height_scale - new_height_scale) > 1E-3F))
     {
-        if (new_width > 0 && new_height > 0)
+        if ((new_width > 0) && (new_height > 0) && (new_width_scale > 1E-3F) && (new_height_scale > 1E-3F))
         {
-            s_wsi_state.m_anari_device->frame_resize_window();
+            wsi_state.m_anari_device->frame_resize_window(1.0F / wsi_state.m_window_width_scale, 1.0F / wsi_state.m_window_height_scale);
         }
 
-        s_wsi_state.m_window_width = new_width;
-        s_wsi_state.m_window_height = new_height;
+        wsi_state.m_window_width = new_width;
+        wsi_state.m_window_height = new_height;
+
+        wsi_state.m_window_width_scale = new_width_scale;
+        wsi_state.m_window_height_scale = new_height_scale;
     }
 }
 
