@@ -85,9 +85,9 @@ else
 fi
 
 if make -C "${PROJECT_DIRECTORY}/../thirdparty/Brioche-ImGui/build-fonts" -f "fonts.mk" "${MAKE_ARGUMENT[@]}"; then
-    echo "build fonts passed"
+    echo "build Brioche-ImGui fonts passed"
 else
-    echo "build fonts failed"
+    echo "build Brioche-ImGui fonts failed"
     exit 1
 fi
 
@@ -113,6 +113,6 @@ else
 fi
 
 if test \( \( -n "$1" \) -a \( "$1" = "debug" \) \); then 
-    cp -f "${PROJECT_DIRECTORY}/../thirdparty/Vulkan-ValidationLayers/bin/linux/x64/VkLayer_khronos_validation.json" "${PROJECT_DIRECTORY}/obj/debug/local/x86_64"
-    cp -f "${PROJECT_DIRECTORY}/../thirdparty/Vulkan-ValidationLayers/bin/linux/x64/libVkLayer_khronos_validation.so" "${PROJECT_DIRECTORY}/obj/debug/local/x86_64"
+    cp -f "${PROJECT_DIRECTORY}/../thirdparty/Vulkan-ValidationLayers/bin/linux/x86_64/VkLayer_khronos_validation.json" "${PROJECT_DIRECTORY}/obj/debug/local/x86_64"
+    cp -f "${PROJECT_DIRECTORY}/../thirdparty/Vulkan-ValidationLayers/bin/linux/x86_64/libVkLayer_khronos_validation.so" "${PROJECT_DIRECTORY}/obj/debug/local/x86_64"
 fi

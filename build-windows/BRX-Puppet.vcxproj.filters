@@ -13,6 +13,18 @@
     <ClCompile Include="..\source\user_input_controller.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256.cpp">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_arm_shani.cpp">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_sse4.cpp">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\bitcoin\src\crypto\sha256_x86_shani.cpp">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\thirdparty\DXUT\Optional\DXUTcamera.h">
@@ -26,6 +38,21 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>build-windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\bitcoin\src\crypto\common.h">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\bitcoin\src\crypto\sha256.h">
+      <Filter>thirdparty\bitcoin\src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\bitcoin\src\compat\byteswap.h">
+      <Filter>thirdparty\bitcoin\src\compat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\bitcoin\src\compat\endian.h">
+      <Filter>thirdparty\bitcoin\src\compat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\bitcoin\src\attributes.h">
+      <Filter>thirdparty\bitcoin\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +79,18 @@
     </Filter>
     <Filter Include="build-windows">
       <UniqueIdentifier>{26abb298-2b4d-43f8-a8b9-31b96ad3df67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\bitcoin">
+      <UniqueIdentifier>{847d6e3b-be40-43a9-8211-558710ae6c3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\bitcoin\src">
+      <UniqueIdentifier>{977c7950-526a-4622-b2c7-439ab5568cfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\bitcoin\src\crypto">
+      <UniqueIdentifier>{b0ff929b-ac4a-450e-87e6-0c9d805bfaa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\bitcoin\src\compat">
+      <UniqueIdentifier>{757c4438-919c-4b7c-a40b-87c71018f5f9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,12 @@
 #include "../thirdparty/Brioche-Asset-Import/include/brx_asset_import_image.h"
 #include "../thirdparty/Brioche-Asset-Import/include/brx_asset_import_scene.h"
 #include "../thirdparty/McRT-Malloc/include/mcrt_tick_count.h"
+#include "../thirdparty/Brioche-Window-System-Integration/include/brx_wsi.h"
+#include "../thirdparty/bitcoin/src/crypto/sha256.h"
+#include <cinttypes>
 #include <climits>
+#include <cstring>
+#include <cstdio>
 #include <algorithm>
 
 static_assert(BRX_ANARI_UINT32_INDEX_INVALID == BRX_ASSET_IMPORT_UINT32_INDEX_INVALID, "");
@@ -209,15 +214,15 @@ static inline brx_motion_ragdoll_direct_mapping const *wrap(brx_asset_import_rag
     return reinterpret_cast<brx_motion_ragdoll_direct_mapping const *>(ragdoll_direct_mapping);
 }
 
-extern bool internal_platform_get_open_file_name(void *platform_context, uint32_t filter_count, char const *const *filter_names, char const *const *filter_specs, int &inout_file_type_index, mcrt_string *out_file_name, uint64_t *out_file_timestamp, mcrt_vector<uint8_t> *out_file_data);
+extern bool internal_platform_get_open_file_name(uint32_t filter_count, char const *const *filter_names, char const *const *filter_specs, int &inout_file_type_index, mcrt_string *out_file_name, uint64_t *out_file_timestamp, mcrt_vector<uint8_t> *out_file_data);
 
 extern bool internal_platform_get_file_timestamp_and_data(char const *file_name, uint64_t *out_file_timestamp, mcrt_vector<uint8_t> *out_file_data);
 
-static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model, mcrt_vector<brx_anari_image *> &out_anonymous_images);
+static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
 
 static inline brx_anari_image *internal_load_asset_image_file(char const *asset_image_file_name, uint64_t asset_image_file_timestamp, void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
 
-static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, mcrt_vector<brx_anari_image *> &out_anonymous_images);
+static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model);
 
 extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_controller)
 {
@@ -255,8 +260,10 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
     ui_controller->m_show_instance_model_manager = false;
     ui_controller->m_show_camera_manager = false;
     ui_controller->m_show_physics_ragdoll_manager = false;
+    ui_controller->m_show_window_manager = false;
     ui_controller->m_show_environment_lighting_manager = false;
     ui_controller->m_show_global_illumination_manager = false;
+    ui_controller->m_show_acknowledgement = false;
 
     ui_controller->m_new_video_capture_type = VIDEO_CAPTURE_TYPE_INVALID;
     ui_controller->m_new_video_capture_camera_index = 0;
@@ -357,7 +364,7 @@ extern void user_camera_simulate(float interval_time, brx_anari_device *device, 
     }
 }
 
-extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)
+extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller)
 {
     ImGuiIO const &io = ImGui::GetIO();
 
@@ -369,7 +376,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
     constexpr float const ui_width = 800.0F;
     constexpr float const ui_height = 600.0F;
 
-    constexpr char const *const help_marker_text = "[ I ]";
+    constexpr char const *const help_marker_text = "[ Information ]";
 
     float const help_marker_position = ImGui::GetFontSize() * 35.0F;
 
@@ -586,6 +593,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 ImGui::AlignTextToFramePadding();
                 {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Window Manager",
+                        "窓管理",
+                        "視窗管理",
+                        "窗口管理"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Checkbox("##Show-Window-Manager", &ui_controller->m_show_window_manager);
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
                         "Environment Lighting Manager",
                         "環境照明管理",
                         "環境照明管理",
@@ -611,6 +634,22 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 ImGui::TableNextColumn();
                 {
                     ImGui::Checkbox("##Show-Global-Illumination-Manager", &ui_controller->m_show_global_illumination_manager);
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Acknowledgement",
+                        "謝辞",
+                        "致謝",
+                        "致谢"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Checkbox("##Show-Acknowledgement", &ui_controller->m_show_acknowledgement);
                 }
 
                 ImGui::EndTable();
@@ -711,12 +750,16 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     ImGui::TableNextColumn();
                     {
                         constexpr char const *const items[] = {
-                            "SD (640 x 480)",
-                            "HD (1280 x 720)",
-                            "FHD (1920 x 1080)",
-                            "QHD (2560 x 1440)",
-                            "4K UHD (3840 x 2160)",
-                            "8K UHD (7680 x 4320)"};
+                            "SD Landscape (640 x 480)",
+                            "SD Portrait (480 x 640)",
+                            "qHD Landscape (960 x 540)",
+                            "qHD Portrait (540 x 960)",
+                            "HD Landscape (1280 x 720)",
+                            "HD Portrait (720 x 1280)",
+                            "HD+ Landscape (1600 x 900)",
+                            "HD+ Portrait (900 x 1600)",
+                            "FHD Landscape (1920 x 1080)",
+                            "FHD Portrait (1080 x 1920)"};
 
                         int selected_resolution_index = std::min(std::max(0, ui_controller->m_new_video_capture_camera_resolution_index), static_cast<int>(sizeof(items) / sizeof(items[0])) - 1);
 
@@ -820,12 +863,15 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                     {
                         constexpr uint32_t const resolutions[][2] = {
                             {640, 480},
+                            {480, 640},
+                            {960, 540},
+                            {540, 960},
                             {1280, 720},
+                            {720, 1280},
+                            {1600, 900},
+                            {900, 1600},
                             {1920, 1080},
-                            {2560, 1440},
-                            {3840, 2160},
-                            {7680, 4320},
-                        };
+                            {1080, 1920}};
 
                         int const resolution_index = std::min(std::max(0, ui_controller->m_new_video_capture_camera_resolution_index), static_cast<int>(sizeof(resolutions) / sizeof(resolutions[0]) - 1U));
 
@@ -880,7 +926,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*",
                         "*.mp4;*.mkv;*.webm;*.avi"};
 
-                    video_capture_file_open = internal_platform_get_open_file_name(platform_context, video_capture_filter_count, video_capture_filter_names, video_capture_filter_specs, ui_controller->m_new_video_capture_get_open_file_name_file_type_index, &video_capture_file_name, &video_capture_file_timestamp, NULL);
+                    video_capture_file_open = internal_platform_get_open_file_name(video_capture_filter_count, video_capture_filter_names, video_capture_filter_specs, ui_controller->m_new_video_capture_get_open_file_name_file_type_index, &video_capture_file_name, &video_capture_file_timestamp, NULL);
                 }
 
                 if (video_capture_file_open)
@@ -1246,7 +1292,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*",
                         "*.vmd"};
 
-                    asset_motion_file_open = internal_platform_get_open_file_name(platform_context, asset_motion_filter_count, asset_motion_filter_names, asset_motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &asset_motion_file_name, &asset_motion_file_timestamp, &asset_motion_file_data);
+                    asset_motion_file_open = internal_platform_get_open_file_name(asset_motion_filter_count, asset_motion_filter_names, asset_motion_filter_specs, ui_controller->m_import_asset_motion_get_open_file_name_file_type_index, &asset_motion_file_name, &asset_motion_file_timestamp, &asset_motion_file_data);
                 }
 
                 if (asset_motion_file_open)
@@ -1563,7 +1609,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*.pmx",
                         "*.vrm;*.glb"};
 
-                    asset_model_file_open = internal_platform_get_open_file_name(platform_context, asset_model_filter_count, asset_model_filter_names, asset_model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &asset_model_file_name, &asset_model_file_timestamp, &asset_model_file_data);
+                    asset_model_file_open = internal_platform_get_open_file_name(asset_model_filter_count, asset_model_filter_names, asset_model_filter_specs, ui_controller->m_import_asset_model_get_open_file_name_file_type_index, &asset_model_file_name, &asset_model_file_timestamp, &asset_model_file_data);
                 }
 
                 if (asset_model_file_open)
@@ -1621,8 +1667,6 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                 {
                                     mcrt_vector<BRX_ANARI_SURFACE> surfaces(static_cast<size_t>(surface_count));
 
-                                    mcrt_vector<brx_anari_image *> anonymous_images;
-
                                     for (uint32_t surface_index = 0U; surface_index < surface_count; ++surface_index)
                                     {
                                         brx_asset_import_surface const *const asset_import_surface = asset_import_surface_group->get_surface(surface_index);
@@ -1647,25 +1691,19 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                                         surfaces[surface_index].m_index_count = asset_import_surface->get_index_count();
                                         surfaces[surface_index].m_indices = asset_import_surface->get_indices();
                                         surfaces[surface_index].m_is_double_sided = asset_import_surface->get_is_double_sided();
-                                        surfaces[surface_index].m_emissive_image = internal_load_asset_image(asset_import_surface->get_emissive_image_url_data(), asset_import_surface->get_emissive_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_emissive_image = internal_load_asset_image(asset_import_surface->get_emissive_image_url_data(), asset_import_surface->get_emissive_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model);
                                         surfaces[surface_index].m_emissive_factor = wrap(asset_import_surface->get_emissive_factor());
-                                        surfaces[surface_index].m_normal_image = internal_load_asset_image(asset_import_surface->get_normal_image_url_data(), asset_import_surface->get_normal_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_normal_image = internal_load_asset_image(asset_import_surface->get_normal_image_url_data(), asset_import_surface->get_normal_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model);
                                         surfaces[surface_index].m_normal_scale = asset_import_surface->get_normal_scale();
-                                        surfaces[surface_index].m_base_color_image = internal_load_asset_image(asset_import_surface->get_base_color_image_url_data(), asset_import_surface->get_base_color_image_url_size(), asset_model_directory_name.c_str(), true, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_base_color_image = internal_load_asset_image(asset_import_surface->get_base_color_image_url_data(), asset_import_surface->get_base_color_image_url_size(), asset_model_directory_name.c_str(), true, device, ui_model);
                                         surfaces[surface_index].m_base_color_factor = wrap(asset_import_surface->get_base_color_factor());
-                                        surfaces[surface_index].m_metallic_roughness_image = internal_load_asset_image(asset_import_surface->get_metallic_roughness_image_url_data(), asset_import_surface->get_metallic_roughness_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model, anonymous_images);
+                                        surfaces[surface_index].m_metallic_roughness_image = internal_load_asset_image(asset_import_surface->get_metallic_roughness_image_url_data(), asset_import_surface->get_metallic_roughness_image_url_size(), asset_model_directory_name.c_str(), false, device, ui_model);
                                         surfaces[surface_index].m_metallic_factor = asset_import_surface->get_metallic_factor();
                                         surfaces[surface_index].m_roughness_factor = asset_import_surface->get_roughness_factor();
                                     }
 
                                     assert(NULL == anari_surface_group);
                                     anari_surface_group = device->new_surface_group(surface_count, surfaces.data());
-
-                                    for (auto &anonymous_image : anonymous_images)
-                                    {
-                                        device->release_image(anonymous_image);
-                                        anonymous_image = NULL;
-                                    }
                                 }
 
                                 if (skin)
@@ -2026,7 +2064,7 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                         "*.tga",
                         "*.exr"};
 
-                    asset_image_file_open = internal_platform_get_open_file_name(platform_context, asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);
+                    asset_image_file_open = internal_platform_get_open_file_name(asset_image_filter_count, asset_image_filter_names, asset_image_filter_specs, ui_controller->m_import_asset_image_get_open_file_name_file_type_index, &asset_image_file_name, &asset_image_file_timestamp, &asset_image_file_data);
                 }
 
                 if (asset_image_file_open)
@@ -2132,43 +2170,87 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
             ImGui::BeginGroup();
 
-            mcrt_string timestamp_text = "Timestamp: ";
-            mcrt_string directory_name;
-            mcrt_string file_name;
+            if (0 == std::strncmp(found_asset_image->first.c_str(), "file", 4))
             {
-                size_t const timestamp_text_end_pos = found_asset_image->first.find(' ');
-                size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
-                if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                mcrt_string timestamp_text = "Timestamp: ";
+                mcrt_string directory_name = "Directory: ";
+                mcrt_string file_name = "File: ";
                 {
-                    timestamp_text += found_asset_image->first.substr(0U, timestamp_text_end_pos);
-                    directory_name = found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
-                    file_name = found_asset_image->first.substr(directory_name_end_pos + 1U);
+                    size_t const timestamp_text_end_pos = found_asset_image->first.find(' ', 5U);
+                    size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
+                    if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                    {
+                        timestamp_text += found_asset_image->first.substr(5U, timestamp_text_end_pos);
+                        directory_name += found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
+                        file_name += found_asset_image->first.substr(directory_name_end_pos + 1U);
+                    }
+                    else
+                    {
+                        assert(false);
+                        timestamp_text = "N/A";
+                        directory_name = "N/A";
+                        file_name = "N/A";
+                    }
                 }
-                else
+
                 {
-                    assert(false);
-                    timestamp_text = "N/A";
-                    directory_name = "N/A";
-                    file_name = "N/A";
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(file_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(directory_name.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(timestamp_text.c_str());
+                    ImGui::PopStyleColor();
                 }
             }
-
+            else if (0 == std::strncmp(found_asset_image->first.c_str(), "data", 4))
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                ImGui::TextUnformatted(file_name.c_str());
-                ImGui::PopStyleColor();
+                mcrt_string size_text = "Size: ";
+                mcrt_string hash_text = "Hash: ";
+                {
+                    size_t const size_text_end_pos = found_asset_image->first.find(' ', 5U);
+                    if (mcrt_string::npos != size_text_end_pos)
+                    {
+                        size_text += found_asset_image->first.substr(5U, size_text_end_pos);
+                        hash_text += found_asset_image->first.substr(size_text_end_pos + 1U);
+                    }
+                    else
+                    {
+                        assert(false);
+                        size_text = "N/A";
+                        hash_text = "N/A";
+                    }
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(hash_text.c_str());
+                    ImGui::PopStyleColor();
+                }
+
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(size_text.c_str());
+                    ImGui::PopStyleColor();
+                }
             }
-
+            else
             {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                ImGui::TextUnformatted(directory_name.c_str());
-                ImGui::PopStyleColor();
-            }
+                assert(false);
 
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                ImGui::TextUnformatted(timestamp_text.c_str());
-                ImGui::PopStyleColor();
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted("Unknown Source");
+                    ImGui::PopStyleColor();
+                }
             }
 
             ImGui::Separator();
@@ -2404,6 +2486,24 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
                 ImGui::TableNextColumn();
                 {
                     ImGui::Checkbox("##Video-Detector-Manager-New-Video-Detector-Force-GPU", &ui_controller->m_new_video_detector_force_gpu);
+                }
+                ImGui::SameLine();
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(help_marker_text);
+                    ImGui::PopStyleColor();
+                    if (ImGui::BeginItemTooltip())
+                    {
+                        ImGui::PushTextWrapPos(help_marker_position);
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "GPU inference does NOT necessarily guarantee better performance.",
+                            "GPU推論は必ずしも性能向上を保証せず。",
+                            "GPU推理并不一定能保證更好的性能。",
+                            "GPU推理并不一定能保证更好的性能。"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
                 }
 
                 ImGui::TableNextRow();
@@ -5807,9 +5907,114 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
                 int select_physics_ragdoll_quality = std::min(std::max(0, static_cast<int>(ui_controller->m_physics_ragdoll_quality)), (int(BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_COUNT) - 1));
 
-                ImGui::Combo("##Physics-Ragdoll-Manager-Table-Layout", &select_physics_ragdoll_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+                ImGui::Combo("##Physics-Ragdoll-Manager-Table-Value-Quality", &select_physics_ragdoll_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
 
                 ui_controller->m_physics_ragdoll_quality = static_cast<BRX_MOTION_PHYSICS_RAGDOLL_QUALITY>(std::min(std::max(0, select_physics_ragdoll_quality), (int(BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_COUNT) - 1)));
+            }
+
+            ImGui::EndTable();
+        }
+
+        ImGui::End();
+    }
+
+    if (ui_controller->m_show_window_manager)
+    {
+        {
+            ImGuiViewport const *const main_viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + ui_x * ui_index, main_viewport->WorkPos.y + ui_y * ui_index), ImGuiCond_FirstUseEver);
+            ++ui_index;
+
+            ImGui::SetNextWindowSize(ImVec2(ui_width, ui_height), ImGuiCond_FirstUseEver);
+        }
+
+        ImGui::Begin("Window Manager", &ui_controller->m_show_window_manager);
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Window Manager",
+                "窓管理",
+                "視窗管理",
+                "窗口管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginTable("##Window-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+        {
+            ImGui::TableSetupColumn("##Window-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("##Window-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Resolution",
+                    "解像度",
+                    "解析度",
+                    "分辨率"};
+
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+            ImGui::TableNextColumn();
+            {
+                constexpr char const *const items[] = {
+                    "SD Landscape (640 x 480)",
+                    "SD Portrait (480 x 640)",
+                    "qHD Landscape (960 x 540)",
+                    "qHD Portrait (540 x 960)",
+                    "HD Landscape (1280 x 720)",
+                    "HD Portrait (720 x 1280)",
+                    "HD+ Landscape (1600 x 900)",
+                    "HD+ Portrait (900 x 1600)",
+                    "FHD Landscape (1920 x 1080)",
+                    "FHD Portrait (1080 x 1920)"};
+
+                constexpr int const resolutions[][2] = {
+                    {640, 480},
+                    {480, 640},
+                    {960, 540},
+                    {540, 960},
+                    {1280, 720},
+                    {720, 1280},
+                    {1600, 900},
+                    {900, 1600},
+                    {1920, 1080},
+                    {1080, 1920}};
+
+                static_assert((sizeof(items) / sizeof(items[0])) == (sizeof(resolutions) / sizeof(resolutions[0])), "");
+
+                int main_window_width;
+                int main_window_height;
+                brx_wsi_get_main_window_size(&main_window_width, &main_window_height);
+
+                int select_main_window_resolution_index = 0;
+
+                while (select_main_window_resolution_index < static_cast<int>(sizeof(resolutions) / sizeof(resolutions[0])))
+                {
+                    if ((resolutions[select_main_window_resolution_index][0] >= main_window_width) && (resolutions[select_main_window_resolution_index][1] >= main_window_height))
+                    {
+                        break;
+                    }
+
+                    ++select_main_window_resolution_index;
+                }
+
+                select_main_window_resolution_index = std::min(std::max(0, select_main_window_resolution_index), static_cast<int>(sizeof(items) / sizeof(items[0])) - 1);
+
+                ImGui::Combo("##Window-Manager-Table-Value-Resolution", &select_main_window_resolution_index, items, IM_ARRAYSIZE(items));
+
+                select_main_window_resolution_index = std::min(std::max(0, select_main_window_resolution_index), static_cast<int>(sizeof(items) / sizeof(items[0])) - 1);
+
+                int const main_window_new_width = resolutions[select_main_window_resolution_index][0];
+                int const main_window_new_height = resolutions[select_main_window_resolution_index][1];
+
+                if ((main_window_width != main_window_new_width) || (main_window_height != main_window_new_height))
+                {
+                    brx_wsi_set_main_window_size(main_window_new_width, main_window_new_height);
+                }
             }
 
             ImGui::EndTable();
@@ -6260,9 +6465,385 @@ extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_mod
 
         ImGui::End();
     }
+
+    if (ui_controller->m_show_acknowledgement)
+    {
+        {
+            ImGuiViewport const *const main_viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + ui_x * ui_index, main_viewport->WorkPos.y + ui_y * ui_index), ImGuiCond_FirstUseEver);
+            ++ui_index;
+
+            ImGui::SetNextWindowSize(ImVec2(ui_width, ui_height), ImGuiCond_FirstUseEver);
+        }
+
+        ImGui::Begin("Acknowledgement", &ui_controller->m_show_acknowledgement);
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Acknowledgement",
+                "謝辞",
+                "致謝",
+                "致谢"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginTable("##Acknowledgement-Table", 3, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+        {
+            ImGui::TableSetupColumn("##Acknowledgement-Table-Name", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("##Acknowledgement-Table-Author", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("##Acknowledgement-Table-License", ImGuiTableColumnFlags_WidthStretch);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("SHA256");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Bitcoin Dvelopers");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("cgltf");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Johannes Kuhlmann");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("DirectXMesh");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Microsoft");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("libdeflate");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Eric Biggers");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("libjpeg-turbo");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Independent JPEG Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Independent JPEG Group License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("libpng");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("PNG Reference Library Authors");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("PNG Reference Library License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("libwebp");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Google");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("BSD License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("OpenEXR");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Industrial Light & Magic");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("BSD License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("zlib");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Jean-loup Gailly & Mark Adler");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("zlib License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Dear ImGui");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Omar Cornut");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("FreeType");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("FreeType Authors");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("FreeType License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("MediaPipe");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Google");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("OpenCL Headers");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Khronos Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Bullet Physics");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Erwin Coumans");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("zlib License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("D3D12 Memory Allocator");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("AMD");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("MoltenVK");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Khronos Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Vulkan Headers");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Khronos Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache OR MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Vulkan Loader");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Khronos Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Vulkan Memory Allocator");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("AMD");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Qt");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Qt Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("LGPL License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("CoreRT");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Microsoft");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("DirectXMath");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Microsoft");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("DirectX Shader Compiler");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Microsoft");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("LLVM Release License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("DXUT");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Microsoft");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("MIT License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("libiconv");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("GNU");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("LGPL License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("TBB");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Intel");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Android NDK");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Google");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("OpenCV");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Intel");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("FFmpeg");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("FFmpeg Team");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("LGPL License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Shaderc");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Google");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Vulkan Validation Layers");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Khronos Group");
+
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted("Apache License");
+
+            ImGui::EndTable();
+        }
+
+        ImGui::End();
+    }
 }
 
-static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model, mcrt_vector<brx_anari_image *> &out_anonymous_images)
+static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_image_url_data, uint32_t const asset_image_url_size, char const *asset_model_directory_name, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model)
 {
     brx_anari_image *load_anari_image;
     if (NULL != asset_image_url_data)
@@ -6292,13 +6873,16 @@ static inline brx_anari_image *internal_load_asset_image(uint8_t const *asset_im
             else
             {
                 // normal or metallic roughness
-                assert(!force_srgb);
+                if (force_srgb)
+                {
+                    brx_wsi_tcc();
+                }
                 load_anari_image = NULL;
             }
         }
         else if ((asset_image_url_size >= 7U) && ('d' == asset_image_url_data[0]) && ('a' == asset_image_url_data[1]) && ('t' == asset_image_url_data[2]) && ('a' == asset_image_url_data[3]) && (':' == asset_image_url_data[4]) && ('/' == asset_image_url_data[5]) && ('/' == asset_image_url_data[6]))
         {
-            load_anari_image = internal_load_asset_image_data(asset_image_url_data + 7U, asset_image_url_size - 7U, force_srgb, device, out_anonymous_images);
+            load_anari_image = internal_load_asset_image_data(asset_image_url_data + 7U, asset_image_url_size - 7U, force_srgb, device, ui_model);
         }
         else
         {
@@ -6320,11 +6904,16 @@ static inline brx_anari_image *internal_load_asset_image_file(char const *asset_
     {
         mcrt_string asset_image_file_identity;
         {
-            char asset_image_file_timestamp_text[] = {"18446744073709551615"};
-            std::snprintf(asset_image_file_timestamp_text, sizeof(asset_image_file_timestamp_text) / sizeof(asset_image_file_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(asset_image_file_timestamp));
-            asset_image_file_timestamp_text[(sizeof(asset_image_file_timestamp_text) / sizeof(asset_image_file_timestamp_text[0])) - 1] = '\0';
+            asset_image_file_identity += "file ";
 
-            asset_image_file_identity += asset_image_file_timestamp_text;
+            {
+                char asset_image_file_timestamp_text[] = {"18446744073709551615"};
+                std::snprintf(asset_image_file_timestamp_text, sizeof(asset_image_file_timestamp_text) / sizeof(asset_image_file_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(asset_image_file_timestamp));
+                asset_image_file_timestamp_text[(sizeof(asset_image_file_timestamp_text) / sizeof(asset_image_file_timestamp_text[0])) - 1] = '\0';
+
+                asset_image_file_identity += asset_image_file_timestamp_text;
+            }
+
             asset_image_file_identity += ' ';
             asset_image_file_identity += asset_image_file_name;
         }
@@ -6393,58 +6982,96 @@ static inline brx_anari_image *internal_load_asset_image_file(char const *asset_
     return load_anari_image;
 }
 
-static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, mcrt_vector<brx_anari_image *> &out_anonymous_images)
+static inline brx_anari_image *internal_load_asset_image_data(void const *asset_image_file_data_base, size_t asset_image_file_data_size, bool force_srgb, brx_anari_device *device, ui_model_t *ui_model)
 {
     brx_anari_image *load_anari_image;
     {
-        brx_asset_import_image *asset_import_image = brx_asset_import_create_image_from_memory(asset_image_file_data_base, asset_image_file_data_size);
-
-        if (NULL != asset_import_image)
+        mcrt_string asset_image_data_identity;
         {
-            if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R8G8B8A8_UNORM == asset_import_image->get_format())
+            asset_image_data_identity += "data ";
+
             {
-                brx_anari_image *anari_image = device->new_image(force_srgb ? BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_SRGB : BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_UNORM, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
+                char asset_image_file_data_size_text[] = {"18446744073709551615"};
+                std::snprintf(asset_image_file_data_size_text, sizeof(asset_image_file_data_size_text) / sizeof(asset_image_file_data_size_text[0]), "%020llu", static_cast<long long unsigned>(asset_image_file_data_size));
+                asset_image_file_data_size_text[(sizeof(asset_image_file_data_size_text) / sizeof(asset_image_file_data_size_text[0])) - 1] = '\0';
 
-                if (NULL != anari_image)
-                {
-                    out_anonymous_images.push_back(anari_image);
-
-                    load_anari_image = anari_image;
-                }
-                else
-                {
-                    assert(false);
-                    load_anari_image = NULL;
-                }
+                asset_image_data_identity += asset_image_file_data_size_text;
+                asset_image_data_identity += ' ';
             }
-            else if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R16G16B16A16_SFLOAT == asset_import_image->get_format())
+
             {
-                brx_anari_image *anari_image = device->new_image(BRX_ANARI_IMAGE_FORMAT_R16G16B16A16_SFLOAT, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
+                CSHA256 sha256;
+                sha256.Write(static_cast<unsigned char const *>(asset_image_file_data_base), asset_image_file_data_size);
 
-                if (NULL != anari_image)
+                unsigned char hash[CSHA256::OUTPUT_SIZE];
+                sha256.Finalize(hash);
+
+                char hash_text[2U * CSHA256::OUTPUT_SIZE + 1U] = {};
+                std::snprintf(hash_text, sizeof(hash_text) / sizeof(hash_text[0]), "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8, static_cast<uint8_t>(hash[0]), static_cast<uint8_t>(hash[1]), static_cast<uint8_t>(hash[2]), static_cast<uint8_t>(hash[3]), static_cast<uint8_t>(hash[4]), static_cast<uint8_t>(hash[5]), static_cast<uint8_t>(hash[6]), static_cast<uint8_t>(hash[7]), static_cast<uint8_t>(hash[8]), static_cast<uint8_t>(hash[9]), static_cast<uint8_t>(hash[10]), static_cast<uint8_t>(hash[11]), static_cast<uint8_t>(hash[12]), static_cast<uint8_t>(hash[13]), static_cast<uint8_t>(hash[14]), static_cast<uint8_t>(hash[15]), static_cast<uint8_t>(hash[16]), static_cast<uint8_t>(hash[17]), static_cast<uint8_t>(hash[18]), static_cast<uint8_t>(hash[19]), static_cast<uint8_t>(hash[20]), static_cast<uint8_t>(hash[21]), static_cast<uint8_t>(hash[22]), static_cast<uint8_t>(hash[23]), static_cast<uint8_t>(hash[24]), static_cast<uint8_t>(hash[25]), static_cast<uint8_t>(hash[26]), static_cast<uint8_t>(hash[27]), static_cast<uint8_t>(hash[28]), static_cast<uint8_t>(hash[29]), static_cast<uint8_t>(hash[30]), static_cast<uint8_t>(hash[31]));
+                hash_text[CSHA256::OUTPUT_SIZE * 2U] = '\0';
+
+                asset_image_data_identity += hash_text;
+            }
+        }
+
+        auto const found_asset_image = ui_model->m_asset_images.find(asset_image_data_identity);
+
+        if (ui_model->m_asset_images.end() == found_asset_image)
+        {
+            brx_asset_import_image *asset_import_image = brx_asset_import_create_image_from_memory(asset_image_file_data_base, asset_image_file_data_size);
+
+            if (NULL != asset_import_image)
+            {
+                if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R8G8B8A8_UNORM == asset_import_image->get_format())
                 {
-                    out_anonymous_images.push_back(anari_image);
+                    brx_anari_image *anari_image = device->new_image(force_srgb ? BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_SRGB : BRX_ANARI_IMAGE_FORMAT_R8G8B8A8_UNORM, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
 
-                    load_anari_image = anari_image;
+                    if (NULL != anari_image)
+                    {
+                        ui_model->m_asset_images.insert(found_asset_image, std::pair<mcrt_string, ui_asset_image_model_t>{std::move(asset_image_data_identity), ui_asset_image_model_t{force_srgb, anari_image}});
+
+                        load_anari_image = anari_image;
+                    }
+                    else
+                    {
+                        assert(false);
+                        load_anari_image = NULL;
+                    }
+                }
+                else if (BRX_ASSET_IMPORT_IMAGE_FORMAT_R16G16B16A16_SFLOAT == asset_import_image->get_format())
+                {
+                    brx_anari_image *anari_image = device->new_image(BRX_ANARI_IMAGE_FORMAT_R16G16B16A16_SFLOAT, asset_import_image->get_pixel_data(), asset_import_image->get_width(), asset_import_image->get_height());
+
+                    if (NULL != anari_image)
+                    {
+                        ui_model->m_asset_images.insert(found_asset_image, std::pair<mcrt_string, ui_asset_image_model_t>{std::move(asset_image_data_identity), ui_asset_image_model_t{false, anari_image}});
+
+                        load_anari_image = anari_image;
+                    }
+                    else
+                    {
+                        assert(false);
+                        load_anari_image = NULL;
+                    }
                 }
                 else
                 {
                     assert(false);
                     load_anari_image = NULL;
                 }
+
+                brx_asset_import_destroy_image(asset_import_image);
             }
             else
             {
                 assert(false);
                 load_anari_image = NULL;
             }
-
-            brx_asset_import_destroy_image(asset_import_image);
         }
         else
         {
-            assert(false);
-            load_anari_image = NULL;
+            assert(NULL != found_asset_image->second.m_image);
+            load_anari_image = found_asset_image->second.m_image;
         }
     }
 

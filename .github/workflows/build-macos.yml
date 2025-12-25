@@ -1,0 +1,27 @@
+name: build macos
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: macos-15-intel
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x86_64]
+    steps:
+      - uses: actions/checkout@main
+        with:
+          submodules: 'recursive'
+      - shell: bash
+        run: |
+          ./build-macos/build.sh "${{matrix.configuration}}"
+      - uses: actions/upload-artifact@main
+        with:
+          name: Brioche-Puppet-macOS-${{matrix.platform}}-${{matrix.configuration}}
+          path: |
+            ./build-macos/Xcode/DerivedData/Build/Products/${{matrix.configuration}}/BRX-Puppet.app

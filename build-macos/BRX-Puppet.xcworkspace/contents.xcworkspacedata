@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:BRX-Puppet.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Physics/thirdparty/BulletPhysics/build-macos/Bullet.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/libiconv/build-macos/iconv.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Physics/build-macos/BRX-Physics-BT.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Motion/build-macos/BRX-Motion.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Analytic-Rendering-Interface/build-macos/BRX-ANARI.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/build-macos/BRX-Asset-Import.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/libjpeg/build-macos/jpeg.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/libpng/build-macos/png.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/libwebp/build-macos/webp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/libdeflate/build-macos/deflate.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/OpenEXR/build-macos/OpenEXR.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Asset-Import/thirdparty/zlib/build-macos/zlib.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-ImGui/build-macos/BRX-ImGui.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-ImGui/thirdparty/freetype/build-macos/freetype.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Platform-Abstraction-Layer/build-macos/BRX-PAL.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/Brioche-Window-System-Integration/build-macos/BRX-WSI.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/McRT-Malloc/build-macos/McRT-Malloc.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/McRT-Malloc/thirdparty/Intel-TBB/build-macos/Intel-TBB.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:../thirdparty/OpenCV/build-macos/OpenCV.xcodeproj">
+   </FileRef>
+</Workspace>

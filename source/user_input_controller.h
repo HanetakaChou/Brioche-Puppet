@@ -65,8 +65,10 @@ struct ui_controller_t
     bool m_show_instance_model_manager;
     bool m_show_camera_manager;
     bool m_show_physics_ragdoll_manager;
+    bool m_show_window_manager;
     bool m_show_environment_lighting_manager;
     bool m_show_global_illumination_manager;
+    bool m_show_acknowledgement;
 
     VIDEO_CAPTURE_TYPE m_new_video_capture_type;
     int m_new_video_capture_camera_index;
@@ -125,6 +127,6 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
 
 extern void user_camera_simulate(float interval_time, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
 
-extern void ui_simulate(void *platform_context, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
+extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
 
 #endif
