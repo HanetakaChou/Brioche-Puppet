@@ -89,6 +89,7 @@ struct ui_controller_t
 
     mcrt_vector<char> m_new_video_detector_name;
     mcrt_string m_new_video_detector_selected_video_capture;
+    uint32_t m_new_video_detector_hand_count;
     uint32_t m_new_video_detector_face_count;
     uint32_t m_new_video_detector_pose_count;
     bool m_new_video_detector_force_gpu;

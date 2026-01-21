@@ -284,6 +284,7 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
 
     ui_controller->m_new_video_detector_name.resize(MAX_INPUT_TEXT_SIZE);
     assert(ui_controller->m_new_video_detector_selected_video_capture.empty());
+    ui_controller->m_new_video_detector_hand_count = 1U;
     ui_controller->m_new_video_detector_face_count = 1U;
     ui_controller->m_new_video_detector_pose_count = 1U;
     ui_controller->m_new_video_detector_force_gpu = true;
@@ -2434,6 +2435,27 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 ImGui::AlignTextToFramePadding();
                 {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Maximum Hand Count",
+                        "人手最大数",
+                        "最大人手數量",
+                        "最大人手数量"};
+
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    int hand_count = std::min(std::max(0U, ui_controller->m_new_video_detector_hand_count), 5U);
+
+                    ImGui::SliderInt("##Video-Detector-Manager-New-Video-Detector-Hand-Count", &hand_count, 0, 5);
+
+                    ui_controller->m_new_video_detector_hand_count = std::min(std::max(0, hand_count), 5);
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
                         "Maximum Face Count",
                         "人顔最大数",
                         "最大人臉數量",
@@ -2443,11 +2465,11 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 }
                 ImGui::TableNextColumn();
                 {
-                    int face_count = std::min(std::max(0U, ui_controller->m_new_video_detector_face_count), 2U);
+                    int face_count = std::min(std::max(0U, ui_controller->m_new_video_detector_face_count), 5U);
 
-                    ImGui::SliderInt("##Video-Detector-Manager-New-Video-Detector-Face-Count", &face_count, 0, 2);
+                    ImGui::SliderInt("##Video-Detector-Manager-New-Video-Detector-Face-Count", &face_count, 0, 5);
 
-                    ui_controller->m_new_video_detector_face_count = std::min(std::max(0, face_count), 2);
+                    ui_controller->m_new_video_detector_face_count = std::min(std::max(0, face_count), 5);
                 }
 
                 ImGui::TableNextRow();
@@ -2554,6 +2576,8 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                     if (NULL != video_capture)
                     {
+                        uint32_t const hand_count = ui_controller->m_new_video_detector_hand_count;
+
                         uint32_t const face_count = ui_controller->m_new_video_detector_face_count;
 
                         uint32_t const pose_count = ui_controller->m_new_video_detector_pose_count;
@@ -2564,7 +2588,7 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                         mcrt_string const name = ui_controller->m_new_video_detector_name.data();
 
-                        brx_motion_video_detector *const video_detector = brx_motion_create_video_detector(face_count, pose_count, force_gpu, video_capture);
+                        brx_motion_video_detector *const video_detector = brx_motion_create_video_detector(hand_count, face_count, pose_count, force_gpu, video_capture);
                         if (NULL != video_detector)
                         {
                             uint64_t const timestamp = mcrt_tick_count_now();
@@ -2788,6 +2812,33 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
             {
                 ImGui::TableSetupColumn("##Video-Detector-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupColumn("##Video-Detector-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Maximum Hand Count",
+                        "人手最大数",
+                        "最大人手數量",
+                        "最大人手数量"};
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TableNextColumn();
+                {
+                    assert(NULL != found_video_detector->second.m_video_detector);
+
+                    char hand_count_timestamp_text[] = {"18446744073709551615"};
+                    std::snprintf(hand_count_timestamp_text, sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0]), "%llu", static_cast<long long unsigned>(found_video_detector->second.m_video_detector->get_hand_count()));
+                    hand_count_timestamp_text[(sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0])) - 1] = '\0';
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted(hand_count_timestamp_text);
+                    ImGui::PopStyleColor();
+                }
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -4810,6 +4861,107 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                         assert(NULL != found_instance_model->second.m_skeleton_instance);
                         brx_motion_video_detector *const video_detector = found_instance_model->second.m_skeleton_instance->get_input_video_detector();
+
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Hand Index",
+                                "人手索引",
+                                "人手索引",
+                                "人手索引"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            constexpr char const *const label = "##Instance-Model-Manager-Right-Group-Table-Value-Video-Detector-Hand-Index";
+
+                            if (NULL != video_detector)
+                            {
+                                uint32_t const hand_count = static_cast<uint32_t>(video_detector->get_hand_count());
+
+                                if (hand_count > 0U)
+                                {
+                                    mcrt_vector<uint32_t> item_values(static_cast<size_t>(hand_count));
+                                    mcrt_vector<mcrt_string> item_strings(static_cast<size_t>(hand_count));
+                                    mcrt_vector<char const *> items(static_cast<size_t>(hand_count));
+                                    int selected_combo_index = 0;
+                                    {
+                                        uint32_t combo_index = 0U;
+
+                                        for (uint32_t hand_index = 0U; hand_index < hand_count; ++hand_index)
+                                        {
+                                            item_values[combo_index] = hand_index;
+
+                                            char hand_index_text[] = {"18446744073709551615"};
+                                            std::snprintf(hand_index_text, sizeof(hand_index_text) / sizeof(hand_index_text[0]), "%llu", static_cast<long long unsigned>(item_values[combo_index]));
+                                            hand_index_text[(sizeof(hand_index_text) / sizeof(hand_index_text[0])) - 1] = '\0';
+
+                                            item_strings[combo_index] = hand_index_text;
+                                            items[combo_index] = item_strings[combo_index].c_str();
+
+                                            if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_hand_index() == item_values[combo_index])
+                                            {
+                                                assert(0 == selected_combo_index);
+                                                assert(static_cast<size_t>(1U + combo_index) < static_cast<size_t>(INT_MAX));
+                                                selected_combo_index = static_cast<int>(combo_index);
+                                            }
+
+                                            ++combo_index;
+                                        }
+                                    }
+
+                                    ImGui::Combo(label, &selected_combo_index, items.data(), items.size());
+
+                                    if (selected_combo_index >= 0)
+                                    {
+                                        if (found_instance_model->second.m_skeleton_instance->get_input_video_detector_hand_index() != item_values[selected_combo_index])
+                                        {
+                                            found_instance_model->second.m_skeleton_instance->set_input_video_detector_hand_index(item_values[selected_combo_index]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        assert(false);
+                                    }
+                                }
+                                else
+                                {
+
+                                    char const *const items[LANGUAGE_COUNT][1] = {
+                                        {"Disable"},
+                                        {"無効"},
+                                        {"停用"},
+                                        {"停用"}};
+
+                                    int selected_combo_index = 0;
+
+                                    ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                                    assert(0 == selected_combo_index);
+
+                                    found_instance_model->second.m_skeleton_instance->set_input_video_detector_hand_index(BRX_MOTION_UINT32_INDEX_INVALID);
+                                }
+                            }
+                            else
+                            {
+
+                                char const *const items[LANGUAGE_COUNT][1] = {
+                                    {"Disable"},
+                                    {"無効"},
+                                    {"停用"},
+                                    {"停用"}};
+
+                                int selected_combo_index = 0;
+
+                                ImGui::Combo(label, &selected_combo_index, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[ui_controller->m_language_index]));
+
+                                assert(0 == selected_combo_index);
+
+                                found_instance_model->second.m_skeleton_instance->set_input_video_detector_hand_index(BRX_MOTION_UINT32_INDEX_INVALID);
+                            }
+                        }
 
                         ImGui::TableNextRow();
                         ImGui::TableNextColumn();
