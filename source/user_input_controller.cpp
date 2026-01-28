@@ -261,6 +261,7 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
     ui_controller->m_show_camera_manager = false;
     ui_controller->m_show_physics_ragdoll_manager = false;
     ui_controller->m_show_window_manager = false;
+    ui_controller->m_show_area_lighting_manager = false;
     ui_controller->m_show_environment_lighting_manager = false;
     ui_controller->m_show_global_illumination_manager = false;
     ui_controller->m_show_acknowledgement = false;
@@ -315,6 +316,22 @@ extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_con
     assert(ui_controller->m_instance_controllers.empty());
 
     ui_controller->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_DISABLED;
+
+    ui_controller->m_new_area_lighting_name.resize(MAX_INPUT_TEXT_SIZE);
+    ui_controller->m_new_area_lighting_color_r = 1.0F;
+    ui_controller->m_new_area_lighting_color_g = 1.0F;
+    ui_controller->m_new_area_lighting_color_b = 1.0F;
+    ui_controller->m_new_area_lighting_radiance = 1.0F;
+    ui_controller->m_new_area_lighting_position_x = 0.0F;
+    ui_controller->m_new_area_lighting_position_y = 1.0F;
+    ui_controller->m_new_area_lighting_position_z = -1.0F;
+    ui_controller->m_new_area_lighting_edge1_x = -1.0F;
+    ui_controller->m_new_area_lighting_edge1_y = 0.0F;
+    ui_controller->m_new_area_lighting_edge1_z = 1.0F;
+    ui_controller->m_new_area_lighting_edge2_x = 1.0F;
+    ui_controller->m_new_area_lighting_edge2_y = 1.0F;
+    ui_controller->m_new_area_lighting_edge2_z = 0.0F;
+    ui_controller->m_tree_view_selected_area_lighting = INVALID_TIMESTAMP;
 
     assert(ui_controller->m_hdri_selected_asset_image.empty());
 }
@@ -603,6 +620,22 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 ImGui::TableNextColumn();
                 {
                     ImGui::Checkbox("##Show-Window-Manager", &ui_controller->m_show_window_manager);
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Area Lighting Manager",
+                        "領域照明管理",
+                        "區域照明管理",
+                        "区域光照管理"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Checkbox("##Show-Area-Lighting-Manager", &ui_controller->m_show_area_lighting_manager);
                 }
 
                 ImGui::TableNextRow();
@@ -2179,9 +2212,9 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 {
                     size_t const timestamp_text_end_pos = found_asset_image->first.find(' ', 5U);
                     size_t const directory_name_end_pos = found_asset_image->first.find_last_of("/\\");
-                    if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
+                    if ((mcrt_string::npos != timestamp_text_end_pos) && (mcrt_string::npos != directory_name_end_pos) && (5U < timestamp_text_end_pos) && (timestamp_text_end_pos < directory_name_end_pos))
                     {
-                        timestamp_text += found_asset_image->first.substr(5U, timestamp_text_end_pos);
+                        timestamp_text += found_asset_image->first.substr(5U, (timestamp_text_end_pos - 5U));
                         directory_name += found_asset_image->first.substr(timestamp_text_end_pos + 1U, ((directory_name_end_pos - timestamp_text_end_pos) - 1U));
                         file_name += found_asset_image->first.substr(directory_name_end_pos + 1U);
                     }
@@ -2218,9 +2251,9 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 mcrt_string hash_text = "Hash: ";
                 {
                     size_t const size_text_end_pos = found_asset_image->first.find(' ', 5U);
-                    if (mcrt_string::npos != size_text_end_pos)
+                    if ((mcrt_string::npos != size_text_end_pos) && (5U < size_text_end_pos))
                     {
-                        size_text += found_asset_image->first.substr(5U, size_text_end_pos);
+                        size_text += found_asset_image->first.substr(5U, (size_text_end_pos - 5U));
                         hash_text += found_asset_image->first.substr(size_text_end_pos + 1U);
                     }
                     else
@@ -3502,8 +3535,8 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
         {
             if (ImGui::BeginTable("##Instance-Model-Manager-New-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
             {
-                ImGui::TableSetupColumn("##Asset-Model-Manager-New-Table-Property", ImGuiTableColumnFlags_WidthFixed);
-                ImGui::TableSetupColumn("##Asset-Model-Manager-New-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("##Instance-Model-Manager-New-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Instance-Model-Manager-New-Table-Value", ImGuiTableColumnFlags_WidthStretch);
 
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -6170,6 +6203,877 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
             }
 
             ImGui::EndTable();
+        }
+
+        ImGui::End();
+    }
+
+    if (ui_controller->m_show_area_lighting_manager)
+    {
+        {
+            ImGuiViewport const *const main_viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + ui_x * ui_index, main_viewport->WorkPos.y + ui_y * ui_index), ImGuiCond_FirstUseEver);
+            ++ui_index;
+
+            ImGui::SetNextWindowSize(ImVec2(ui_width, ui_height), ImGuiCond_FirstUseEver);
+        }
+
+        ImGui::Begin("Area Lighting Manager", &ui_controller->m_show_area_lighting_manager);
+
+        {
+            constexpr char const *const text[LANGUAGE_COUNT] = {
+                "Area Lighting Manager",
+                "領域照明管理",
+                "區域照明管理",
+                "区域光照管理"};
+            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginTable("##Area-Lighting-Manager-Configuration-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+        {
+            ImGui::TableSetupColumn("##Area-Lighting-Manager-Configuration-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("##Area-Lighting-Manager-Configuration-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            {
+                constexpr char const *text[LANGUAGE_COUNT] = {
+                    "Enable Debug Renderer",
+                    "Debug Renderer 有効",
+                    "啟用調試渲染",
+                    "启用调试渲染"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::TableNextColumn();
+            {
+                bool enable_debug_renderer = device->get_quad_lights_enable_debug_renderer();
+
+                ImGui::Checkbox("##Area-Lighting-Manager-Configuration-Table-Value-Enable-Debug-Renderer", &enable_debug_renderer);
+
+                device->set_quad_lights_enable_debug_renderer(enable_debug_renderer);
+            }
+
+            ImGui::SameLine();
+
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                ImGui::TextUnformatted(help_marker_text);
+                ImGui::PopStyleColor();
+                if (ImGui::BeginItemTooltip())
+                {
+                    ImGui::PushTextWrapPos(help_marker_position);
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "You can view the emissive surface representing the light source.",
+                        "光源を表現する発光面を閲覧できます。",
+                        "你可以查看代表光源的發光表面。",
+                        "你可以查看代表光源的发光表面。"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
+            }
+
+            ImGui::EndTable();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::TreeNodeEx("##Area-Lighting-Manager-New-Node", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog))
+        {
+            if (ImGui::BeginTable("##Area-Lighting-Manager-New-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                ImGui::TableSetupColumn("##Area-Lighting-Manager-New-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Area-Lighting-Manager-New-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Name",
+                        "名称",
+                        "名稱",
+                        "名称"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    constexpr char const *const hint[LANGUAGE_COUNT] = {
+                        "New Area Lighting Name",
+                        "新規領域照明名前",
+                        "新建區域照明名稱",
+                        "新建区域光照名称"};
+                    ImGui::InputTextWithHint("##Area-Lighting-Manager-New-Area-Lighting-Name", hint[ui_controller->m_language_index], ui_controller->m_new_area_lighting_name.data(), ui_controller->m_new_area_lighting_name.size());
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Color",
+                        "顔色",
+                        "顏色",
+                        "颜色"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    float new_area_lighting_color_rgb[3] = {ui_controller->m_new_area_lighting_color_r, ui_controller->m_new_area_lighting_color_g, ui_controller->m_new_area_lighting_color_b};
+
+                    ImGui::ColorEdit3("##Area-Lighting-Manager-New-Area-Lighting-Color", new_area_lighting_color_rgb);
+
+                    ui_controller->m_new_area_lighting_color_r = new_area_lighting_color_rgb[0];
+                    ui_controller->m_new_area_lighting_color_g = new_area_lighting_color_rgb[1];
+                    ui_controller->m_new_area_lighting_color_b = new_area_lighting_color_rgb[2];
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Radiance",
+                        "放射輝度",
+                        "輻射亮度",
+                        "辐射亮度"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    char radiance_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                    std::snprintf(&radiance_text[0], sizeof(radiance_text) / sizeof(radiance_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_radiance);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                    radiance_text[(sizeof(radiance_text) / sizeof(radiance_text[0]) - 1)] = '\0';
+
+                    ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Radiance", &radiance_text[0], sizeof(radiance_text) / sizeof(radiance_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                    ui_controller->m_new_area_lighting_radiance = std::strtof(radiance_text, NULL);
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position X",
+                            "位置 X",
+                            "位置 X",
+                            "位置 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_position_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Position-X", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_position_x = std::strtof(position_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position Y",
+                            "位置 Y",
+                            "位置 Y",
+                            "位置 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_position_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Position-Y", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_position_y = std::strtof(position_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position Z",
+                            "位置 Z",
+                            "位置 Z",
+                            "位置 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_position_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Position-Z", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_position_z = std::strtof(position_text, NULL);
+                    }
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 X",
+                            "側1 X",
+                            "邊1 X",
+                            "边1 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge1_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge1-X", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge1_x = std::strtof(edge1_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 Y",
+                            "側1 Y",
+                            "邊1 Y",
+                            "边1 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge1_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge1-Y", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge1_y = std::strtof(edge1_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 Z",
+                            "側1 Z",
+                            "邊1 Z",
+                            "边1 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge1_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge1-Z", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge1_z = std::strtof(edge1_text, NULL);
+                    }
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 X",
+                            "側2 X",
+                            "邊2 X",
+                            "边2 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge2_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge2-X", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge2_x = std::strtof(edge2_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 Y",
+                            "側2 Y",
+                            "邊2 Y",
+                            "边2 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge2_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge2-Y", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge2_y = std::strtof(edge2_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 Z",
+                            "側2 Z",
+                            "邊2 Z",
+                            "边2 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", ui_controller->m_new_area_lighting_edge2_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-New-Area-Lighting-Edge2-Z", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        ui_controller->m_new_area_lighting_edge2_z = std::strtof(edge2_text, NULL);
+                    }
+                }
+
+                ImGui::EndTable();
+            }
+
+            ImGui::TreePop();
+        }
+
+        {
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "New",
+                    "新規作成",
+                    "新建",
+                    "新建"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("N##Area-Lighting-Manager-New-Button"))
+            {
+                mcrt_string const name = ui_controller->m_new_area_lighting_name.data();
+
+                float const color_r = ui_controller->m_new_area_lighting_color_r;
+                float const color_g = ui_controller->m_new_area_lighting_color_g;
+                float const color_b = ui_controller->m_new_area_lighting_color_b;
+
+                float const radiance = ui_controller->m_new_area_lighting_radiance;
+
+                float const position_x = ui_controller->m_new_area_lighting_position_x;
+                float const position_y = ui_controller->m_new_area_lighting_position_y;
+                float const position_z = ui_controller->m_new_area_lighting_position_z;
+
+                float const edge1_x = ui_controller->m_new_area_lighting_edge1_x;
+                float const edge1_y = ui_controller->m_new_area_lighting_edge1_y;
+                float const edge1_z = ui_controller->m_new_area_lighting_edge1_z;
+
+                float const edge2_x = ui_controller->m_new_area_lighting_edge2_x;
+                float const edge2_y = ui_controller->m_new_area_lighting_edge2_y;
+                float const edge2_z = ui_controller->m_new_area_lighting_edge2_z;
+
+                uint64_t const timestamp = mcrt_tick_count_now();
+
+                mcrt_string area_lighting_identity;
+                {
+                    char area_lighting_timestamp_text[] = {"18446744073709551615"};
+                    std::snprintf(area_lighting_timestamp_text, sizeof(area_lighting_timestamp_text) / sizeof(area_lighting_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(timestamp));
+                    area_lighting_timestamp_text[(sizeof(area_lighting_timestamp_text) / sizeof(area_lighting_timestamp_text[0])) - 1] = '\0';
+
+                    area_lighting_identity += area_lighting_identity;
+                    area_lighting_identity += ' ';
+                    area_lighting_identity += name;
+                }
+
+                // should always NOT already exist in practice
+                assert(ui_model->m_area_lightings.end() == ui_model->m_area_lightings.find(timestamp));
+
+                ui_model->m_area_lightings.insert(ui_model->m_area_lightings.end(), std::pair<uint64_t, ui_area_lighting_model_t>{timestamp, ui_area_lighting_model_t{name, color_r, color_g, color_b, radiance, position_x, position_y, position_z, edge1_x, edge1_y, edge1_z, edge2_x, edge2_y, edge2_z}});
+            }
+        }
+
+        ImGui::Separator();
+
+        {
+
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Delete",
+                    "削除",
+                    "刪除",
+                    "删除"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("X##Area-Lighting-Manager-Delete-Button"))
+            {
+                auto const found_area_lighting = ui_model->m_area_lightings.find(ui_controller->m_tree_view_selected_area_lighting);
+
+                if (ui_model->m_area_lightings.end() != found_area_lighting)
+                {
+                    ui_model->m_area_lightings.erase(found_area_lighting);
+
+                    ui_controller->m_tree_view_selected_area_lighting = INVALID_TIMESTAMP;
+                }
+                else
+                {
+                    assert(INVALID_TIMESTAMP == ui_controller->m_tree_view_selected_area_lighting);
+                }
+            }
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginChild("##Area-Lighting-Manager-Left-Child", ImVec2(ui_width * left_child_width_ratio, 0.0F), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+        {
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+            ImGuiTextFilter text_filter;
+            {
+                constexpr char const *const hint[LANGUAGE_COUNT] = {
+                    "Search",
+                    "検索",
+                    "檢索",
+                    "检索"};
+                if (ImGui::InputTextWithHint("##Area-Lighting-Manager-Left-Child-Text-Filter", hint[ui_controller->m_language_index], text_filter.InputBuf, IM_ARRAYSIZE(text_filter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                {
+                    text_filter.Build();
+                }
+            }
+
+            ImGui::PopItemFlag();
+
+            if (ImGui::BeginTable("##Area-Lighting-Manager-Left-Child-Table", 1, ImGuiTableFlags_RowBg))
+            {
+                for (auto const &area_lighting : ui_model->m_area_lightings)
+                {
+                    mcrt_string area_lighting_identity;
+                    {
+                        char area_lighting_timestamp_text[] = {"18446744073709551615"};
+                        std::snprintf(area_lighting_timestamp_text, sizeof(area_lighting_timestamp_text) / sizeof(area_lighting_timestamp_text[0]), "%020llu", static_cast<long long unsigned>(area_lighting.first));
+                        area_lighting_timestamp_text[(sizeof(area_lighting_timestamp_text) / sizeof(area_lighting_timestamp_text[0])) - 1] = '\0';
+
+                        area_lighting_identity += area_lighting_timestamp_text;
+                        area_lighting_identity += ' ';
+                        area_lighting_identity += area_lighting.second.m_name;
+                    }
+
+                    if (text_filter.PassFilter(area_lighting_identity.c_str()))
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+
+                        ImGuiTreeNodeFlags const flags = ((ui_controller->m_tree_view_selected_area_lighting != area_lighting.first)) ? ImGuiTreeNodeFlags_Leaf : (ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Selected);
+
+                        bool const node_open = ImGui::TreeNodeEx(area_lighting_identity.c_str(), flags);
+
+                        if (ImGui::IsItemFocused())
+                        {
+                            ui_controller->m_tree_view_selected_area_lighting = area_lighting.first;
+                        }
+
+                        if (node_open)
+                        {
+                            ImGui::TreePop();
+                        }
+                    }
+                }
+
+                ImGui::EndTable();
+            }
+        }
+        ImGui::EndChild();
+
+        auto const found_area_lighting = ui_model->m_area_lightings.find(ui_controller->m_tree_view_selected_area_lighting);
+
+        if (ui_model->m_area_lightings.end() != found_area_lighting)
+        {
+            ImGui::SameLine();
+
+            ImGui::BeginGroup();
+
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                ImGui::TextUnformatted(found_area_lighting->second.m_name.c_str());
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginTable("##Area-Lighting-Manager-Right-Group-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                ImGui::TableSetupColumn("##Area-Lighting-Manager-Right-Group-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Area-Lighting-Manager-Right-Group-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Color",
+                        "顔色",
+                        "顏色",
+                        "颜色"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    float area_lighting_color_rgb[3] = {found_area_lighting->second.m_color_r, found_area_lighting->second.m_color_g, found_area_lighting->second.m_color_b};
+
+                    ImGui::ColorEdit3("##Area-Lighting-Manager-Right-Group-Table-Value-Color", area_lighting_color_rgb);
+
+                    found_area_lighting->second.m_color_r = area_lighting_color_rgb[0];
+                    found_area_lighting->second.m_color_g = area_lighting_color_rgb[1];
+                    found_area_lighting->second.m_color_b = area_lighting_color_rgb[2];
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Radiance",
+                        "放射輝度",
+                        "輻射亮度",
+                        "辐射亮度"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    char radiance_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                    std::snprintf(&radiance_text[0], sizeof(radiance_text) / sizeof(radiance_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_radiance);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                    radiance_text[(sizeof(radiance_text) / sizeof(radiance_text[0]) - 1)] = '\0';
+
+                    ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Radiance", &radiance_text[0], sizeof(radiance_text) / sizeof(radiance_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                    found_area_lighting->second.m_radiance = std::strtof(radiance_text, NULL);
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position X",
+                            "位置 X",
+                            "位置 X",
+                            "位置 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+
+                    ImGui::TableNextColumn();
+
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_position_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Position-X", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_position_x = std::strtof(position_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position Y",
+                            "位置 Y",
+                            "位置 Y",
+                            "位置 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+
+                    ImGui::TableNextColumn();
+
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_position_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Position-Y", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_position_y = std::strtof(position_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Position Z",
+                            "位置 Z",
+                            "位置 Z",
+                            "位置 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+
+                    ImGui::TableNextColumn();
+
+                    {
+                        char position_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&position_text[0], sizeof(position_text) / sizeof(position_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_position_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        position_text[(sizeof(position_text) / sizeof(position_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Position-Z", &position_text[0], sizeof(position_text) / sizeof(position_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_position_z = std::strtof(position_text, NULL);
+                    }
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 X",
+                            "側1 X",
+                            "邊1 X",
+                            "边1 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge1_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge1-X", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge1_x = std::strtof(edge1_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 Y",
+                            "側1 Y",
+                            "邊1 Y",
+                            "边1 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge1_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge1-Y", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge1_y = std::strtof(edge1_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge1 Z",
+                            "側1 Z",
+                            "邊1 Z",
+                            "边1 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge1_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge1_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge1_text[(sizeof(edge1_text) / sizeof(edge1_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge1-Z", &edge1_text[0], sizeof(edge1_text) / sizeof(edge1_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge1_z = std::strtof(edge1_text, NULL);
+                    }
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 X",
+                            "側2 X",
+                            "邊2 X",
+                            "边2 X"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge2_x);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge2-X", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge2_x = std::strtof(edge2_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 Y",
+                            "側2 Y",
+                            "邊2 Y",
+                            "边2 Y"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge2_y);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge2-Y", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge2_y = std::strtof(edge2_text, NULL);
+                    }
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Edge2 Z",
+                            "側2 Z",
+                            "邊2 Z",
+                            "边2 Z"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        char edge2_text[256];
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                        std::snprintf(&edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", found_area_lighting->second.m_edge2_z);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                        edge2_text[(sizeof(edge2_text) / sizeof(edge2_text[0]) - 1)] = '\0';
+
+                        ImGui::InputText("##Area-Lighting-Manager-Right-Group-Table-Value-Edge2-Z", &edge2_text[0], sizeof(edge2_text) / sizeof(edge2_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                        found_area_lighting->second.m_edge2_z = std::strtof(edge2_text, NULL);
+                    }
+                }
+
+                ImGui::EndTable();
+            }
+
+            ImGui::EndGroup();
         }
 
         ImGui::End();

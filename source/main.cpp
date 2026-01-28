@@ -490,6 +490,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                     }
                 }
 
+                // Area Lighting
+                {
+                    mcrt_vector<BRX_ANARI_QUAD> quad_lights;
+                    quad_lights.reserve(wsi_state.m_ui_model.m_area_lightings.size());
+                    for (auto const &area_lighting : wsi_state.m_ui_model.m_area_lightings)
+                    {
+                        quad_lights.push_back(BRX_ANARI_QUAD{{area_lighting.second.m_color_r * area_lighting.second.m_radiance, area_lighting.second.m_color_g * area_lighting.second.m_radiance, area_lighting.second.m_color_b * area_lighting.second.m_radiance}, {area_lighting.second.m_position_x, area_lighting.second.m_position_y, area_lighting.second.m_position_z}, {area_lighting.second.m_edge1_x, area_lighting.second.m_edge1_y, area_lighting.second.m_edge1_z}, {area_lighting.second.m_edge2_x, area_lighting.second.m_edge2_y, area_lighting.second.m_edge2_z}});
+                    }
+                    wsi_state.m_anari_device->set_quad_lights(quad_lights.size(), quad_lights.data());
+                }
+
                 // Render
                 wsi_state.m_anari_device->renderer_render_frame(wsi_state.m_ui_view);
             }
@@ -590,6 +601,7 @@ static void internal_key_press_handler(void *handler_context, int key, bool shif
             wsi_state.m_ui_controller.m_show_camera_manager = false;
             wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;
             wsi_state.m_ui_controller.m_show_window_manager = false;
+            wsi_state.m_ui_controller.m_show_area_lighting_manager = false;
             wsi_state.m_ui_controller.m_show_environment_lighting_manager = false;
             wsi_state.m_ui_controller.m_show_global_illumination_manager = false;
             wsi_state.m_ui_controller.m_show_acknowledgement = false;

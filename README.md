@@ -22,7 +22,7 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
     - [x] [PBR (Microfacet Model | Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
     - [ ] [~~Toon Shading~~](https://github.com/unity3d-jp/UnityChanToonShaderVer2_Project)  
     - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://github.com/HanetakaChou/Subsurface-Scattering)  
-    - [ ] [~~LTC (Area Lighting | Linearly Transformed Cosine)~~](https://github.com/HanetakaChou/Linearly-Transformed-Cosine)  
+    - [x] [LTC (Area Lighting | Linearly Transformed Cosine)](https://github.com/HanetakaChou/Linearly-Transformed-Cosine)  
     - [x] [SH (Environment Lighting | Spherical Harmonics)](https://github.com/HanetakaChou/Spherical-Harmonic)  
     - [x] [VCT (Global Illumination | Voxel Cone Tracing)](https://github.com/HanetakaChou/Voxel-Cone-Tracing)  
 - [ ] Ray Tracing  
