@@ -66,6 +66,7 @@ struct ui_controller_t
     bool m_show_camera_manager;
     bool m_show_physics_ragdoll_manager;
     bool m_show_window_manager;
+    bool m_show_area_lighting_manager;
     bool m_show_environment_lighting_manager;
     bool m_show_global_illumination_manager;
     bool m_show_acknowledgement;
@@ -120,6 +121,22 @@ struct ui_controller_t
     mcrt_unordered_map<uint64_t, ui_instance_model_controller_t> m_instance_controllers;
 
     BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
+
+    mcrt_vector<char> m_new_area_lighting_name;
+    float m_new_area_lighting_color_r;
+    float m_new_area_lighting_color_g;
+    float m_new_area_lighting_color_b;
+    float m_new_area_lighting_radiance;
+    float m_new_area_lighting_position_x;
+    float m_new_area_lighting_position_y;
+    float m_new_area_lighting_position_z;
+    float m_new_area_lighting_edge1_x;
+    float m_new_area_lighting_edge1_y;
+    float m_new_area_lighting_edge1_z;
+    float m_new_area_lighting_edge2_x;
+    float m_new_area_lighting_edge2_y;
+    float m_new_area_lighting_edge2_z;
+    uint64_t m_tree_view_selected_area_lighting;
 
     mcrt_string m_hdri_selected_asset_image;
 };

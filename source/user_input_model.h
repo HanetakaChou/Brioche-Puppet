@@ -80,6 +80,24 @@ struct ui_instance_model_model_t
     float m_model_transform_translation_z;
 };
 
+struct ui_area_lighting_model_t
+{
+    mcrt_string m_name;
+    float m_color_r;
+    float m_color_g;
+    float m_color_b;
+    float m_radiance;
+    float m_position_x;
+    float m_position_y;
+    float m_position_z;
+    float m_edge1_x;
+    float m_edge1_y;
+    float m_edge1_z;
+    float m_edge2_x;
+    float m_edge2_y;
+    float m_edge2_z;
+};
+
 struct ui_model_t
 {
     mcrt_unordered_map<mcrt_string, ui_video_capture_model_t> m_video_captures;
@@ -89,6 +107,7 @@ struct ui_model_t
     mcrt_unordered_map<uint64_t, ui_video_detector_model_t> m_video_detectors;
     mcrt_unordered_map<uint64_t, ui_instance_motion_model_t> m_instance_motions;
     mcrt_unordered_map<uint64_t, ui_instance_model_model_t> m_instance_models;
+    mcrt_unordered_map<uint64_t, ui_area_lighting_model_t> m_area_lightings;
 };
 
 extern void ui_model_init(brx_anari_device *device, ui_model_t *out_user_camera_model);
