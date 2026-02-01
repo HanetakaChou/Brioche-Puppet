@@ -54,6 +54,8 @@ struct ui_controller_t
 {
     CDXUTFirstPersonCamera m_first_person_camera;
 
+    bool m_ui_view;
+
     int m_language_index;
 
     bool m_show_video_capture_manager;
@@ -66,6 +68,7 @@ struct ui_controller_t
     bool m_show_camera_manager;
     bool m_show_physics_ragdoll_manager;
     bool m_show_window_manager;
+    bool m_show_directional_lighting_manager;
     bool m_show_area_lighting_manager;
     bool m_show_environment_lighting_manager;
     bool m_show_global_illumination_manager;
@@ -120,8 +123,6 @@ struct ui_controller_t
 
     mcrt_unordered_map<uint64_t, ui_instance_model_controller_t> m_instance_controllers;
 
-    BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
-
     mcrt_vector<char> m_new_area_lighting_name;
     float m_new_area_lighting_color_r;
     float m_new_area_lighting_color_g;
@@ -141,9 +142,9 @@ struct ui_controller_t
     mcrt_string m_hdri_selected_asset_image;
 };
 
-extern void ui_controller_init(brx_anari_device *device, ui_controller_t *ui_controller);
+extern void ui_controller_init(ui_model_t const *ui_model, ui_controller_t *ui_controller);
 
-extern void user_camera_simulate(float interval_time, brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
+extern void user_camera_simulate(float interval_time, ui_model_t *ui_model, ui_controller_t *ui_controller);
 
 extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_controller_t *ui_controller);
 

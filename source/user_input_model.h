@@ -100,6 +100,28 @@ struct ui_area_lighting_model_t
 
 struct ui_model_t
 {
+    brx_anari_vec3 m_camera_position;
+    brx_anari_vec3 m_camera_direction;
+    brx_anari_vec3 m_camera_up;
+    float m_camera_fovy;
+    float m_camera_near;
+    float m_camera_far;
+
+    BRX_ANARI_RENDERER_STYLE m_renderer_style;
+
+    BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
+
+    bool m_directional_lighting_visible;
+    float m_directional_lighting_color_r;
+    float m_directional_lighting_color_g;
+    float m_directional_lighting_color_b;
+    float m_directional_lighting_irradiance;
+    float m_directional_lighting_direction_x;
+    float m_directional_lighting_direction_y;
+    float m_directional_lighting_direction_z;
+
+    bool m_quad_light_enable_debug_renderer;
+
     mcrt_unordered_map<mcrt_string, ui_video_capture_model_t> m_video_captures;
     mcrt_unordered_map<mcrt_string, ui_asset_motion_model_t> m_asset_motions;
     mcrt_unordered_map<mcrt_string, ui_asset_model_model_t> m_asset_models;

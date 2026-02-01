@@ -35,10 +35,10 @@
 
 extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
 {
-    // camera
+    // Camera
     {
         // [PerspectiveCamera.constructor](https://github.com/KhronosGroup/glTF-Sample-Renderer/blob/main/source/gltf/camera.js#L236)
-        constexpr float const fov = DirectX::XM_PIDIV4;
+        constexpr float const fovy = DirectX::XM_PIDIV4;
         constexpr float const near = 0.01F;
         // TODO: change "far plane" based on the AABB
         constexpr float const far = 1000.0F;
@@ -54,7 +54,7 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         scene_bounding_box.Extents.y = 1.0F;
         scene_bounding_box.Extents.z = 1.0F;
 
-        DirectX::XMMATRIX projection_transform = brx_DirectX_Math_Matrix_PerspectiveFovRH_ReversedZ(fov, 1.0F, near, far);
+        DirectX::XMMATRIX projection_transform = brx_DirectX_Math_Matrix_PerspectiveFovRH_ReversedZ(fovy, 1.0F, near, far);
 
         DirectX::XMFLOAT2 axis_length(scene_bounding_box.Extents.x, scene_bounding_box.Extents.y);
         DirectX::XMVECTOR zoom = DirectX::XMVector2TransformNormal(DirectX::XMLoadFloat2(&axis_length), projection_transform);
@@ -77,12 +77,33 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         DirectX::XMFLOAT3 eye_position;
         DirectX::XMStoreFloat3(&eye_position, DirectX::XMVectorSubtract(look_at_position, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&look_direction), distance)));
 
-        device->camera_set_position(brx_anari_vec3{eye_position.x, eye_position.y, eye_position.z});
-        device->camera_set_direction(brx_anari_vec3{look_direction.x, look_direction.y, look_direction.z});
-        device->camera_set_up(brx_anari_vec3{0.0F, 1.0F, 0.0F});
-        device->camera_set_fovy(fov);
-        device->camera_set_near(near);
-        device->camera_set_far(far);
+        ui_model->m_camera_position = brx_anari_vec3{eye_position.x, eye_position.y, eye_position.z};
+        ui_model->m_camera_direction = brx_anari_vec3{look_direction.x, look_direction.y, look_direction.z};
+        ui_model->m_camera_up = brx_anari_vec3{0.0F, 1.0F, 0.0F};
+        ui_model->m_camera_fovy = fovy;
+        ui_model->m_camera_near = near;
+        ui_model->m_camera_far = far;
+    }
+
+    ui_model->m_renderer_style = BRX_ANARI_RENDERER_STYLE_PHYSICALLY_BASED_RENDERING;
+
+    ui_model->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_DISABLED;
+
+    // Directional
+    {
+        ui_model->m_directional_lighting_visible = false;
+        ui_model->m_directional_lighting_color_r = 1.0F;
+        ui_model->m_directional_lighting_color_g = 1.0F;
+        ui_model->m_directional_lighting_color_b = 1.0F;
+        ui_model->m_directional_lighting_irradiance = 1.0F;
+        ui_model->m_directional_lighting_direction_x = 1.0F;
+        ui_model->m_directional_lighting_direction_y = 0.0F;
+        ui_model->m_directional_lighting_direction_z = -1.0F;
+    }
+
+    // Quad
+    {
+        ui_model->m_quad_light_enable_debug_renderer = true;
     }
 
     // HDRI

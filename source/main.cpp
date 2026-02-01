@@ -42,7 +42,6 @@ struct wsi_state_t
     float m_window_height_scale;
     double m_tick_count_resolution;
     uint64_t m_tick_count_previous_frame;
-    bool m_ui_view;
     ui_model_t m_ui_model;
     ui_controller_t m_ui_controller;
 };
@@ -243,8 +242,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
         1.0F,
         1.0F,
         1.0 / static_cast<double>(mcrt_tick_count_per_second()),
-        mcrt_tick_count_now(),
-        true};
+        mcrt_tick_count_now()};
 
     brx_wsi_init_connection();
 
@@ -301,7 +299,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
     ui_model_init(wsi_state.m_anari_device, &wsi_state.m_ui_model);
 
-    ui_controller_init(wsi_state.m_anari_device, &wsi_state.m_ui_controller);
+    ui_controller_init(&wsi_state.m_ui_model, &wsi_state.m_ui_controller);
 
     wsi_state.m_anari_device->frame_attach_window(brx_wsi_get_main_window(), 1.0F / wsi_state.m_window_width_scale, 1.0F / wsi_state.m_window_height_scale);
 
@@ -322,7 +320,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                 }
 
                 // User Camera
-                user_camera_simulate(interval_time, wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
+                user_camera_simulate(interval_time, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
 
                 // UI
                 {
@@ -473,7 +471,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                                 }
 
                                 {
-                                    skeleton_instance->step(wsi_state.m_ui_controller.m_physics_ragdoll_quality);
+                                    skeleton_instance->step(wsi_state.m_ui_model.m_physics_ragdoll_quality);
                                     surface_group_instance->set_skin_transforms(skeleton_instance->get_skin_transform_count(), wrap(skeleton_instance->get_skin_transforms()));
                                 }
                             }
@@ -490,19 +488,36 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                     }
                 }
 
+                // Camera
+                {
+                    wsi_state.m_anari_device->camera_set(wsi_state.m_ui_model.m_camera_position, wsi_state.m_ui_model.m_camera_direction, wsi_state.m_ui_model.m_camera_up, wsi_state.m_ui_model.m_camera_fovy, wsi_state.m_ui_model.m_camera_near, wsi_state.m_ui_model.m_camera_far);
+                }
+
+                // Renderer
+                {
+                    wsi_state.m_anari_device->renderer_set_style(wsi_state.m_ui_model.m_renderer_style);
+                }
+
+                // Directional Lighting
+                {
+                    wsi_state.m_anari_device->directional_light_set(wsi_state.m_ui_model.m_directional_lighting_visible, brx_anari_vec3{wsi_state.m_ui_model.m_directional_lighting_color_r * wsi_state.m_ui_model.m_directional_lighting_irradiance, wsi_state.m_ui_model.m_directional_lighting_color_g * wsi_state.m_ui_model.m_directional_lighting_irradiance, wsi_state.m_ui_model.m_directional_lighting_color_b * wsi_state.m_ui_model.m_directional_lighting_irradiance}, brx_anari_vec3{wsi_state.m_ui_model.m_directional_lighting_direction_x, wsi_state.m_ui_model.m_directional_lighting_direction_y, wsi_state.m_ui_model.m_directional_lighting_direction_z});
+                }
+
                 // Area Lighting
                 {
-                    mcrt_vector<BRX_ANARI_QUAD> quad_lights;
+                    wsi_state.m_anari_device->quad_light_set_enable_debug_renderer(wsi_state.m_ui_model.m_quad_light_enable_debug_renderer);
+
+                    mcrt_vector<BRX_ANARI_QUAD_LIGHT> quad_lights;
                     quad_lights.reserve(wsi_state.m_ui_model.m_area_lightings.size());
                     for (auto const &area_lighting : wsi_state.m_ui_model.m_area_lightings)
                     {
-                        quad_lights.push_back(BRX_ANARI_QUAD{{area_lighting.second.m_color_r * area_lighting.second.m_radiance, area_lighting.second.m_color_g * area_lighting.second.m_radiance, area_lighting.second.m_color_b * area_lighting.second.m_radiance}, {area_lighting.second.m_position_x, area_lighting.second.m_position_y, area_lighting.second.m_position_z}, {area_lighting.second.m_edge1_x, area_lighting.second.m_edge1_y, area_lighting.second.m_edge1_z}, {area_lighting.second.m_edge2_x, area_lighting.second.m_edge2_y, area_lighting.second.m_edge2_z}});
+                        quad_lights.push_back(BRX_ANARI_QUAD_LIGHT{{area_lighting.second.m_color_r * area_lighting.second.m_radiance, area_lighting.second.m_color_g * area_lighting.second.m_radiance, area_lighting.second.m_color_b * area_lighting.second.m_radiance}, {area_lighting.second.m_position_x, area_lighting.second.m_position_y, area_lighting.second.m_position_z}, {area_lighting.second.m_edge1_x, area_lighting.second.m_edge1_y, area_lighting.second.m_edge1_z}, {area_lighting.second.m_edge2_x, area_lighting.second.m_edge2_y, area_lighting.second.m_edge2_z}});
                     }
-                    wsi_state.m_anari_device->set_quad_lights(quad_lights.size(), quad_lights.data());
+                    wsi_state.m_anari_device->quad_light_set(quad_lights.size(), quad_lights.data());
                 }
 
                 // Render
-                wsi_state.m_anari_device->renderer_render_frame(wsi_state.m_ui_view);
+                wsi_state.m_anari_device->renderer_render_frame(wsi_state.m_ui_controller.m_ui_view);
             }
 
             return true;
@@ -589,7 +604,7 @@ static void internal_key_press_handler(void *handler_context, int key, bool shif
     break;
     case ImGuiKey_Escape:
     {
-        if (!(wsi_state.m_ui_view = (!wsi_state.m_ui_view)))
+        if (!(wsi_state.m_ui_controller.m_ui_view = (!wsi_state.m_ui_controller.m_ui_view)))
         {
             wsi_state.m_ui_controller.m_show_video_capture_manager = false;
             wsi_state.m_ui_controller.m_show_asset_motion_manager = false;
@@ -601,6 +616,7 @@ static void internal_key_press_handler(void *handler_context, int key, bool shif
             wsi_state.m_ui_controller.m_show_camera_manager = false;
             wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;
             wsi_state.m_ui_controller.m_show_window_manager = false;
+            wsi_state.m_ui_controller.m_show_directional_lighting_manager = false;
             wsi_state.m_ui_controller.m_show_area_lighting_manager = false;
             wsi_state.m_ui_controller.m_show_environment_lighting_manager = false;
             wsi_state.m_ui_controller.m_show_global_illumination_manager = false;
