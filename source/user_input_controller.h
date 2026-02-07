@@ -58,6 +58,7 @@ struct ui_controller_t
 
     int m_language_index;
 
+    bool m_show_renderer_manager;
     bool m_show_video_capture_manager;
     bool m_show_asset_motion_manager;
     bool m_show_asset_model_manager;

@@ -333,7 +333,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 #error Unknown Platform
 #endif
 #elif defined(_MSC_VER)
-                    ImGui_ImplWin32_NewFrame();
+                    ImGui_ImplWin32_NewFrame(interval_time);
 #else
 #error Unknown Compiler
 #endif
@@ -495,7 +495,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                 // Renderer
                 {
-                    wsi_state.m_anari_device->renderer_set_style(wsi_state.m_ui_model.m_renderer_style);
+                    wsi_state.m_anari_device->renderer_set(brx_anari_vec3{wsi_state.m_ui_model.m_renderer_background_r, wsi_state.m_ui_model.m_renderer_background_g, wsi_state.m_ui_model.m_renderer_background_b}, wsi_state.m_ui_model.m_renderer_style, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_base_color, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_high_color_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_inside_mask);
                 }
 
                 // Directional Lighting
@@ -514,6 +514,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                         quad_lights.push_back(BRX_ANARI_QUAD_LIGHT{{area_lighting.second.m_color_r * area_lighting.second.m_radiance, area_lighting.second.m_color_g * area_lighting.second.m_radiance, area_lighting.second.m_color_b * area_lighting.second.m_radiance}, {area_lighting.second.m_position_x, area_lighting.second.m_position_y, area_lighting.second.m_position_z}, {area_lighting.second.m_edge1_x, area_lighting.second.m_edge1_y, area_lighting.second.m_edge1_z}, {area_lighting.second.m_edge2_x, area_lighting.second.m_edge2_y, area_lighting.second.m_edge2_z}});
                     }
                     wsi_state.m_anari_device->quad_light_set(quad_lights.size(), quad_lights.data());
+                }
+
+                // Environment Lighting
+                {
+                    wsi_state.m_anari_device->hdri_light_set_enable_skybox_renderer(wsi_state.m_ui_model.m_hdri_light_enable_skybox_renderer);
                 }
 
                 // Render
@@ -606,6 +611,7 @@ static void internal_key_press_handler(void *handler_context, int key, bool shif
     {
         if (!(wsi_state.m_ui_controller.m_ui_view = (!wsi_state.m_ui_controller.m_ui_view)))
         {
+            wsi_state.m_ui_controller.m_show_renderer_manager = false;
             wsi_state.m_ui_controller.m_show_video_capture_manager = false;
             wsi_state.m_ui_controller.m_show_asset_motion_manager = false;
             wsi_state.m_ui_controller.m_show_asset_model_manager = false;

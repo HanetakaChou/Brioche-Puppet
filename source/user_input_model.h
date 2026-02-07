@@ -107,7 +107,20 @@ struct ui_model_t
     float m_camera_near;
     float m_camera_far;
 
+    float m_renderer_background_r;
+    float m_renderer_background_g;
+    float m_renderer_background_b;
     BRX_ANARI_RENDERER_STYLE m_renderer_style;
+    float m_renderer_toon_shading_first_shade_color_step;
+    float m_renderer_toon_shading_first_shade_color_feather;
+    float m_renderer_toon_shading_second_shade_color_step;
+    float m_renderer_toon_shading_second_shade_color_feather;
+    float m_renderer_toon_shading_base_color;
+    float m_renderer_toon_shading_first_shade_color;
+    float m_renderer_toon_shading_second_shade_color;
+    float m_renderer_toon_shading_high_color_power;
+    float m_renderer_toon_shading_rim_light_power;
+    float m_renderer_toon_shading_rim_light_inside_mask;
 
     BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
 
@@ -121,6 +134,8 @@ struct ui_model_t
     float m_directional_lighting_direction_z;
 
     bool m_quad_light_enable_debug_renderer;
+
+    bool m_hdri_light_enable_skybox_renderer;
 
     mcrt_unordered_map<mcrt_string, ui_video_capture_model_t> m_video_captures;
     mcrt_unordered_map<mcrt_string, ui_asset_motion_model_t> m_asset_motions;

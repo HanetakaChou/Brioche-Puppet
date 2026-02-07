@@ -247,6 +247,7 @@ extern void ui_controller_init(ui_model_t const *ui_model, ui_controller_t *ui_c
 
     ui_controller->m_language_index = 0;
 
+    ui_controller->m_show_renderer_manager = false;
     ui_controller->m_show_video_capture_manager = false;
     ui_controller->m_show_asset_motion_manager = false;
     ui_controller->m_show_asset_model_manager = false;
@@ -423,68 +424,70 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
             ImGui::Separator();
 
-            if (ImGui::BeginTable("##Renderer-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
             {
-                ImGui::TableSetupColumn("##Renderer-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
-                ImGui::TableSetupColumn("##Renderer-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
-
+                if (ImGui::BeginTable("##Renderer-Manager-Display-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
                 {
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
+                    ImGui::TableSetupColumn("##Renderer-Manager-Display-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("##Renderer-Manager-Display-Table-Value", ImGuiTableColumnFlags_WidthStretch);
 
                     {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Rendering FPS",
-                            "描画 FPS",
-                            "渲染 FPS",
-                            "渲染 FPS"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
 
-                    ImGui::TableNextColumn();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Rendering FPS",
+                                "描画 FPS",
+                                "渲染 FPS",
+                                "渲染 FPS"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+
+                        ImGui::TableNextColumn();
+
+                        {
+                            char fps_text[] = {"18446744073709551615"};
+                            std::snprintf(fps_text, sizeof(fps_text) / sizeof(fps_text[0]), "%llu", static_cast<long long unsigned>(io.Framerate));
+                            fps_text[(sizeof(fps_text) / sizeof(fps_text[0])) - 1] = '\0';
+
+                            ImGui::TextUnformatted(fps_text);
+                        }
+                    }
 
                     {
-                        char fps_text[] = {"18446744073709551615"};
-                        std::snprintf(fps_text, sizeof(fps_text) / sizeof(fps_text[0]), "%llu", static_cast<long long unsigned>(io.Framerate));
-                        fps_text[(sizeof(fps_text) / sizeof(fps_text[0])) - 1] = '\0';
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
 
-                        ImGui::TextUnformatted(fps_text);
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Rendering Style",
+                                "描画方式",
+                                "渲染風格",
+                                "渲染风格"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+
+                        ImGui::TableNextColumn();
+
+                        {
+                            constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_STYLE_COUNT] = {
+                                {"Physically Based Rendering", "Toon Shading"},
+                                {"物理基盤描画", "漫画風陰影"},
+                                {"基於物理渲染", "卡通著色"},
+                                {"基于物理渲染", "卡通着色"}};
+
+                            int select_style = std::min(std::max(0, static_cast<int>(ui_model->m_renderer_style) - int(BRX_ANARI_RENDERER_STYLE_BASE)), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1));
+
+                            ImGui::Combo("##Renderer-Manager-Display-Table-Value-Renderer-Style", &select_style, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+
+                            ui_model->m_renderer_style = static_cast<BRX_ANARI_RENDERER_STYLE>(int(BRX_ANARI_RENDERER_STYLE_BASE) + std::min(std::max(0, select_style), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1)));
+                        }
                     }
+
+                    ImGui::EndTable();
                 }
-
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableNextColumn();
-                    ImGui::AlignTextToFramePadding();
-
-                    {
-                        constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Rendering Style",
-                            "描画方式",
-                            "渲染風格",
-                            "渲染风格"};
-                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    }
-
-                    ImGui::TableNextColumn();
-
-                    {
-                        constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_STYLE_COUNT] = {
-                            {"Physically Based Rendering", "Toon Shading"},
-                            {"物理基盤描画", "漫画風陰影"},
-                            {"基於物理渲染", "卡通著色"},
-                            {"基于物理渲染", "卡通着色"}};
-
-                        int select_style = std::min(std::max(0, static_cast<int>(ui_model->m_renderer_style) - int(BRX_ANARI_RENDERER_STYLE_BASE)), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1));
-
-                        ImGui::Combo("##Renderer-Manager-Table-Value-Renderer-Style", &select_style, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
-
-                        ui_model->m_renderer_style = static_cast<BRX_ANARI_RENDERER_STYLE>(int(BRX_ANARI_RENDERER_STYLE_BASE) + std::min(std::max(0, select_style), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1)));
-                    }
-                }
-
-                ImGui::EndTable();
             }
 
             ImGui::Separator();
@@ -494,6 +497,22 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 {
                     ImGui::TableSetupColumn("##Show-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("##Show-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Renderer Manager",
+                            "描画器管理",
+                            "渲染器管理",
+                            "渲染器管理"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        ImGui::Checkbox("##Show-Renderer-Manager", &ui_controller->m_show_renderer_manager);
+                    }
 
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
@@ -737,6 +756,458 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                     ImGui::EndTable();
                 }
+            }
+        }
+
+        ImGui::End();
+    }
+
+    if (ui_controller->m_show_renderer_manager)
+    {
+        {
+            ImGuiViewport const *const main_viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + ui_x * ui_index, main_viewport->WorkPos.y + ui_y * ui_index), ImGuiCond_FirstUseEver);
+            ++ui_index;
+
+            ImGui::SetNextWindowSize(ImVec2(ui_width, ui_height), ImGuiCond_FirstUseEver);
+        }
+
+        if (ImGui::Begin("Renderer Manager", &ui_controller->m_show_renderer_manager))
+        {
+            {
+                constexpr char const *const text[LANGUAGE_COUNT] = {
+                    "Renderer Manager",
+                    "描画器管理",
+                    "渲染器管理",
+                    "渲染器管理"};
+                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginTable("##Renderer-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                ImGui::TableSetupColumn("##Renderer-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("##Renderer-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Background",
+                        "背景",
+                        "背景",
+                        "背景"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+                ImGui::TableNextColumn();
+                {
+                    float renderer_background_rgb[3] = {ui_model->m_renderer_background_r, ui_model->m_renderer_background_g, ui_model->m_renderer_background_b};
+
+                    ImGui::ColorEdit3("##Renderer-Manager-Table-Value-Background", renderer_background_rgb);
+
+                    ui_model->m_renderer_background_r = renderer_background_rgb[0];
+                    ui_model->m_renderer_background_g = renderer_background_rgb[1];
+                    ui_model->m_renderer_background_b = renderer_background_rgb[2];
+                }
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Rendering Style",
+                            "描画方式",
+                            "渲染風格",
+                            "渲染风格"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+
+                    ImGui::TableNextColumn();
+
+                    {
+                        constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_STYLE_COUNT] = {
+                            {"Physically Based Rendering", "Toon Shading"},
+                            {"物理基盤描画", "漫画風陰影"},
+                            {"基於物理渲染", "卡通著色"},
+                            {"基于物理渲染", "卡通着色"}};
+
+                        int select_style = std::min(std::max(0, static_cast<int>(ui_model->m_renderer_style) - int(BRX_ANARI_RENDERER_STYLE_BASE)), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1));
+
+                        ImGui::Combo("##Renderer-Manager-Table-Value-Renderer-Style", &select_style, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+
+                        ui_model->m_renderer_style = static_cast<BRX_ANARI_RENDERER_STYLE>(int(BRX_ANARI_RENDERER_STYLE_BASE) + std::min(std::max(0, select_style), (int(BRX_ANARI_RENDERER_STYLE_COUNT) - 1)));
+                    }
+                }
+
+                ImGui::EndTable();
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginTable("##Renderer-Manager-Toon-Shading-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
+            {
+                if (BRX_ANARI_RENDERER_STYLE_TOON_SHADING == ui_model->m_renderer_style)
+                {
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "First Shade Color Step",
+                                "First Shade Color Step",
+                                "First Shade Color Step",
+                                "First Shade Color Step"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_first_shade_color_step = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_first_shade_color_step), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Step-Slider", &toon_shading_first_shade_color_step, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_first_shade_color_step_text[256];
+                            std::snprintf(&toon_shading_first_shade_color_step_text[0], sizeof(toon_shading_first_shade_color_step_text) / sizeof(toon_shading_first_shade_color_step_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_first_shade_color_step);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_first_shade_color_step_text[(sizeof(toon_shading_first_shade_color_step_text) / sizeof(toon_shading_first_shade_color_step_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Step-Text", &toon_shading_first_shade_color_step_text[0], sizeof(toon_shading_first_shade_color_step_text) / sizeof(toon_shading_first_shade_color_step_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_first_shade_color_step = std::min(std::max(0.0F, std::strtof(toon_shading_first_shade_color_step_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "First Shade Color Feather",
+                                "First Shade Color Feather",
+                                "First Shade Color Feather",
+                                "First Shade Color Feather"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_first_shade_color_feather = std::min(std::max(0.0001F, ui_model->m_renderer_toon_shading_first_shade_color_feather), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Feather-Slider", &toon_shading_first_shade_color_feather, 0.0001F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_first_shade_color_feather_text[256];
+                            std::snprintf(&toon_shading_first_shade_color_feather_text[0], sizeof(toon_shading_first_shade_color_feather_text) / sizeof(toon_shading_first_shade_color_feather_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_first_shade_color_feather);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_first_shade_color_feather_text[(sizeof(toon_shading_first_shade_color_feather_text) / sizeof(toon_shading_first_shade_color_feather_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Feather-Text", &toon_shading_first_shade_color_feather_text[0], sizeof(toon_shading_first_shade_color_feather_text) / sizeof(toon_shading_first_shade_color_feather_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_first_shade_color_feather = std::min(std::max(0.0001F, std::strtof(toon_shading_first_shade_color_feather_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Second Shade Color Step",
+                                "Second Shade Color Step",
+                                "Second Shade Color Step",
+                                "Second Shade Color Step"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_second_shade_color_step = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_second_shade_color_step), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Step-Slider", &toon_shading_second_shade_color_step, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_second_shade_color_step_text[256];
+                            std::snprintf(&toon_shading_second_shade_color_step_text[0], sizeof(toon_shading_second_shade_color_step_text) / sizeof(toon_shading_second_shade_color_step_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_second_shade_color_step);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_second_shade_color_step_text[(sizeof(toon_shading_second_shade_color_step_text) / sizeof(toon_shading_second_shade_color_step_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Step-Text", &toon_shading_second_shade_color_step_text[0], sizeof(toon_shading_second_shade_color_step_text) / sizeof(toon_shading_second_shade_color_step_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_second_shade_color_step = std::min(std::max(0.0F, std::strtof(toon_shading_second_shade_color_step_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Second Shade Color Feather",
+                                "Second Shade Color Feather",
+                                "Second Shade Color Feather",
+                                "Second Shade Color Feather"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_second_shade_color_feather = std::min(std::max(0.0001F, ui_model->m_renderer_toon_shading_second_shade_color_feather), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Feather-Slider", &toon_shading_second_shade_color_feather, 0.0001F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_second_shade_color_feather_text[256];
+                            std::snprintf(&toon_shading_second_shade_color_feather_text[0], sizeof(toon_shading_second_shade_color_feather_text) / sizeof(toon_shading_second_shade_color_feather_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_second_shade_color_feather);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_second_shade_color_feather_text[(sizeof(toon_shading_second_shade_color_feather_text) / sizeof(toon_shading_second_shade_color_feather_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Feather-Text", &toon_shading_second_shade_color_feather_text[0], sizeof(toon_shading_second_shade_color_feather_text) / sizeof(toon_shading_second_shade_color_feather_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_second_shade_color_feather = std::min(std::max(0.0001F, std::strtof(toon_shading_second_shade_color_feather_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Base Color",
+                                "Base Color",
+                                "Base Color",
+                                "Base Color"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_base_color = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_base_color), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Base-Color-Slider", &toon_shading_base_color, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_base_color_text[256];
+                            std::snprintf(&toon_shading_base_color_text[0], sizeof(toon_shading_base_color_text) / sizeof(toon_shading_base_color_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_base_color);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_base_color_text[(sizeof(toon_shading_base_color_text) / sizeof(toon_shading_base_color_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Base-Color-Text", &toon_shading_base_color_text[0], sizeof(toon_shading_base_color_text) / sizeof(toon_shading_base_color_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_base_color = std::min(std::max(0.0F, std::strtof(toon_shading_base_color_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "First Shade Color",
+                                "First Shade Color",
+                                "First Shade Color",
+                                "First Shade Color"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_first_shade_color = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_first_shade_color), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Slider", &toon_shading_first_shade_color, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_first_shade_color_text[256];
+                            std::snprintf(&toon_shading_first_shade_color_text[0], sizeof(toon_shading_first_shade_color_text) / sizeof(toon_shading_first_shade_color_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_first_shade_color);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_first_shade_color_text[(sizeof(toon_shading_first_shade_color_text) / sizeof(toon_shading_first_shade_color_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-First-Shade-Color-Text", &toon_shading_first_shade_color_text[0], sizeof(toon_shading_first_shade_color_text) / sizeof(toon_shading_first_shade_color_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_first_shade_color = std::min(std::max(0.0F, std::strtof(toon_shading_first_shade_color_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Second Shade Color",
+                                "Second Shade Color",
+                                "Second Shade Color",
+                                "Second Shade Color"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_second_shade_color = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_second_shade_color), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Slider", &toon_shading_second_shade_color, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_second_shade_color_text[256];
+                            std::snprintf(&toon_shading_second_shade_color_text[0], sizeof(toon_shading_second_shade_color_text) / sizeof(toon_shading_second_shade_color_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_second_shade_color);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_second_shade_color_text[(sizeof(toon_shading_second_shade_color_text) / sizeof(toon_shading_second_shade_color_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Second-Shade-Color-Text", &toon_shading_second_shade_color_text[0], sizeof(toon_shading_second_shade_color_text) / sizeof(toon_shading_second_shade_color_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_second_shade_color = std::min(std::max(0.0F, std::strtof(toon_shading_second_shade_color_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "High Color Power",
+                                "High Color Power",
+                                "High Color Power",
+                                "High Color Power"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_high_color_power = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_high_color_power), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-High-Color-Power-Slider", &toon_shading_high_color_power, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_high_color_power_text[256];
+                            std::snprintf(&toon_shading_high_color_power_text[0], sizeof(toon_shading_high_color_power_text) / sizeof(toon_shading_high_color_power_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_high_color_power);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_high_color_power_text[(sizeof(toon_shading_high_color_power_text) / sizeof(toon_shading_high_color_power_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-High-Color-Power-Text", &toon_shading_high_color_power_text[0], sizeof(toon_shading_high_color_power_text) / sizeof(toon_shading_high_color_power_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_high_color_power = std::min(std::max(0.0F, std::strtof(toon_shading_high_color_power_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Rim Light Power",
+                                "Rim Light Power",
+                                "Rim Light Power",
+                                "Rim Light Power"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_rim_light_power = std::min(std::max(0.0F, ui_model->m_renderer_toon_shading_rim_light_power), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Rim-Light-Power-Slider", &toon_shading_rim_light_power, 0.0F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_rim_light_power_text[256];
+                            std::snprintf(&toon_shading_rim_light_power_text[0], sizeof(toon_shading_rim_light_power_text) / sizeof(toon_shading_rim_light_power_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_rim_light_power);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_rim_light_power_text[(sizeof(toon_shading_rim_light_power_text) / sizeof(toon_shading_rim_light_power_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Rim-Light-Power-Text", &toon_shading_rim_light_power_text[0], sizeof(toon_shading_rim_light_power_text) / sizeof(toon_shading_rim_light_power_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_rim_light_power = std::min(std::max(0.0F, std::strtof(toon_shading_rim_light_power_text, NULL)), 1.0F);
+                        }
+                    }
+
+                    {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::AlignTextToFramePadding();
+                        {
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Rim Light Inside Mask",
+                                "Rim Light Inside Mask",
+                                "Rim Light Inside Mask",
+                                "Rim Light Inside Mask"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                        }
+                        ImGui::TableNextColumn();
+                        {
+                            float toon_shading_rim_light_inside_mask = std::min(std::max(0.0001F, ui_model->m_renderer_toon_shading_rim_light_inside_mask), 1.0F);
+#define _INTERNAL_BRX_STRINGIZING(string) #string
+#define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
+                            ImGui::SliderFloat("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Rim-Light-Inside-Mask-Slider", &toon_shading_rim_light_inside_mask, 0.0001F, 1.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+
+                            // ImGui::SameLine();
+
+                            // ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * table_column_same_line_ratio);
+
+                            char toon_shading_rim_light_inside_mask_text[256];
+                            std::snprintf(&toon_shading_rim_light_inside_mask_text[0], sizeof(toon_shading_rim_light_inside_mask_text) / sizeof(toon_shading_rim_light_inside_mask_text[0]), "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f", toon_shading_rim_light_inside_mask);
+#undef _INTERNAL_BRX_STRINGIZING
+#undef _INTERNAL_BRX_X_STRINGIZING
+                            toon_shading_rim_light_inside_mask_text[(sizeof(toon_shading_rim_light_inside_mask_text) / sizeof(toon_shading_rim_light_inside_mask_text[0]) - 1)] = '\0';
+
+                            ImGui::InputText("##Renderer-Manager-Toon-Shading-Table-Value-Toon-Shading-Rim-Light-Inside-Mask-Text", &toon_shading_rim_light_inside_mask_text[0], sizeof(toon_shading_rim_light_inside_mask_text) / sizeof(toon_shading_rim_light_inside_mask_text[0]), ImGuiInputTextFlags_CharsDecimal);
+
+                            ui_model->m_renderer_toon_shading_rim_light_inside_mask = std::min(std::max(0.0001F, std::strtof(toon_shading_rim_light_inside_mask_text, NULL)), 1.0F);
+                        }
+                    }
+                }
+                else
+                {
+                    assert(BRX_ANARI_RENDERER_STYLE_PHYSICALLY_BASED_RENDERING == ui_model->m_renderer_style);
+                }
+
+                ImGui::EndTable();
             }
         }
 
@@ -7350,6 +7821,23 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 ImGui::TableNextColumn();
                 ImGui::AlignTextToFramePadding();
                 {
+                    constexpr char const *text[LANGUAGE_COUNT] = {
+                        "Enable Skybox Renderer",
+                        "Skybox Renderer 有効",
+                        "啟用天空包廂渲染",
+                        "启用天空包厢渲染"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                }
+
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Checkbox("##Environment-Lighting-Manager-Table-Value-Enable-Skybox-Renderer", &ui_model->m_hdri_light_enable_skybox_renderer);
+                }
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::AlignTextToFramePadding();
+                {
                     constexpr char const *const text[LANGUAGE_COUNT] = {
                         "Asset Image",
                         "資源画像",
@@ -7359,7 +7847,7 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 }
                 ImGui::TableNextColumn();
                 {
-                    constexpr char const *const label = "##Environment-Lighting-Manager-Table-Select-Asset-Image";
+                    constexpr char const *const label = "##Environment-Lighting-Manager-Table-Value-Select-Asset-Image";
 
                     if (!ui_model->m_asset_images.empty())
                     {
@@ -7501,7 +7989,7 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                     int select_layout = std::min(std::max(0, static_cast<int>(device->hdri_light_get_layout())), (int(BRX_ANARI_HDRI_LIGHT_LAYOUT_COUNT) - 1));
 
-                    ImGui::Combo("##Environment-Lighting-Manager-Table-Layout", &select_layout, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+                    ImGui::Combo("##Environment-Lighting-Manager-Table-Value-Layout", &select_layout, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
 
                     device->hdri_light_set_layout(static_cast<BRX_ANARI_HDRI_LIGHT_LAYOUT>(std::min(std::max(0, select_layout), (int(BRX_ANARI_HDRI_LIGHT_LAYOUT_COUNT) - 1))));
                 }
@@ -7720,6 +8208,26 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                     "全域照明管理",
                     "全局光照管理"};
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+            }
+
+            ImGui::SameLine();
+
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                ImGui::TextUnformatted(help_marker_text);
+                ImGui::PopStyleColor();
+                if (ImGui::BeginItemTooltip())
+                {
+                    ImGui::PushTextWrapPos(help_marker_position);
+                    constexpr char const *const text[LANGUAGE_COUNT] = {
+                        "Recommended for high-end hardware only.",
+                        "高性能機器専用推奨。",
+                        "僅推薦用於高端硬件。",
+                        "仅推荐用于高端硬件。"};
+                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
             }
 
             ImGui::Separator();

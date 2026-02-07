@@ -85,7 +85,23 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         ui_model->m_camera_far = far;
     }
 
-    ui_model->m_renderer_style = BRX_ANARI_RENDERER_STYLE_PHYSICALLY_BASED_RENDERING;
+    // Renderer
+    {
+        ui_model->m_renderer_background_r = 0.0F;
+        ui_model->m_renderer_background_g = 1.0F;
+        ui_model->m_renderer_background_b = 0.0F;
+        ui_model->m_renderer_style = BRX_ANARI_RENDERER_STYLE_PHYSICALLY_BASED_RENDERING;
+        ui_model->m_renderer_toon_shading_first_shade_color_step = 0.8;
+        ui_model->m_renderer_toon_shading_first_shade_color_feather = 0.0001;
+        ui_model->m_renderer_toon_shading_second_shade_color_step = 0.5;
+        ui_model->m_renderer_toon_shading_second_shade_color_feather = 0.0001;
+        ui_model->m_renderer_toon_shading_base_color = 0.7843138;
+        ui_model->m_renderer_toon_shading_first_shade_color = 0.49411768;
+        ui_model->m_renderer_toon_shading_second_shade_color = 0.19607845;
+        ui_model->m_renderer_toon_shading_high_color_power = 0.0;
+        ui_model->m_renderer_toon_shading_rim_light_power = 0.1;
+        ui_model->m_renderer_toon_shading_rim_light_inside_mask = 0.0001;
+    }
 
     ui_model->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_DISABLED;
 
@@ -96,9 +112,12 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         ui_model->m_directional_lighting_color_g = 1.0F;
         ui_model->m_directional_lighting_color_b = 1.0F;
         ui_model->m_directional_lighting_irradiance = 1.0F;
-        ui_model->m_directional_lighting_direction_x = 1.0F;
-        ui_model->m_directional_lighting_direction_y = 0.0F;
-        ui_model->m_directional_lighting_direction_z = -1.0F;
+        // Rembrandt Lighting
+        // zenith 45 degree
+        // azimuth 45 degree
+        ui_model->m_directional_lighting_direction_x = 0.5F;
+        ui_model->m_directional_lighting_direction_y = -std::sqrt(0.5F);
+        ui_model->m_directional_lighting_direction_z = -0.5F;
     }
 
     // Quad
@@ -110,6 +129,7 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
     {
         device->hdri_light_set_up(brx_anari_vec3{0.0F, 1.0F, 0.0F});
         device->hdri_light_set_direction(brx_anari_vec3{0.0F, 0.0F, -1.0F});
+        ui_model->m_hdri_light_enable_skybox_renderer = true;
     }
 
     assert(ui_model->m_video_captures.empty());
