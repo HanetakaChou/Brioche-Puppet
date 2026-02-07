@@ -333,7 +333,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 #error Unknown Platform
 #endif
 #elif defined(_MSC_VER)
-                    ImGui_ImplWin32_NewFrame();
+                    ImGui_ImplWin32_NewFrame(interval_time);
 #else
 #error Unknown Compiler
 #endif
@@ -495,7 +495,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                 // Renderer
                 {
-                    wsi_state.m_anari_device->renderer_set_style(wsi_state.m_ui_model.m_renderer_style);
+                    wsi_state.m_anari_device->renderer_set_style(wsi_state.m_ui_model.m_renderer_style, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_base_color, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_high_color_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_inside_mask);
                 }
 
                 // Directional Lighting

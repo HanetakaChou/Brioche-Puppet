@@ -108,6 +108,16 @@ struct ui_model_t
     float m_camera_far;
 
     BRX_ANARI_RENDERER_STYLE m_renderer_style;
+    float m_renderer_toon_shading_first_shade_color_step;
+    float m_renderer_toon_shading_first_shade_color_feather;
+    float m_renderer_toon_shading_second_shade_color_step;
+    float m_renderer_toon_shading_second_shade_color_feather;
+    float m_renderer_toon_shading_base_color;
+    float m_renderer_toon_shading_first_shade_color;
+    float m_renderer_toon_shading_second_shade_color;
+    float m_renderer_toon_shading_high_color_power; 
+    float m_renderer_toon_shading_rim_light_power;
+    float m_renderer_toon_shading_rim_light_inside_mask;
 
     BRX_MOTION_PHYSICS_RAGDOLL_QUALITY m_physics_ragdoll_quality;
 
