@@ -124,6 +124,8 @@ struct ui_controller_t
 
     mcrt_unordered_map<uint64_t, ui_instance_model_controller_t> m_instance_controllers;
 
+    bool m_enable_camera_controller;
+
     mcrt_vector<char> m_new_area_lighting_name;
     float m_new_area_lighting_color_r;
     float m_new_area_lighting_color_g;

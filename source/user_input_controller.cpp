@@ -313,6 +313,8 @@ extern void ui_controller_init(ui_model_t const *ui_model, ui_controller_t *ui_c
 
     assert(ui_controller->m_instance_controllers.empty());
 
+    ui_controller->m_enable_camera_controller = true;
+
     ui_controller->m_new_area_lighting_name.resize(MAX_INPUT_TEXT_SIZE);
     ui_controller->m_new_area_lighting_color_r = 1.0F;
     ui_controller->m_new_area_lighting_color_g = 1.0F;
@@ -334,37 +336,40 @@ extern void ui_controller_init(ui_model_t const *ui_model, ui_controller_t *ui_c
 
 extern void user_camera_simulate(float interval_time, ui_model_t *ui_model, ui_controller_t *ui_controller)
 {
+    if (ui_controller->m_enable_camera_controller)
     {
-        DirectX::XMFLOAT3 const eye_position(ui_model->m_camera_position.m_x, ui_model->m_camera_position.m_y, ui_model->m_camera_position.m_z);
+        {
+            DirectX::XMFLOAT3 const eye_position(ui_model->m_camera_position.m_x, ui_model->m_camera_position.m_y, ui_model->m_camera_position.m_z);
 
-        DirectX::XMFLOAT3 const eye_direction(ui_model->m_camera_direction.m_x, ui_model->m_camera_direction.m_y, ui_model->m_camera_direction.m_z);
+            DirectX::XMFLOAT3 const eye_direction(ui_model->m_camera_direction.m_x, ui_model->m_camera_direction.m_y, ui_model->m_camera_direction.m_z);
 
-        DirectX::XMFLOAT3 const up_direction(ui_model->m_camera_up.m_x, ui_model->m_camera_up.m_y, ui_model->m_camera_up.m_z);
+            DirectX::XMFLOAT3 const up_direction(ui_model->m_camera_up.m_x, ui_model->m_camera_up.m_y, ui_model->m_camera_up.m_z);
 
-        ui_controller->m_first_person_camera.SetEyePt(eye_position);
+            ui_controller->m_first_person_camera.SetEyePt(eye_position);
 
-        ui_controller->m_first_person_camera.SetEyeDir(eye_direction);
+            ui_controller->m_first_person_camera.SetEyeDir(eye_direction);
 
-        ui_controller->m_first_person_camera.SetUpDir(up_direction);
-    }
+            ui_controller->m_first_person_camera.SetUpDir(up_direction);
+        }
 
-    ui_controller->m_first_person_camera.FrameMove(interval_time);
+        ui_controller->m_first_person_camera.FrameMove(interval_time);
 
-    {
-        DirectX::XMFLOAT3 eye_position;
-        DirectX::XMStoreFloat3(&eye_position, ui_controller->m_first_person_camera.GetEyePt());
+        {
+            DirectX::XMFLOAT3 eye_position;
+            DirectX::XMStoreFloat3(&eye_position, ui_controller->m_first_person_camera.GetEyePt());
 
-        DirectX::XMFLOAT3 eye_direction;
-        DirectX::XMStoreFloat3(&eye_direction, ui_controller->m_first_person_camera.GetEyeDir());
+            DirectX::XMFLOAT3 eye_direction;
+            DirectX::XMStoreFloat3(&eye_direction, ui_controller->m_first_person_camera.GetEyeDir());
 
-        DirectX::XMFLOAT3 up_direction;
-        DirectX::XMStoreFloat3(&up_direction, ui_controller->m_first_person_camera.GetUpDir());
+            DirectX::XMFLOAT3 up_direction;
+            DirectX::XMStoreFloat3(&up_direction, ui_controller->m_first_person_camera.GetUpDir());
 
-        ui_model->m_camera_position = brx_anari_vec3{eye_position.x, eye_position.y, eye_position.z};
+            ui_model->m_camera_position = brx_anari_vec3{eye_position.x, eye_position.y, eye_position.z};
 
-        ui_model->m_camera_direction = brx_anari_vec3{eye_direction.x, eye_direction.y, eye_direction.z};
+            ui_model->m_camera_direction = brx_anari_vec3{eye_direction.x, eye_direction.y, eye_direction.z};
 
-        ui_model->m_camera_up = brx_anari_vec3{up_direction.x, up_direction.y, up_direction.z};
+            ui_model->m_camera_up = brx_anari_vec3{up_direction.x, up_direction.y, up_direction.z};
+        }
     }
 }
 
@@ -1360,12 +1365,8 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                         {
                             constexpr char const *const items[] = {
                                 "24",
-                                "25",
                                 "30",
-                                "50",
-                                "60",
-                                "100",
-                                "120"};
+                                "60"};
 
                             int selected_fps_index = std::min(std::max(0, ui_controller->m_new_video_capture_camera_fps_index), static_cast<int>(sizeof(items) / sizeof(items[0])) - 1);
 
@@ -1434,12 +1435,8 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                             constexpr uint32_t const FPSs[] = {
                                 24,
-                                25,
                                 30,
-                                50,
-                                60,
-                                100,
-                                120};
+                                60};
 
                             int const fps_index = std::min(std::max(0, ui_controller->m_new_video_capture_camera_fps_index), static_cast<int>(sizeof(FPSs) / sizeof(FPSs[0]) - 1U));
 
@@ -6119,32 +6116,51 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
             }
 
-            ImGui::SameLine();
-
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                ImGui::TextUnformatted(help_marker_text);
-                ImGui::PopStyleColor();
-                if (ImGui::BeginItemTooltip())
-                {
-                    ImGui::PushTextWrapPos(help_marker_position);
-                    constexpr char const *const text[LANGUAGE_COUNT] = {
-                        "Q -> Up | E -> Down | W -> Forward | S -> Backward | A -> Left | D -> Right | Mouse Right Button -> Rotation",
-                        "Q -> 上 | E -> 下 | W -> 前 | S -> 後 | A -> 左 | D -> 右 | Mouse Right Button -> 回転",
-                        "Q -> 上 | E -> 下 | W -> 前 | S -> 後 | A -> 左 | D -> 右 | Mouse Right Button -> 旋轉",
-                        "Q -> 上 | E -> 下 | W -> 前 | S -> 后 | A -> 左 | D -> 右 | Mouse Right Button -> 旋转"};
-                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    ImGui::PopTextWrapPos();
-                    ImGui::EndTooltip();
-                }
-            }
-
             ImGui::Separator();
 
             if (ImGui::BeginTable("##Camera-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
             {
                 ImGui::TableSetupColumn("##Camera-Manager-Table-Property", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupColumn("##Camera-Manager-Table-Value", ImGuiTableColumnFlags_WidthStretch);
+
+                {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::AlignTextToFramePadding();
+                    {
+                        constexpr char const *const text[LANGUAGE_COUNT] = {
+                            "Enable Camera Controller",
+                            "有効写真機制御器",
+                            "啟用相機控制器",
+                            "启用相机控制器"};
+                        ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        ImGui::Checkbox("##Camera-Manager-Table-Value-Enable-Camera-Controller", &ui_controller->m_enable_camera_controller);
+
+                        ImGui::SameLine();
+
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                            ImGui::TextUnformatted(help_marker_text);
+                            ImGui::PopStyleColor();
+                            if (ImGui::BeginItemTooltip())
+                            {
+                                ImGui::PushTextWrapPos(help_marker_position);
+                                constexpr char const *const text[LANGUAGE_COUNT] = {
+                                    "Q -> Up | E -> Down | W -> Forward | S -> Backward | A -> Left | D -> Right | Mouse Right Button -> Rotation",
+                                    "Q -> 上 | E -> 下 | W -> 前 | S -> 後 | A -> 左 | D -> 右 | Mouse Right Button -> 回転",
+                                    "Q -> 上 | E -> 下 | W -> 前 | S -> 後 | A -> 左 | D -> 右 | Mouse Right Button -> 旋轉",
+                                    "Q -> 上 | E -> 下 | W -> 前 | S -> 后 | A -> 左 | D -> 右 | Mouse Right Button -> 旋转"};
+                                ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
+                            }
+                        }
+                    }
+                }
 
                 {
                     ImGui::TableNextRow();
@@ -6425,7 +6441,7 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                         float fovy = std::min(std::max(0.0F, DirectX::XMConvertToDegrees(ui_model->m_camera_fovy)), 180.0F);
 #define _INTERNAL_BRX_STRINGIZING(string) #string
 #define _INTERNAL_BRX_X_STRINGIZING(string) _INTERNAL_BRX_STRINGIZING(string)
-                        ImGui::SliderFloat("##Camera-Manager-Table-Value-FOV-Y-Slider", &fovy, 1.0F, 180.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
+                        ImGui::SliderFloat("##Camera-Manager-Table-Value-FOV-Y-Slider", &fovy, 1.0F, 179.0F, "%." _INTERNAL_BRX_X_STRINGIZING(DBL_DIG) "f");
 
                         // ImGui::SameLine();
 
@@ -6439,7 +6455,7 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
 
                         ImGui::InputText("##Camera-Manager-Table-Value-FOV-Y-Text", &fovy_text[0], sizeof(fovy_text) / sizeof(fovy_text[0]), ImGuiInputTextFlags_CharsDecimal);
 
-                        ui_model->m_camera_fovy = DirectX::XMConvertToRadians(std::min(std::max(1.0F, std::strtof(fovy_text, NULL)), 180.0F));
+                        ui_model->m_camera_fovy = DirectX::XMConvertToRadians(std::min(std::max(1.0F, std::strtof(fovy_text, NULL)), 179.0F));
                     }
                 }
 
@@ -8210,26 +8226,6 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 ImGui::TextUnformatted(text[ui_controller->m_language_index]);
             }
 
-            ImGui::SameLine();
-
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                ImGui::TextUnformatted(help_marker_text);
-                ImGui::PopStyleColor();
-                if (ImGui::BeginItemTooltip())
-                {
-                    ImGui::PushTextWrapPos(help_marker_position);
-                    constexpr char const *const text[LANGUAGE_COUNT] = {
-                        "Recommended for high-end hardware only.",
-                        "高性能機器専用推奨。",
-                        "僅推薦用於高端硬件。",
-                        "仅推荐用于高端硬件。"};
-                    ImGui::TextUnformatted(text[ui_controller->m_language_index]);
-                    ImGui::PopTextWrapPos();
-                    ImGui::EndTooltip();
-                }
-            }
-
             ImGui::Separator();
 
             if (ImGui::BeginTable("##Global-Illumination-Manager-Table", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV))
@@ -8251,17 +8247,39 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                 }
                 ImGui::TableNextColumn();
                 {
-                    constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_GI_QUALITY_COUNT] = {
-                        {"Disable", "Low", "Medium", "High"},
-                        {"無効", "低", "中", "高"},
-                        {"停用", "低", "中", "高"},
-                        {"停用", "低", "中", "高"}};
+                    {
+                        constexpr char const *const items[LANGUAGE_COUNT][BRX_ANARI_RENDERER_GI_QUALITY_COUNT] = {
+                            {"Disable", "Low", "Medium", "High"},
+                            {"無効", "低", "中", "高"},
+                            {"停用", "低", "中", "高"},
+                            {"停用", "低", "中", "高"}};
 
-                    int select_gi_quality = std::min(std::max(0, static_cast<int>(device->renderer_get_gi_quality())), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1));
+                        int select_gi_quality = std::min(std::max(0, static_cast<int>(device->renderer_get_gi_quality())), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1));
 
-                    ImGui::Combo("##Global-Illumination-Manager-Table-Layout", &select_gi_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
+                        ImGui::Combo("##Global-Illumination-Manager-Table-Layout", &select_gi_quality, items[ui_controller->m_language_index], IM_ARRAYSIZE(items[0]));
 
-                    device->renderer_set_gi_quality(static_cast<BRX_ANARI_RENDERER_GI_QUALITY>(std::min(std::max(0, select_gi_quality), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1))));
+                        device->renderer_set_gi_quality(static_cast<BRX_ANARI_RENDERER_GI_QUALITY>(std::min(std::max(0, select_gi_quality), (int(BRX_ANARI_RENDERER_GI_QUALITY_COUNT) - 1))));
+                    }
+
+                    ImGui::SameLine();
+
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted(help_marker_text);
+                        ImGui::PopStyleColor();
+                        if (ImGui::BeginItemTooltip())
+                        {
+                            ImGui::PushTextWrapPos(help_marker_position);
+                            constexpr char const *const text[LANGUAGE_COUNT] = {
+                                "Recommended only for high-end hardware. Not recommended for toon shading.",
+                                "高性能硬件限定推奨。漫画風陰影非推奨。",
+                                "僅推薦用於高端硬件。不推薦用於卡通著色。",
+                                "仅推荐用于高端硬件。不推荐用于卡通着色。"};
+                            ImGui::TextUnformatted(text[ui_controller->m_language_index]);
+                            ImGui::PopTextWrapPos();
+                            ImGui::EndTooltip();
+                        }
+                    }
                 }
 
                 ImGui::EndTable();
