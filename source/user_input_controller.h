@@ -47,7 +47,8 @@ static constexpr int const INVALID_UINT32_INDEX = static_cast<uint32_t>(~static_
 
 struct ui_instance_model_controller_t
 {
-    ANIMATION_INPUT_TYPE m_animation_input_type;
+    ANIMATION_INPUT_TYPE m_morph_animation_input_type;
+    ANIMATION_INPUT_TYPE m_joint_animation_input_type;
 };
 
 struct ui_controller_t
@@ -94,9 +95,9 @@ struct ui_controller_t
 
     mcrt_vector<char> m_new_video_detector_name;
     mcrt_string m_new_video_detector_selected_video_capture;
-    uint32_t m_new_video_detector_hand_count;
-    uint32_t m_new_video_detector_face_count;
     uint32_t m_new_video_detector_pose_count;
+    uint32_t m_new_video_detector_face_count;
+    uint32_t m_new_video_detector_hand_count;
     bool m_new_video_detector_force_gpu;
     bool m_new_video_detector_enable_debug_renderer;
     uint64_t m_tree_view_selected_video_detector;
@@ -109,11 +110,18 @@ struct ui_controller_t
     mcrt_vector<char> m_new_instance_model_name;
     mcrt_string m_new_instance_model_selected_asset_model;
     uint32_t m_new_instance_model_selected_surface_group_index;
-    ANIMATION_INPUT_TYPE m_new_instance_model_animation_input_type;
-    uint64_t m_new_instance_model_selected_video_detector;
-    uint32_t m_new_instance_model_selected_video_detector_face_index;
-    uint32_t m_new_instance_model_selected_video_detector_pose_index;
-    uint64_t m_new_instance_model_selected_instance_motion;
+    ANIMATION_INPUT_TYPE m_new_instance_model_morph_animation_input_type;
+    uint64_t m_new_instance_model_selected_morph_video_detector;
+    uint32_t m_new_instance_model_selected_morph_video_detector_pose_index;
+    uint32_t m_new_instance_model_selected_morph_video_detector_face_index;
+    uint32_t m_new_instance_model_selected_morph_video_detector_hand_index;
+    uint64_t m_new_instance_model_selected_morph_instance_motion;
+    ANIMATION_INPUT_TYPE m_new_instance_model_joint_animation_input_type;
+    uint64_t m_new_instance_model_selected_joint_video_detector;
+    uint32_t m_new_instance_model_selected_joint_video_detector_pose_index;
+    uint32_t m_new_instance_model_selected_joint_video_detector_face_index;
+    uint32_t m_new_instance_model_selected_joint_video_detector_hand_index;
+    uint64_t m_new_instance_model_selected_joint_instance_motion;
     float m_new_instance_model_transform_rotation_roll;
     float m_new_instance_model_transform_rotation_pitch;
     float m_new_instance_model_transform_rotation_yaw;

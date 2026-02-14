@@ -20,7 +20,7 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
   
 - [ ] Rasterization  
     - [x] [PBR (Lambert + Trowbridge Reitz)](https://pharr.org/matt/blog/2022/05/06/trowbridge-reitz)  
-    - [x] [Toon Shading (Celluloid Face Shadow Map (Midsagittal Plane SDF) + Three Base Color + High Color + Rim Light)](https://github.com/Unity-Technologies/com.unity.toonshader)  
+    - [x] [Toon Shading (Celluloid Face Shadow Map (Midsagittal Plane SDF) + Three Base Color + Rim Light)](https://github.com/Unity-Technologies/com.unity.toonshader)  
     - [ ] [~~SSS (Skin Material | Subsurface Scattering)~~](https://github.com/HanetakaChou/Subsurface-Scattering)  
     - [x] [LTC (Area Lighting | Linearly Transformed Cosine)](https://github.com/HanetakaChou/Linearly-Transformed-Cosine)  
     - [x] [SH (Environment Lighting | Spherical Harmonics)](https://github.com/HanetakaChou/Spherical-Harmonic)  

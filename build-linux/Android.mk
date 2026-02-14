@@ -72,7 +72,7 @@ LOCAL_CFLAGS += -DIMGUI_IMPL_API=
 LOCAL_CFLAGS += -finput-charset=UTF-8 -fexec-charset=UTF-8
 
 LOCAL_CPPFLAGS := 
-LOCAL_CPPFLAGS += -std=c++17
+LOCAL_CPPFLAGS += -std=c++20
 
 LOCAL_C_INCLUDES :=
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../thirdparty/CoreRT/src/Native/inc/unix

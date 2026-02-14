@@ -24,7 +24,7 @@
 #include "user_input_controller.h"
 #include "../thirdparty/McRT-Malloc/include/mcrt_vector.h"
 #include "../thirdparty/McRT-Malloc/include/mcrt_string.h"
-#include "../thirdparty/McRT-Malloc/include/mcrt_set.h"
+#include "../thirdparty/McRT-Malloc/include/mcrt_unordered_set.h"
 #include "../thirdparty/McRT-Malloc/include/mcrt_tick_count.h"
 #include "../thirdparty/Brioche-Analytic-Rendering-Interface/include/brx_anari.h"
 #include "../thirdparty/Brioche-Window-System-Integration/include/brx_wsi.h"
@@ -347,93 +347,110 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                 // Motion
                 {
-                    mcrt_set<brx_motion_video_detector *> video_detectors;
-                    mcrt_set<brx_motion_animation_instance *> animation_instances;
-                    for (auto const &instance_model : wsi_state.m_ui_model.m_instance_models)
                     {
-                        brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
-
-                        if (NULL != skeleton_instance)
+                        mcrt_unordered_set<brx_motion_video_detector *> video_detectors;
+                        mcrt_unordered_set<brx_motion_animation_instance *> animation_instances;
+                        for (auto const &instance_model : wsi_state.m_ui_model.m_instance_models)
                         {
-                            brx_motion_video_detector *const video_detector = skeleton_instance->get_input_video_detector();
-                            brx_motion_animation_instance *const animation_instance = skeleton_instance->get_input_animation_instance();
+                            brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
 
-                            assert((NULL == video_detector) || (NULL == animation_instance));
+                            if (NULL != skeleton_instance)
+                            {
+                                brx_motion_video_detector *const morph_video_detector = skeleton_instance->get_morph_input_video_detector();
+                                brx_motion_animation_instance *const morph_animation_instance = skeleton_instance->get_morph_input_animation_instance();
+                                brx_motion_video_detector *const joint_video_detector = skeleton_instance->get_joint_input_video_detector();
+                                brx_motion_animation_instance *const joint_animation_instance = skeleton_instance->get_joint_input_animation_instance();
 
+                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance));
+
+                                if (NULL != morph_video_detector)
+                                {
+                                    video_detectors.insert(morph_video_detector);
+                                }
+                                else if (NULL != morph_animation_instance)
+                                {
+                                    animation_instances.insert(morph_animation_instance);
+                                }
+
+                                assert((NULL == joint_video_detector) || (NULL == joint_animation_instance));
+
+                                if (NULL != joint_video_detector)
+                                {
+                                    video_detectors.insert(joint_video_detector);
+                                }
+                                else if (NULL != joint_animation_instance)
+                                {
+                                    animation_instances.insert(joint_animation_instance);
+                                }
+                            }
+                            else
+                            {
+                                assert(INVALID_TIMESTAMP == instance_model.second.m_morph_video_detector);
+                                assert(INVALID_TIMESTAMP == instance_model.second.m_morph_instance_motion);
+                                assert(INVALID_TIMESTAMP == instance_model.second.m_joint_video_detector);
+                                assert(INVALID_TIMESTAMP == instance_model.second.m_joint_instance_motion);
+                            }
+                        }
+
+                        mcrt_unordered_set<brx_motion_video_capture *> video_captures;
+                        for (brx_motion_video_detector *const video_detector : video_detectors)
+                        {
                             if (NULL != video_detector)
                             {
-                                video_detectors.insert(video_detector);
-                            }
-                            else if (NULL != animation_instance)
-                            {
-                                animation_instances.insert(animation_instance);
-                            }
-                        }
-                        else
-                        {
-                            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
-                            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
-                        }
-                    }
+                                brx_motion_video_capture *const video_capture = video_detector->get_input();
 
-                    mcrt_set<brx_motion_video_capture *> video_captures;
-                    for (brx_motion_video_detector *const video_detector : video_detectors)
-                    {
-                        if (NULL != video_detector)
-                        {
-                            brx_motion_video_capture *const video_capture = video_detector->get_input();
-
-                            if (NULL != video_capture)
-                            {
-                                video_captures.insert(video_capture);
+                                if (NULL != video_capture)
+                                {
+                                    video_captures.insert(video_capture);
+                                }
+                                else
+                                {
+                                    assert(false);
+                                }
                             }
                             else
                             {
                                 assert(false);
                             }
                         }
-                        else
-                        {
-                            assert(false);
-                        }
-                    }
 
-                    for (brx_motion_video_capture *const video_capture : video_captures)
-                    {
-                        if (NULL != video_capture)
+                        for (brx_motion_video_capture *const video_capture : video_captures)
                         {
+                            if (NULL != video_capture)
+                            {
 
-                            video_capture->step();
+                                video_capture->step();
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
                         }
-                        else
-                        {
-                            assert(false);
-                        }
-                    }
 
-                    for (brx_motion_video_detector *const video_detector : video_detectors)
-                    {
-                        if (NULL != video_detector)
+                        for (brx_motion_video_detector *const video_detector : video_detectors)
                         {
+                            if (NULL != video_detector)
+                            {
 
-                            video_detector->step();
+                                video_detector->step();
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
                         }
-                        else
-                        {
-                            assert(false);
-                        }
-                    }
 
-                    float const clipped_interval_time = std::min(interval_time, 1.0F / 30.0F);
-                    for (brx_motion_animation_instance *const animation_instance : animation_instances)
-                    {
-                        if (NULL != animation_instance)
+                        float const clipped_interval_time = std::min(interval_time, 1.0F / 30.0F);
+                        for (brx_motion_animation_instance *const animation_instance : animation_instances)
                         {
-                            animation_instance->step(clipped_interval_time);
-                        }
-                        else
-                        {
-                            assert(false);
+                            if (NULL != animation_instance)
+                            {
+                                animation_instance->step(clipped_interval_time);
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
                         }
                     }
 
@@ -446,27 +463,35 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                             if ((NULL != surface_group_instance) && (NULL != skeleton_instance))
                             {
-                                brx_motion_video_detector *const video_detector = skeleton_instance->get_input_video_detector();
-                                brx_motion_animation_instance *const animation_instance = skeleton_instance->get_input_animation_instance();
+                                brx_motion_video_detector *const morph_video_detector = skeleton_instance->get_morph_input_video_detector();
+                                brx_motion_animation_instance *const morph_animation_instance = skeleton_instance->get_morph_input_animation_instance();
 
-                                assert((NULL == video_detector) || (NULL == animation_instance));
+                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance));
 
-                                if (NULL != video_detector)
+                                if (NULL != morph_video_detector)
                                 {
                                     for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
                                     {
                                         BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
-                                        float const morph_target_weight = video_detector->get_morph_target_weight(skeleton_instance->get_input_video_detector_face_index(), morph_target_name);
+                                        float const morph_target_weight = morph_video_detector->get_morph_target_weight(skeleton_instance->get_morph_input_video_detector_face_index(), morph_target_name);
                                         surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
                                     }
                                 }
-                                else if (NULL != animation_instance)
+                                else if (NULL != morph_animation_instance)
                                 {
                                     for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
                                     {
                                         BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
-                                        float const morph_target_weight = animation_instance->get_morph_target_weight(morph_target_name);
+                                        float const morph_target_weight = morph_animation_instance->get_morph_target_weight(morph_target_name);
                                         surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
+                                    }
+                                }
+                                else
+                                {
+                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_ANARI_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    {
+                                        BRX_ANARI_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_ANARI_MORPH_TARGET_NAME>(morph_target_name_index);
+                                        surface_group_instance->set_morph_target_weight(morph_target_name, 0.0F);
                                     }
                                 }
 
@@ -482,8 +507,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                         }
                         else
                         {
-                            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
-                            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_morph_video_detector);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_morph_instance_motion);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_joint_video_detector);
+                            assert(INVALID_TIMESTAMP == instance_model.second.m_joint_instance_motion);
                         }
                     }
                 }
@@ -495,7 +522,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
                 // Renderer
                 {
-                    wsi_state.m_anari_device->renderer_set(brx_anari_vec3{wsi_state.m_ui_model.m_renderer_background_r, wsi_state.m_ui_model.m_renderer_background_g, wsi_state.m_ui_model.m_renderer_background_b}, wsi_state.m_ui_model.m_renderer_style, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_base_color, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_high_color_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_inside_mask);
+                    wsi_state.m_anari_device->renderer_set(brx_anari_vec3{wsi_state.m_ui_model.m_renderer_background_r, wsi_state.m_ui_model.m_renderer_background_g, wsi_state.m_ui_model.m_renderer_background_b}, wsi_state.m_ui_model.m_renderer_style, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_step, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color_feather, wsi_state.m_ui_model.m_renderer_toon_shading_base_color, wsi_state.m_ui_model.m_renderer_toon_shading_first_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_second_shade_color, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_power, wsi_state.m_ui_model.m_renderer_toon_shading_rim_light_inside_mask);
                 }
 
                 // Directional Lighting

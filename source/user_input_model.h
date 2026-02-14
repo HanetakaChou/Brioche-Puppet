@@ -70,8 +70,10 @@ struct ui_instance_model_model_t
     uint32_t m_surface_group_index;
     brx_anari_surface_group_instance *m_surface_group_instance;
     brx_motion_skeleton_instance *m_skeleton_instance;
-    uint64_t m_video_detector;
-    uint64_t m_instance_motion;
+    uint64_t m_morph_video_detector;
+    uint64_t m_morph_instance_motion;
+    uint64_t m_joint_video_detector;
+    uint64_t m_joint_instance_motion;
     float m_model_transform_rotation_roll;
     float m_model_transform_rotation_pitch;
     float m_model_transform_rotation_yaw;
@@ -118,7 +120,6 @@ struct ui_model_t
     float m_renderer_toon_shading_base_color;
     float m_renderer_toon_shading_first_shade_color;
     float m_renderer_toon_shading_second_shade_color;
-    float m_renderer_toon_shading_high_color_power;
     float m_renderer_toon_shading_rim_light_power;
     float m_renderer_toon_shading_rim_light_inside_mask;
 

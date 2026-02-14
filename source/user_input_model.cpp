@@ -90,7 +90,7 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         ui_model->m_renderer_background_r = 0.0F;
         ui_model->m_renderer_background_g = 1.0F;
         ui_model->m_renderer_background_b = 0.0F;
-        ui_model->m_renderer_style = BRX_ANARI_RENDERER_STYLE_PHYSICALLY_BASED_RENDERING;
+        ui_model->m_renderer_style = BRX_ANARI_RENDERER_STYLE_TOON_SHADING;
         ui_model->m_renderer_toon_shading_first_shade_color_step = 0.8;
         ui_model->m_renderer_toon_shading_first_shade_color_feather = 0.0001;
         ui_model->m_renderer_toon_shading_second_shade_color_step = 0.5;
@@ -98,16 +98,15 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
         ui_model->m_renderer_toon_shading_base_color = 0.7843138;
         ui_model->m_renderer_toon_shading_first_shade_color = 0.49411768;
         ui_model->m_renderer_toon_shading_second_shade_color = 0.19607845;
-        ui_model->m_renderer_toon_shading_high_color_power = 0.0;
         ui_model->m_renderer_toon_shading_rim_light_power = 0.1;
         ui_model->m_renderer_toon_shading_rim_light_inside_mask = 0.0001;
     }
 
-    ui_model->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_DISABLED;
+    ui_model->m_physics_ragdoll_quality = BRX_MOTION_PHYSICS_RAGDOLL_QUALITY_LOW;
 
     // Directional
     {
-        ui_model->m_directional_lighting_visible = false;
+        ui_model->m_directional_lighting_visible = true;
         ui_model->m_directional_lighting_color_r = 1.0F;
         ui_model->m_directional_lighting_color_g = 1.0F;
         ui_model->m_directional_lighting_color_b = 1.0F;
@@ -162,8 +161,10 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
         }
         else
         {
-            assert(INVALID_TIMESTAMP == instance_model.second.m_video_detector);
-            assert(INVALID_TIMESTAMP == instance_model.second.m_instance_motion);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_morph_video_detector);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_morph_instance_motion);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_joint_video_detector);
+            assert(INVALID_TIMESTAMP == instance_model.second.m_joint_instance_motion);
         }
     }
     ui_model->m_instance_models.clear();
@@ -194,7 +195,7 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
             assert(false);
         }
     }
-    ui_model->m_instance_motions.clear();
+    ui_model->m_video_detectors.clear();
 
     for (auto &asset_image : ui_model->m_asset_images)
     {
