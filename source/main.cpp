@@ -312,40 +312,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
 
             if ((wsi_state.m_window_width > 0) && (wsi_state.m_window_height > 0) && (wsi_state.m_window_width_scale > 1E-3F) && (wsi_state.m_window_height_scale > 1E-3F))
             {
-                float interval_time;
-                {
-                    uint64_t const tick_count_current_frame = mcrt_tick_count_now();
-                    interval_time = static_cast<float>(static_cast<double>(tick_count_current_frame - wsi_state.m_tick_count_previous_frame) * wsi_state.m_tick_count_resolution);
-                    wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
-                }
-
-                // User Camera
-                user_camera_simulate(interval_time, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
-
-                // UI
-                {
-#if defined(__GNUC__)
-#if defined(__linux__)
-                    ImGui_ImplGLUT_NewFrame(interval_time);
-#elif defined(__MACH__)
-                    ImGui_ImplOSX_NewFrame(interval_time);
-#else
-#error Unknown Platform
-#endif
-#elif defined(_MSC_VER)
-                    ImGui_ImplWin32_NewFrame(interval_time);
-#else
-#error Unknown Compiler
-#endif
-                    ImGui::NewFrame();
-
-                    ui_simulate(wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
-
-                    // ImGui::EndFrame();
-                    ImGui::Render();
-                }
-
                 // Motion
+                float interval_time;
                 {
                     {
                         mcrt_unordered_set<brx_motion_video_detector *> video_detectors;
@@ -440,12 +408,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             }
                         }
 
-                        float const clipped_interval_time = std::min(interval_time, 1.0F / 30.0F);
+                        // video capture will sync with the video FPS
+                        {
+                            uint64_t const tick_count_current_frame = mcrt_tick_count_now();
+                            interval_time = static_cast<float>(static_cast<double>(tick_count_current_frame - wsi_state.m_tick_count_previous_frame) * wsi_state.m_tick_count_resolution);
+                            wsi_state.m_tick_count_previous_frame = tick_count_current_frame;
+                        }
+
                         for (brx_motion_animation_instance *const animation_instance : animation_instances)
                         {
                             if (NULL != animation_instance)
                             {
-                                animation_instance->step(clipped_interval_time);
+                                animation_instance->step(interval_time);
                             }
                             else
                             {
@@ -513,6 +487,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             assert(INVALID_TIMESTAMP == instance_model.second.m_joint_instance_motion);
                         }
                     }
+                }
+
+                // User Camera
+                user_camera_simulate(interval_time, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
+
+                // UI
+                {
+#if defined(__GNUC__)
+#if defined(__linux__)
+                    ImGui_ImplGLUT_NewFrame(interval_time);
+#elif defined(__MACH__)
+                    ImGui_ImplOSX_NewFrame(interval_time);
+#else
+#error Unknown Platform
+#endif
+#elif defined(_MSC_VER)
+                    ImGui_ImplWin32_NewFrame(interval_time);
+#else
+#error Unknown Compiler
+#endif
+                    ImGui::NewFrame();
+
+                    ui_simulate(wsi_state.m_anari_device, &wsi_state.m_ui_model, &wsi_state.m_ui_controller);
+
+                    // ImGui::EndFrame();
+                    ImGui::Render();
                 }
 
                 // Camera

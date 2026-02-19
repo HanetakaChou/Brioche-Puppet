@@ -3381,10 +3381,10 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                     ImGui::AlignTextToFramePadding();
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Maximum Hand Count",
-                            "人手最大数",
-                            "最大人手數量",
-                            "最大人手数量"};
+                            "Maximum Pose Count",
+                            "姿勢最大数",
+                            "最大姿勢數量",
+                            "最大姿勢数量"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
@@ -3394,12 +3394,12 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                     {
                         assert(NULL != found_video_detector->second.m_video_detector);
 
-                        char hand_count_timestamp_text[] = {"18446744073709551615"};
-                        std::snprintf(hand_count_timestamp_text, sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0]), "%llu", static_cast<long long unsigned>(found_video_detector->second.m_video_detector->get_hand_count()));
-                        hand_count_timestamp_text[(sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0])) - 1] = '\0';
+                        char pose_count_timestamp_text[] = {"18446744073709551615"};
+                        std::snprintf(pose_count_timestamp_text, sizeof(pose_count_timestamp_text) / sizeof(pose_count_timestamp_text[0]), "%llu", static_cast<long long unsigned>(found_video_detector->second.m_video_detector->get_pose_count()));
+                        pose_count_timestamp_text[(sizeof(pose_count_timestamp_text) / sizeof(pose_count_timestamp_text[0])) - 1] = '\0';
 
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                        ImGui::TextUnformatted(hand_count_timestamp_text);
+                        ImGui::TextUnformatted(pose_count_timestamp_text);
                         ImGui::PopStyleColor();
                     }
 
@@ -3435,10 +3435,10 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                     ImGui::AlignTextToFramePadding();
                     {
                         constexpr char const *const text[LANGUAGE_COUNT] = {
-                            "Maximum Pose Count",
-                            "姿勢最大数",
-                            "最大姿勢數量",
-                            "最大姿勢数量"};
+                            "Maximum Hand Count",
+                            "人手最大数",
+                            "最大人手數量",
+                            "最大人手数量"};
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted(text[ui_controller->m_language_index]);
                         ImGui::PopStyleColor();
@@ -3448,12 +3448,12 @@ extern void ui_simulate(brx_anari_device *device, ui_model_t *ui_model, ui_contr
                     {
                         assert(NULL != found_video_detector->second.m_video_detector);
 
-                        char pose_count_timestamp_text[] = {"18446744073709551615"};
-                        std::snprintf(pose_count_timestamp_text, sizeof(pose_count_timestamp_text) / sizeof(pose_count_timestamp_text[0]), "%llu", static_cast<long long unsigned>(found_video_detector->second.m_video_detector->get_pose_count()));
-                        pose_count_timestamp_text[(sizeof(pose_count_timestamp_text) / sizeof(pose_count_timestamp_text[0])) - 1] = '\0';
+                        char hand_count_timestamp_text[] = {"18446744073709551615"};
+                        std::snprintf(hand_count_timestamp_text, sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0]), "%llu", static_cast<long long unsigned>(found_video_detector->second.m_video_detector->get_hand_count()));
+                        hand_count_timestamp_text[(sizeof(hand_count_timestamp_text) / sizeof(hand_count_timestamp_text[0])) - 1] = '\0';
 
                         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-                        ImGui::TextUnformatted(pose_count_timestamp_text);
+                        ImGui::TextUnformatted(hand_count_timestamp_text);
                         ImGui::PopStyleColor();
                     }
 
