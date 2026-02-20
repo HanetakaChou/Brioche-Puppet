@@ -39,11 +39,12 @@ enum ANIMATION_INPUT_TYPE
     ANIMATION_INPUT_TYPE_INVALID = 0,
     ANIMATION_INPUT_TYPE_VIDEO_DETECTOR = 1,
     ANIMATION_INPUT_TYPE_INSTANCE_MOTION = 2,
-    ANIMATION_INPUT_TYPE_MAX = 2,
-    ANIMATION_INPUT_TYPE_COUNT = 3
+    ANIMATION_INPUT_TYPE_MOTION_RECEIVER = 3,
+    ANIMATION_INPUT_TYPE_MAX = 3,
+    ANIMATION_INPUT_TYPE_COUNT = 4
 };
 
-static constexpr int const INVALID_UINT32_INDEX = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
+static constexpr uint32_t const INVALID_UINT32_INDEX = static_cast<uint32_t>(~static_cast<uint32_t>(0U));
 
 struct ui_instance_model_controller_t
 {
@@ -66,6 +67,7 @@ struct ui_controller_t
     bool m_show_asset_image_manager;
     bool m_show_video_detector_manager;
     bool m_show_instance_motion_manager;
+    bool m_show_motion_receiver_manager;
     bool m_show_instance_model_manager;
     bool m_show_camera_manager;
     bool m_show_physics_ragdoll_manager;
@@ -81,6 +83,7 @@ struct ui_controller_t
     int m_new_video_capture_camera_resolution_index;
     int m_new_video_capture_camera_fps_index;
     int m_new_video_capture_get_open_file_name_file_type_index;
+    bool m_new_video_capture_enable_debug_renderer;
     mcrt_string m_tree_view_selected_video_capture;
 
     int m_import_asset_motion_get_open_file_name_file_type_index;
@@ -98,6 +101,9 @@ struct ui_controller_t
     uint32_t m_new_video_detector_pose_count;
     uint32_t m_new_video_detector_face_count;
     uint32_t m_new_video_detector_hand_count;
+    float m_new_video_detector_pose_confidence_threshold;
+    float m_new_video_detector_face_confidence_threshold;
+    float m_new_video_detector_hand_confidence_threshold;
     bool m_new_video_detector_force_gpu;
     bool m_new_video_detector_enable_debug_renderer;
     uint64_t m_tree_view_selected_video_detector;
@@ -106,6 +112,9 @@ struct ui_controller_t
     mcrt_string m_new_instance_motion_selected_asset_motion;
     uint32_t m_new_instance_motion_selected_animation_index;
     uint64_t m_tree_view_selected_instance_motion;
+
+    uint16_t m_new_motion_receiver_port;
+    uint16_t m_tree_view_selected_motion_receiver;
 
     mcrt_vector<char> m_new_instance_model_name;
     mcrt_string m_new_instance_model_selected_asset_model;
@@ -116,12 +125,14 @@ struct ui_controller_t
     uint32_t m_new_instance_model_selected_morph_video_detector_face_index;
     uint32_t m_new_instance_model_selected_morph_video_detector_hand_index;
     uint64_t m_new_instance_model_selected_morph_instance_motion;
+    uint16_t m_new_instance_model_selected_morph_motion_receiver;
     ANIMATION_INPUT_TYPE m_new_instance_model_joint_animation_input_type;
     uint64_t m_new_instance_model_selected_joint_video_detector;
     uint32_t m_new_instance_model_selected_joint_video_detector_pose_index;
     uint32_t m_new_instance_model_selected_joint_video_detector_face_index;
     uint32_t m_new_instance_model_selected_joint_video_detector_hand_index;
     uint64_t m_new_instance_model_selected_joint_instance_motion;
+    uint16_t m_new_instance_model_selected_joint_motion_receiver;
     float m_new_instance_model_transform_rotation_roll;
     float m_new_instance_model_transform_rotation_pitch;
     float m_new_instance_model_transform_rotation_yaw;

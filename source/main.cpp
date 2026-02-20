@@ -318,6 +318,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                     {
                         mcrt_unordered_set<brx_motion_video_detector *> video_detectors;
                         mcrt_unordered_set<brx_motion_animation_instance *> animation_instances;
+                        mcrt_unordered_set<brx_motion_motion_receiver *> motion_receivers;
+
                         for (auto const &instance_model : wsi_state.m_ui_model.m_instance_models)
                         {
                             brx_motion_skeleton_instance *const skeleton_instance = instance_model.second.m_skeleton_instance;
@@ -326,10 +328,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             {
                                 brx_motion_video_detector *const morph_video_detector = skeleton_instance->get_morph_input_video_detector();
                                 brx_motion_animation_instance *const morph_animation_instance = skeleton_instance->get_morph_input_animation_instance();
+                                brx_motion_motion_receiver *const morph_motion_receiver = skeleton_instance->get_morph_input_motion_receiver();
+
                                 brx_motion_video_detector *const joint_video_detector = skeleton_instance->get_joint_input_video_detector();
                                 brx_motion_animation_instance *const joint_animation_instance = skeleton_instance->get_joint_input_animation_instance();
+                                brx_motion_motion_receiver *const joint_motion_receiver = skeleton_instance->get_joint_input_motion_receiver();
 
-                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance));
+                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance) || (NULL == morph_motion_receiver));
 
                                 if (NULL != morph_video_detector)
                                 {
@@ -339,8 +344,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                                 {
                                     animation_instances.insert(morph_animation_instance);
                                 }
+                                else if (NULL != morph_motion_receiver)
+                                {
+                                    motion_receivers.insert(morph_motion_receiver);
+                                }
 
-                                assert((NULL == joint_video_detector) || (NULL == joint_animation_instance));
+                                assert((NULL == joint_video_detector) || (NULL == joint_animation_instance) || (NULL == joint_motion_receiver));
 
                                 if (NULL != joint_video_detector)
                                 {
@@ -350,13 +359,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                                 {
                                     animation_instances.insert(joint_animation_instance);
                                 }
+                                else if (NULL != joint_motion_receiver)
+                                {
+                                    motion_receivers.insert(joint_motion_receiver);
+                                }
                             }
                             else
                             {
                                 assert(INVALID_TIMESTAMP == instance_model.second.m_morph_video_detector);
                                 assert(INVALID_TIMESTAMP == instance_model.second.m_morph_instance_motion);
+                                assert(INVALID_PORT == instance_model.second.m_morph_motion_receiver);
                                 assert(INVALID_TIMESTAMP == instance_model.second.m_joint_video_detector);
                                 assert(INVALID_TIMESTAMP == instance_model.second.m_joint_instance_motion);
+                                assert(INVALID_PORT == instance_model.second.m_joint_motion_receiver);
                             }
                         }
 
@@ -408,6 +423,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             }
                         }
 
+                        for (brx_motion_motion_receiver *const motion_receiver : motion_receivers)
+                        {
+                            if (NULL != motion_receiver)
+                            {
+                                motion_receiver->step();
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                        }
+
                         // video capture will sync with the video FPS
                         {
                             uint64_t const tick_count_current_frame = mcrt_tick_count_now();
@@ -439,8 +466,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                             {
                                 brx_motion_video_detector *const morph_video_detector = skeleton_instance->get_morph_input_video_detector();
                                 brx_motion_animation_instance *const morph_animation_instance = skeleton_instance->get_morph_input_animation_instance();
+                                brx_motion_motion_receiver *const morph_motion_receiver = skeleton_instance->get_morph_input_motion_receiver();
 
-                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance));
+                                assert((NULL == morph_video_detector) || (NULL == morph_animation_instance) || (NULL == morph_motion_receiver));
 
                                 if (NULL != morph_video_detector)
                                 {
@@ -457,6 +485,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR 
                                     {
                                         BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
                                         float const morph_target_weight = morph_animation_instance->get_morph_target_weight(morph_target_name);
+                                        surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
+                                    }
+                                }
+                                else if (NULL != morph_motion_receiver)
+                                {
+                                    for (uint32_t morph_target_name_index = 0U; morph_target_name_index < BRX_MOTION_MORPH_TARGET_NAME_MMD_COUNT; ++morph_target_name_index)
+                                    {
+                                        BRX_MOTION_MORPH_TARGET_NAME const morph_target_name = static_cast<BRX_MOTION_MORPH_TARGET_NAME>(morph_target_name_index);
+                                        float const morph_target_weight = morph_motion_receiver->get_morph_target_weight(morph_target_name);
                                         surface_group_instance->set_morph_target_weight(wrap(morph_target_name), morph_target_weight);
                                     }
                                 }
@@ -645,6 +682,7 @@ static void internal_key_press_handler(void *handler_context, int key, bool shif
             wsi_state.m_ui_controller.m_show_asset_image_manager = false;
             wsi_state.m_ui_controller.m_show_video_detector_manager = false;
             wsi_state.m_ui_controller.m_show_instance_motion_manager = false;
+            wsi_state.m_ui_controller.m_show_motion_receiver_manager = false;
             wsi_state.m_ui_controller.m_show_instance_model_manager = false;
             wsi_state.m_ui_controller.m_show_camera_manager = false;
             wsi_state.m_ui_controller.m_show_physics_ragdoll_manager = false;

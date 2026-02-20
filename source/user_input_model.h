@@ -24,6 +24,7 @@
 #include "../thirdparty/Brioche-Analytic-Rendering-Interface/include/brx_anari.h"
 #include "../thirdparty/Brioche-Motion/include/brx_motion.h"
 
+static constexpr uint16_t const INVALID_PORT = static_cast<uint16_t>(~static_cast<uint16_t>(0U));
 static constexpr uint64_t const INVALID_TIMESTAMP = 0XFFFFFFFFFFFFFFFFU;
 
 struct ui_video_capture_model_t
@@ -63,6 +64,11 @@ struct ui_instance_motion_model_t
     brx_motion_animation_instance *m_animation_instance;
 };
 
+struct ui_motion_receiver_model_t
+{
+    brx_motion_motion_receiver *m_motion_receiver;
+};
+
 struct ui_instance_model_model_t
 {
     mcrt_string m_name;
@@ -72,8 +78,10 @@ struct ui_instance_model_model_t
     brx_motion_skeleton_instance *m_skeleton_instance;
     uint64_t m_morph_video_detector;
     uint64_t m_morph_instance_motion;
+    uint16_t m_morph_motion_receiver;
     uint64_t m_joint_video_detector;
     uint64_t m_joint_instance_motion;
+    uint16_t m_joint_motion_receiver;
     float m_model_transform_rotation_roll;
     float m_model_transform_rotation_pitch;
     float m_model_transform_rotation_yaw;
@@ -144,6 +152,7 @@ struct ui_model_t
     mcrt_unordered_map<mcrt_string, ui_asset_image_model_t> m_asset_images;
     mcrt_unordered_map<uint64_t, ui_video_detector_model_t> m_video_detectors;
     mcrt_unordered_map<uint64_t, ui_instance_motion_model_t> m_instance_motions;
+    mcrt_unordered_map<uint16_t, ui_motion_receiver_model_t> m_motion_receivers;
     mcrt_unordered_map<uint64_t, ui_instance_model_model_t> m_instance_models;
     mcrt_unordered_map<uint64_t, ui_area_lighting_model_t> m_area_lightings;
 };

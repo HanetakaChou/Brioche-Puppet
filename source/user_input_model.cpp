@@ -32,6 +32,7 @@
 #endif
 #include "../thirdparty/Brioche-Shader-Language/include/brx_reversed_z.h"
 #include <algorithm>
+#include <cassert>
 
 extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
 {
@@ -137,11 +138,15 @@ extern void ui_model_init(brx_anari_device *device, ui_model_t *ui_model)
     assert(ui_model->m_asset_images.empty());
     assert(ui_model->m_video_detectors.empty());
     assert(ui_model->m_instance_motions.empty());
+    assert(ui_model->m_motion_receivers.empty());
     assert(ui_model->m_instance_models.empty());
+    assert(ui_model->m_area_lightings.empty());
 }
 
 extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
 {
+    ui_model->m_area_lightings.clear();
+
     for (auto &instance_model : ui_model->m_instance_models)
     {
         if (NULL != instance_model.second.m_surface_group_instance)
@@ -168,6 +173,20 @@ extern void ui_model_uninit(brx_anari_device *device, ui_model_t *ui_model)
         }
     }
     ui_model->m_instance_models.clear();
+
+    for (auto &motion_receiver : ui_model->m_motion_receivers)
+    {
+        if (NULL != motion_receiver.second.m_motion_receiver)
+        {
+            brx_motion_destroy_motion_receiver(motion_receiver.second.m_motion_receiver);
+            motion_receiver.second.m_motion_receiver = NULL;
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    ui_model->m_motion_receivers.clear();
 
     for (auto &instance_motion : ui_model->m_instance_motions)
     {
