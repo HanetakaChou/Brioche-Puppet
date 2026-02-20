@@ -47,8 +47,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdeflate", "..\thirdparty
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bullet", "..\thirdparty\Brioche-Physics\thirdparty\BulletPhysics\build-windows\Bullet.vcxproj", "{E5FA4976-13BF-40C8-A46B-489E61A591BD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opencv", "..\thirdparty\OpenCV\build-windows\opencv.vcxproj", "{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Motion-MediaPipe-Model", "..\thirdparty\Brioche-Motion\build-windows\BRX-Motion-MediaPipe-Model.vcxproj", "{1B3AD1F1-BBB2-4473-AD0A-F9C1487CD385}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-WSI", "..\thirdparty\Brioche-Window-System-Integration\build-windows\BRX-WSI.vcxproj", "{0D2DEF0C-0883-44CB-A9C2-38063ED78802}"
@@ -58,6 +56,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-ImGui-Font-Asset", "..\thirdparty\Brioche-ImGui\build-windows\BRX-ImGui-Font-Asset.vcxproj", "{42E90939-5AE4-472E-B07A-934378F9841D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BRX-Motion-MediaPipe-Model-Asset", "..\thirdparty\Brioche-Motion\build-windows\BRX-Motion-MediaPipe-Model-Asset.vcxproj", "{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCV", "..\thirdparty\OpenCV\build-windows\OpenCV.vcxproj", "{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -243,14 +243,6 @@ Global
 		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|Win32.Build.0 = Release|Win32
 		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.ActiveCfg = Release|x64
 		{E5FA4976-13BF-40C8-A46B-489E61A591BD}.Release|x64.Build.0 = Release|x64
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|Win32.Build.0 = Debug|Win32
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|x64.ActiveCfg = Debug|x64
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|x64.Build.0 = Debug|x64
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|Win32.ActiveCfg = Release|Win32
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|Win32.Build.0 = Release|Win32
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|x64.ActiveCfg = Release|x64
-		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|x64.Build.0 = Release|x64
 		{1B3AD1F1-BBB2-4473-AD0A-F9C1487CD385}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1B3AD1F1-BBB2-4473-AD0A-F9C1487CD385}.Debug|Win32.Build.0 = Debug|Win32
 		{1B3AD1F1-BBB2-4473-AD0A-F9C1487CD385}.Debug|x64.ActiveCfg = Debug|x64
@@ -291,6 +283,14 @@ Global
 		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|Win32.Build.0 = Release|Win32
 		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|x64.ActiveCfg = Release|x64
 		{CC6296BF-44C7-49BC-A871-4ACC3DA9CA0F}.Release|x64.Build.0 = Release|x64
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|Win32.Build.0 = Debug|Win32
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|x64.ActiveCfg = Debug|x64
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Debug|x64.Build.0 = Debug|x64
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|Win32.ActiveCfg = Release|Win32
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|Win32.Build.0 = Release|Win32
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|x64.ActiveCfg = Release|x64
+		{20AF1BFB-9677-455B-BDF7-7CB9F1A96CF0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
