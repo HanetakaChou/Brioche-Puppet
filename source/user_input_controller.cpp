@@ -322,7 +322,7 @@ extern void ui_controller_init(ui_model_t const *ui_model, ui_controller_t *ui_c
     ui_controller->m_new_instance_model_selected_joint_motion_capture_hand_index = BRX_MOTION_UINT32_INDEX_INVALID;
     ui_controller->m_new_instance_model_selected_joint_instance_motion = INVALID_TIMESTAMP;
     ui_controller->m_new_instance_model_selected_joint_motion_receiver = INVALID_PORT;
-    ui_controller->m_new_instance_model_enable_root_motion = true;
+    ui_controller->m_new_instance_model_enable_root_motion = false;
     ui_controller->m_new_instance_model_transform_rotation_x = 0.0F;
     ui_controller->m_new_instance_model_transform_rotation_y = 0.0F;
     ui_controller->m_new_instance_model_transform_rotation_z = 0.0F;
