@@ -99,7 +99,7 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
 
 - [x] Backend  
     - [x] [Bullet Physics](https://github.com/HanetakaChou/BulletPhysics)  
-    - [ ] [Jolt Physics](https://github.com/HanetakaChou/JoltPhysics)  
+    - [ ] ~~Jolt Physics~~  
 - [x] Rigid Body  
     - [x] Shape
         - [x] Sphere  
@@ -110,9 +110,9 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
         - [x] Keyframe  
         - [x] Dynamic  
 - [ ] Constraint 
-  - [x] Fixed    
-  - [x] Ball and Socket  
-  - [x] Hinge
-  - [x] Prismatic  
+  - [ ] ~~Fixed~~   
+  - [ ] ~~Ball and Socket~~  
+  - [ ] ~~Hinge~~  
+  - [ ] ~~Prismatic~~  
   - [x] Ragdoll  
-  - [ ] ~~6 DOF~~  
+  - [x] 6DOF  

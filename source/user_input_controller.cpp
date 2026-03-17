@@ -194,16 +194,24 @@ static inline brx_motion_physics_rigid_body const *wrap(brx_asset_import_physics
 static inline brx_motion_physics_constraint const *wrap(brx_asset_import_physics_constraint const *physics_constrain)
 {
     static_assert(sizeof(brx_motion_physics_constraint) == sizeof(brx_asset_import_physics_constraint), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_rigid_body_a_index) == offsetof(brx_asset_import_physics_constraint, m_rigid_body_a_index), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_rigid_body_b_index) == offsetof(brx_asset_import_physics_constraint, m_rigid_body_b_index), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_rigid_body_reference_index) == offsetof(brx_asset_import_physics_constraint, m_rigid_body_reference_index), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_rigid_body_attached_index) == offsetof(brx_asset_import_physics_constraint, m_rigid_body_attached_index), "");
     static_assert(offsetof(brx_motion_physics_constraint, m_constraint_type) == offsetof(brx_asset_import_physics_constraint, m_constraint_type), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_pivot) == offsetof(brx_asset_import_physics_constraint, m_pivot), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_twist_axis) == offsetof(brx_asset_import_physics_constraint, m_twist_axis), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_plane_axis) == offsetof(brx_asset_import_physics_constraint, m_plane_axis), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_normal_axis) == offsetof(brx_asset_import_physics_constraint, m_normal_axis), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_twist_limit) == offsetof(brx_asset_import_physics_constraint, m_twist_limit), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_plane_limit) == offsetof(brx_asset_import_physics_constraint, m_plane_limit), "");
-    static_assert(offsetof(brx_motion_physics_constraint, m_normal_limit) == offsetof(brx_asset_import_physics_constraint, m_normal_limit), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_pivot) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_pivot), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_twist_axis) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_twist_axis), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_plane_axis) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_plane_axis), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_normal_axis) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_normal_axis), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_twist_limit) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_twist_limit), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_plane_limit) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_plane_limit), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_ragdoll.m_normal_limit) == offsetof(brx_asset_import_physics_constraint, m_ragdoll.m_normal_limit), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_rotation) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_rotation), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_translation) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_translation), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_rotation_limit_min) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_rotation_limit_min), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_rotation_limit_max) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_rotation_limit_max), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_translation_limit_min) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_translation_limit_min), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_translation_limit_max) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_translation_limit_max), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_rotation_spring) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_rotation_spring), "");
+    static_assert(offsetof(brx_motion_physics_constraint, m_6dof.m_translation_spring) == offsetof(brx_asset_import_physics_constraint, m_6dof.m_translation_spring), "");
     return reinterpret_cast<brx_motion_physics_constraint const *>(physics_constrain);
 }
 
