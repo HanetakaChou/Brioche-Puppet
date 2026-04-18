@@ -75,6 +75,8 @@ As a rendering engineer, the **rendering** is implemented by me. But the third-p
 - [x] Motion Capture  
     - [x] Video Capture (Backend [OpenCV](https://github.com/BriochePuppet/OpenCV))  
     - [x] Motion Detector (Backend [MeidaPipe](https://github.com/HanetakaChou/mediapipe))  
+- [x] Motion Receiver  
+    - [x] [VMC Protocal](https://protocol.vmc.info/)  
 - [ ] Animation  
     - [ ] IK (Inverse Kinematics)  
         - [ ] Reaching IK (Target Position)  
