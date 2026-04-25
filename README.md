@@ -10,9 +10,11 @@
 
 [![](Steam.png)](https://store.steampowered.com/app/4286130/Brioche_Puppet/)  
 
-I am currently working on the free and open-source **VTuber** software [Brioche Puppet](https://github.com/HanetakaChou/Brioche-Puppet).  
+Free and open-source **VTuber** software: [Brioche Puppet](https://github.com/HanetakaChou/Brioche-Puppet).  
 
-As a rendering engineer, the **rendering** is implemented by me. But the third-party libraries [BulletPhysics](https://github.com/HanetakaChou/BulletPhysics) and [MeidaPipe](https://github.com/HanetakaChou/mediapipe) are used for **ragdoll physics** and **motion capture**.  
+The **rendering** is implemented from scratch. Third-party libraries, including [Bullet Physics](https://github.com/HanetakaChou/BulletPhysics) and [MediaPipe](https://github.com/HanetakaChou/mediapipe), are used for **ragdoll physics** and **motion capture**.  
+
+**Brioche Puppet®** is a registered European Union trade mark.  
 
 ## 1\. Rendering (High Level)  
 
