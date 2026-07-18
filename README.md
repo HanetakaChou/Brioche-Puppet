@@ -14,7 +14,7 @@ Free and open-source **VTuber** software: [Brioche Puppet](https://github.com/Ha
 
 The **rendering** is implemented from scratch. Third-party libraries, including [Bullet Physics](https://github.com/HanetakaChou/BulletPhysics) and [MediaPipe](https://github.com/HanetakaChou/mediapipe), are used for **ragdoll physics** and **motion capture**.  
 
-**Brioche Puppet®** is a registered European Union trade mark.  
+**Brioche®** and **Brioche Puppet®** are registered European Union trade marks.  
 
 ## 1\. Rendering (High Level)  
 
